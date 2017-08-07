@@ -4,7 +4,7 @@
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions_4_3_Core>
 
-#include <dmp/gui/gl_base.h>
+#include <dmp/rendering/gl_base.h>
 
 namespace dmp
 {

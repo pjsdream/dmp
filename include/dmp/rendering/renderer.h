@@ -9,6 +9,7 @@
 namespace dmp
 {
 class RendererImpl;
+class SceneManager;
 class Renderer
 {
 public:
@@ -17,6 +18,7 @@ public:
 
 private:
   std::unique_ptr<RendererImpl> impl_;
+  std::unique_ptr<SceneManager> scene_manager_;
 };
 }
 

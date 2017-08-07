@@ -1,4 +1,4 @@
-#include <dmp/gui/renderer_impl.h>
+#include <dmp/rendering/renderer_impl.h>
 
 namespace dmp
 {

@@ -1,5 +1,5 @@
 #include <QApplication>
-#include <dmp/gui/renderer.h>
+#include <dmp/rendering/renderer.h>
 
 int main(int argc, char **argv)
 {

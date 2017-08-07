@@ -1,5 +1,4 @@
-#include <dmp/gui/shader.h>
-#include <QtGui/qopengl.h>
+#include <include/dmp/rendering/shader/shader.h>
 
 namespace dmp
 {

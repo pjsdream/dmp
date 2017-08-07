@@ -39,15 +39,15 @@ include_directories(
 )
 
 set(DMP_SOURCE_FILES
-  include/dmp/gui/renderer.h
-  include/dmp/gui/shader.h
-  include/dmp/gui/renderer_impl.h
-  include/dmp/gui/gl_base.h
+  include/dmp/rendering/renderer.h
+  include/dmp/rendering/shader/shader.h
+  include/dmp/rendering/renderer_impl.h
+  include/dmp/rendering/gl_base.h
   src/dmp.cpp
-  src/gui/renderer.cpp
-  src/gui/shader.cpp
-  src/gui/renderer_impl.cpp
-  src/gui/gl_base.cpp)
+  src/rendering/renderer.cpp
+  src/rendering/shader/shader.cpp
+  src/rendering/renderer_impl.cpp
+  src/rendering/gl_base.cpp include/dmp/rendering/scene/scene_manager.h src/rendering/scene/scene_manager.cpp src/rendering/scene/scene_node.cpp include/dmp/rendering/scene/scene_node.h)
 
 add_executable(dmp ${DMP_SOURCE_FILES})
 target_link_libraries(dmp
