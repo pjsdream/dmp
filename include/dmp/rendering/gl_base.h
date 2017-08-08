@@ -1,8 +1,9 @@
 #ifndef DMP_GL_BASE_H
 #define DMP_GL_BASE_H
 
-#include <QOpenGLFunctions_4_3_Core>
 #include <memory>
+
+#include <QOpenGLFunctions_4_3_Core>
 
 namespace dmp
 {
@@ -10,8 +11,14 @@ class GlBase
 {
 public:
   GlBase();
-  GlBase(std::shared_ptr<GlBase> base);
+  explicit GlBase(std::shared_ptr<GlBase> base);
   virtual ~GlBase();
+
+  GlBase(const GlBase& rhs) = delete;
+  GlBase& operator=(const GlBase& rhs) = delete;
+
+  GlBase(GlBase&& rhs) = delete;
+  GlBase& operator=(GlBase&& rhs) = delete;
 
   void initializeBaseGL(QOpenGLContext* context);
 

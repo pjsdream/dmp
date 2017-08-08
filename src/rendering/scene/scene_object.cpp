@@ -1,0 +1,1 @@
+#include <dmp/rendering/scene/scene_object.h>

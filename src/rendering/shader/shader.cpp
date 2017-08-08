@@ -2,7 +2,10 @@
 
 namespace dmp
 {
-Shader::Shader() = default;
+Shader::Shader(const std::shared_ptr<GlBase>& base)
+    : GlBase(base)
+{
+}
 
 void Shader::loadShader(const std::string& filename, ShaderType type)
 {
@@ -48,8 +51,6 @@ void Shader::loadShader(const std::string& filename, ShaderType type)
 
 void Shader::createShader()
 {
-  std::make_shared<Shader>();
-
   GLuint program = gl_->glCreateProgram();
 
   for (GLuint shader : shaders_)

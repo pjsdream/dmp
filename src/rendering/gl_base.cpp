@@ -1,5 +1,7 @@
 #include <dmp/rendering/gl_base.h>
 
+#include <QOpenGLFunctions_4_3_Core>
+
 namespace dmp
 {
 GlBase::GlBase()

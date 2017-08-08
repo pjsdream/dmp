@@ -4,6 +4,9 @@ project(dmp)
 # C++14
 set(CMAKE_CXX_STANDARD 14)
 
+# C++ thread
+find_package(Threads)
+
 # fPIC
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
@@ -43,16 +46,30 @@ include_directories(
 set(DMP_SOURCE_FILES
   include/dmp/rendering/renderer.h
   include/dmp/rendering/shader/shader.h
-  include/dmp/rendering/renderer_impl.h
   include/dmp/rendering/gl_base.h
   src/dmp.cpp
   src/rendering/renderer.cpp
   src/rendering/shader/shader.cpp
-  src/rendering/renderer_impl.cpp
-  src/rendering/gl_base.cpp include/dmp/rendering/scene/scene_manager.h src/rendering/scene/scene_manager.cpp src/rendering/scene/scene_node.cpp include/dmp/rendering/scene/scene_node.h)
+  src/rendering/gl_base.cpp
+  include/dmp/rendering/scene/scene_manager.h
+  src/rendering/scene/scene_manager.cpp
+  src/rendering/scene/scene_node.cpp
+  include/dmp/rendering/scene/scene_node.h
+  include/dmp/rendering/scene/scene_mesh_object.h
+  include/dmp/rendering/scene/scene_object.h
+  src/rendering/scene/scene_mesh_object.cpp
+  src/rendering/scene/scene_object.cpp
+  include/dmp/rendering/resource/resource_manager.h
+  src/rendering/resource/resource_manager.cpp
+  src/rendering/resource/resource.cpp
+  src/rendering/resource/resource_mesh.cpp
+  include/dmp/rendering/resource/resource.h
+  include/dmp/rendering/resource/resource_mesh.h
+  src/rendering/shader/light_shader.cpp include/dmp/rendering/shader/light_shader.h)
 
 add_executable(dmp ${DMP_SOURCE_FILES})
 target_link_libraries(dmp
+  Threads::Threads
   ${catkin_LIBRARIES}
   ${ASSIMP_LIBRARIES}
   ${YAML_CPP_LIBRARIES}

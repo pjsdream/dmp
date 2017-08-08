@@ -1,16 +1,49 @@
 #include <dmp/rendering/renderer.h>
-#include <dmp/rendering/renderer_impl.h>
-#include <dmp/rendering/scene/scene_manager.h>
 
 namespace dmp
 {
 Renderer::Renderer(QWidget* parent)
-    : impl_(std::make_unique<RendererImpl>(parent)), scene_manager_(std::make_unique<SceneManager>())
+    : QOpenGLWidget(parent), scene_manager_(std::make_unique<SceneManager>())
 {
-  impl_->show();
-  impl_->resize(800, 600);
-  impl_->move(100, 100);
+  resize(800, 600);
+  move(100, 100);
+  show();
 }
 
-Renderer::~Renderer() = default;
+void Renderer::paintGL()
+{
+  gl_->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void Renderer::resizeGL(int w, int h)
+{
+  gl_->glViewport(0, 0, w, h);
+}
+
+void Renderer::initializeGL()
+{
+  initializeBaseGL(context());
+
+  gl_->glClearColor(0.8f, 0.8f, 0.8f, 0.f);
+}
+
+std::shared_ptr<SceneNode> Renderer::createNode()
+{
+  return scene_manager_->createNode();
+}
+
+std::shared_ptr<SceneNode> Renderer::createNode(const Eigen::Affine3d& transform)
+{
+  return scene_manager_->createNode(transform);
+}
+
+std::shared_ptr<SceneNode> Renderer::createNode(const Eigen::Vector3d& translate)
+{
+  return scene_manager_->createNode(translate);
+}
+
+std::shared_ptr<SceneObject> Renderer::createMeshObject(const std::string& filename)
+{
+  return scene_manager_->createMeshObject(filename);
+}
 }
