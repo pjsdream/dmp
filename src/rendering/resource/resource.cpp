@@ -1,0 +1,1 @@
+#include <dmp/rendering/resource/resource.h>

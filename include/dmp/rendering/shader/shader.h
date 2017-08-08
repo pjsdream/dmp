@@ -16,7 +16,7 @@ public:
     Fragment
   };
 
-  Shader();
+  Shader(const std::shared_ptr<GlBase>& base);
 
   void loadShader(const std::string& filename, ShaderType type);
   void createShader();
