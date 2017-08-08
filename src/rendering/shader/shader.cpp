@@ -28,7 +28,7 @@ void Shader::loadShader(const std::string& filename, ShaderType type)
   GLuint shader = gl_->glCreateShader(shaderTypeToGlType(type));
 
   gl_->glShaderSource(shader, 1, &const_source, NULL);
-  delete source;
+  delete[] source;
 
   gl_->glCompileShader(shader);
 
@@ -43,7 +43,7 @@ void Shader::loadShader(const std::string& filename, ShaderType type)
     GLchar* log = new GLchar[len + 1];
     gl_->glGetShaderInfoLog(shader, len, &len, log);
     fprintf(stderr, "Shader compilation failed:\n%s\n", log);
-    delete log;
+    delete[] log;
   }
 
   shaders_.push_back(shader);
@@ -69,7 +69,7 @@ void Shader::createShader()
     GLchar* log = new GLchar[len + 1];
     gl_->glGetProgramInfoLog(program, len, &len, log);
     fprintf(stderr, "Shader linking failed:\n%s\n", log);
-    delete log;
+    delete[] log;
 
     return;
   }

@@ -14,7 +14,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 find_package(Eigen3)
 
 # assimp
-find_package(assimp 3.3.1)
+find_package(assimp 4.0.1)
 
 # yaml-cpp
 find_package(yaml-cpp 0.5.3)
@@ -25,10 +25,16 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Instruct CMake to run moc automatically when needed
 set(CMAKE_AUTOMOC ON)
 # Find the Qt library
-set(QT_PATH /Users/jaesungp/Qt/5.9.1/ios)
-set(Qt5Widgets_DIR ${QT_PATH}/lib/cmake/Qt5Widgets)
-set(Qt5OpenGL_DIR ${QT_PATH}/lib/cmake/Qt5OpenGL)
-message(${Qt5Widgets_DIR})
+IF (APPLE)
+  set(QT_PATH ~/Qt/5.9.1/clang_64)
+  set(Qt5Widgets_DIR ${QT_PATH}/lib/cmake/Qt5Widgets)
+  set(Qt5OpenGL_DIR ${QT_PATH}/lib/cmake/Qt5OpenGL)
+ENDIF (APPLE)
+IF (LINUX)
+  set(QT_PATH ~/Qt/5.9.1/clang_64)
+  set(Qt5Widgets_DIR ${QT_PATH})
+  set(Qt5OpenGL_DIR ${QT_PATH})
+ENDIF (LINUX)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5OpenGL REQUIRED)
 add_definitions(${Qt5Widgets_DEFINITIONS})

@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include <QOpenGLFunctions_4_3_Core>
+#include <QOpenGLFunctions_4_1_Core>
 
 namespace dmp
 {
@@ -23,10 +23,10 @@ public:
   void initializeBaseGL(QOpenGLContext* context);
 
 protected:
-  std::shared_ptr<QOpenGLFunctions_4_3_Core> gl_;
+  std::shared_ptr<QOpenGLFunctions_4_1_Core> gl_;
 
 private:
-  std::shared_ptr<QOpenGLFunctions_4_3_Core> getGl()
+  std::shared_ptr<QOpenGLFunctions_4_1_Core> getGl()
   {
     return gl_;
   }

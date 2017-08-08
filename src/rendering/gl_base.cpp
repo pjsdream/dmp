@@ -1,6 +1,6 @@
 #include <dmp/rendering/gl_base.h>
 
-#include <QOpenGLFunctions_4_3_Core>
+#include <QOpenGLFunctions_4_1_Core>
 
 namespace dmp
 {
@@ -18,7 +18,7 @@ GlBase::~GlBase() = default;
 
 void GlBase::initializeBaseGL(QOpenGLContext* context)
 {
-  auto deleter = [](QOpenGLFunctions_4_3_Core*) {};
-  gl_.reset(context->versionFunctions<QOpenGLFunctions_4_3_Core>(), deleter);
+  auto deleter = [](QOpenGLFunctions_4_1_Core*) {};
+  gl_.reset(context->versionFunctions<QOpenGLFunctions_4_1_Core>(), deleter);
 }
 }

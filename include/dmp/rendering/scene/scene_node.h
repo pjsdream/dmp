@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 
 #include <memory>
+#include <vector>
 
 namespace dmp
 {
