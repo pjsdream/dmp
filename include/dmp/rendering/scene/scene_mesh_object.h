@@ -12,6 +12,10 @@ class SceneMeshObject : public SceneObject
 public:
   explicit SceneMeshObject(const std::string& filename);
 
+  bool isMeshObject() const noexcept override;
+
+  std::string getFilename() const;
+
 private:
   std::string filename_;
 };

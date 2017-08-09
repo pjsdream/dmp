@@ -11,7 +11,8 @@ namespace dmp
 class ResourceMesh : public Resource
 {
 public:
-  explicit ResourceMesh(const std::string& fileneame);
+  ResourceMesh() = delete;
+  explicit ResourceMesh(const std::shared_ptr<GlFunctions>& gl, const std::string& fileneame);
   ~ResourceMesh() override;
 
   ResourceMesh(const ResourceMesh& rhs) = delete;
@@ -25,11 +26,12 @@ public:
 private:
   struct RawMesh;
 
-  RawMesh asyncLoadMesh(const std::string& filename);
+  RawMesh asyncLoadMesh(std::string filename);
   std::future<RawMesh> future_raw_mesh_;
 
   void prepareGlBuffers();
 
+  bool ready_rendering_;
   GLuint vao_;
   std::vector<GLuint> vbos_;
 

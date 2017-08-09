@@ -1,13 +1,15 @@
 #ifndef DMP_SHADER_H
 #define DMP_SHADER_H
 
+#include <dmp/rendering/gl_base.h>
+
 #include <string>
 
-#include <dmp/rendering/gl_base.h>
+#include <Eigen/Dense>
 
 namespace dmp
 {
-class Shader : public GlBase
+class Shader
 {
 public:
   enum class ShaderType
@@ -16,15 +18,28 @@ public:
     Fragment
   };
 
-  Shader(const std::shared_ptr<GlBase>& base);
+  Shader() = delete;
+  explicit Shader(const std::shared_ptr<GlFunctions>& gl);
 
   void loadShader(const std::string& filename, ShaderType type);
-  void createShader();
+  void linkShader();
+
+  void start();
+  void end();
+
+  void uniform(GLint location, const Eigen::Matrix4f& matrix);
+
+protected:
+  std::shared_ptr<GlFunctions> gl_;
+
+  GLint getUniformLocation(const std::string& name);
+  void bindAttribLocation(GLuint index, const std::string& name);
 
 private:
-  GLuint shaderTypeToGlType(ShaderType type);
+  static GLuint shaderTypeToGlType(ShaderType type);
 
   std::vector<GLuint> shaders_;
+  GLuint program_;
 };
 }
 

@@ -15,6 +15,8 @@ public:
   SceneObject(SceneObject&& rhs) = default;
   SceneObject& operator = (SceneObject&& rhs) = default;
 
+  virtual bool isMeshObject() const noexcept;
+
 private:
 };
 }

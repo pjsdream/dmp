@@ -1,27 +1,33 @@
 #include <dmp/rendering/scene/scene_manager.h>
 #include <dmp/rendering/scene/scene_node.h>
+#include <dmp/rendering/scene/scene_edge.h>
 #include <dmp/rendering/scene/scene_object.h>
 #include <dmp/rendering/scene/scene_mesh_object.h>
+#include <thread>
 
 namespace dmp
 {
+SceneManager::SceneManager()
+    : root_(std::make_shared<SceneNode>())
+{
+}
+
 std::shared_ptr<SceneNode> SceneManager::createNode()
 {
-  return std::make_shared<SceneNode>();
-}
+  std::lock_guard<std::mutex> lock{mutex_};
 
-std::shared_ptr<SceneNode> SceneManager::createNode(const Eigen::Affine3d& transform)
-{
-  return std::make_shared<SceneNode>(transform);
-}
-
-std::shared_ptr<SceneNode> SceneManager::createNode(const Eigen::Vector3d& translate)
-{
-  return std::make_shared<SceneNode>(translate);
+  auto node = std::make_shared<SceneNode>();
+  root_->createEdge(node);
+  return node;
 }
 
 std::shared_ptr<SceneObject> SceneManager::createMeshObject(const std::string& filename)
 {
   return std::make_shared<SceneMeshObject>(filename);
+}
+
+std::shared_ptr<SceneNode> SceneManager::getRoot()
+{
+  return root_;
 }
 }

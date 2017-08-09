@@ -12,9 +12,12 @@ struct ResourceMesh::RawMesh
   std::vector<float> normal_buffer;
   std::vector<float> texture_buffer;
   std::vector<int> face_buffer;
+
+  RawMesh(RawMesh&& rhs) = default;
 };
 
-ResourceMesh::ResourceMesh(const std::string& filename)
+ResourceMesh::ResourceMesh(const std::shared_ptr<GlFunctions>& gl, const std::string& filename)
+: Resource(gl), ready_rendering_(false)
 {
   future_raw_mesh_ = std::async(std::launch::async,
                                 [&]()
@@ -27,7 +30,7 @@ ResourceMesh::~ResourceMesh()
   // TODO: clear gl objects
 }
 
-ResourceMesh::RawMesh ResourceMesh::asyncLoadMesh(const std::string& filename)
+ResourceMesh::RawMesh ResourceMesh::asyncLoadMesh(std::string filename)
 {
   RawMesh raw_mesh{};
 
@@ -75,12 +78,23 @@ void ResourceMesh::draw()
 {
   using namespace std::literals;
 
-  if (future_raw_mesh_.wait_for(0s) == std::future_status::ready)
-    prepareGlBuffers();
+  if (!ready_rendering_)
+  {
+    if (future_raw_mesh_.valid() &&
+        future_raw_mesh_.wait_for(0s) == std::future_status::ready)
+    {
+      ready_rendering_ = true;
+      prepareGlBuffers();
+    }
+  }
 
-  gl_->glBindVertexArray(vao_);
-  gl_->glDrawArrays(GL_TRIANGLES, 0, num_faces_ * 3);
-  gl_->glBindVertexArray(0);
+  if (ready_rendering_)
+  {
+    gl_->glBindVertexArray(vao_);
+    gl_->glDrawArrays(GL_TRIANGLES, 0, 3);
+    gl_->glDrawElements(GL_TRIANGLES, num_faces_ * 3, GL_UNSIGNED_INT, 0);
+    gl_->glBindVertexArray(0);
+  }
 }
 
 void ResourceMesh::prepareGlBuffers()

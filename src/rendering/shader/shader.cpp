@@ -2,9 +2,10 @@
 
 namespace dmp
 {
-Shader::Shader(const std::shared_ptr<GlBase>& base)
-    : GlBase(base)
+Shader::Shader(const std::shared_ptr<GlFunctions>& gl)
+    : gl_(gl)
 {
+  program_ = gl_->glCreateProgram();
 }
 
 void Shader::loadShader(const std::string& filename, ShaderType type)
@@ -49,25 +50,26 @@ void Shader::loadShader(const std::string& filename, ShaderType type)
   shaders_.push_back(shader);
 }
 
-void Shader::createShader()
+void Shader::linkShader()
 {
-  GLuint program = gl_->glCreateProgram();
-
   for (GLuint shader : shaders_)
-    gl_->glAttachShader(program, shader);
+    gl_->glAttachShader(program_, shader);
 
-  gl_->glLinkProgram(program);
+  gl_->glLinkProgram(program_);
 
   GLint linked;
-  gl_->glGetProgramiv(program, GL_LINK_STATUS, &linked);
+  gl_->glGetProgramiv(program_, GL_LINK_STATUS, &linked);
 
   if (!linked)
   {
+    for (GLuint shader : shaders_)
+      gl_->glDetachShader(program_, shader);
+
     GLsizei len;
-    gl_->glGetProgramiv(program, GL_INFO_LOG_LENGTH, &len);
+    gl_->glGetProgramiv(program_, GL_INFO_LOG_LENGTH, &len);
 
     GLchar* log = new GLchar[len + 1];
-    gl_->glGetProgramInfoLog(program, len, &len, log);
+    gl_->glGetProgramInfoLog(program_, len, &len, log);
     fprintf(stderr, "Shader linking failed:\n%s\n", log);
     delete[] log;
 
@@ -79,8 +81,35 @@ GLuint Shader::shaderTypeToGlType(ShaderType type)
 {
   switch (type)
   {
-    case ShaderType::Vertex:return GL_VERTEX_SHADER;
-    case ShaderType::Fragment:return GL_FRAGMENT_SHADER;
+    case ShaderType::Vertex:
+      return GL_VERTEX_SHADER;
+    case ShaderType::Fragment:
+      return GL_FRAGMENT_SHADER;
   }
+}
+
+void Shader::start()
+{
+  gl_->glUseProgram(program_);
+}
+
+void Shader::end()
+{
+  gl_->glUseProgram(0);
+}
+
+void Shader::uniform(GLint location, const Eigen::Matrix4f& matrix)
+{
+  gl_->glUniformMatrix4fv(location, 1, GL_FALSE, matrix.data());
+}
+
+GLint Shader::getUniformLocation(const std::string& name)
+{
+  return gl_->glGetUniformLocation(program_, name.c_str());
+}
+
+void Shader::bindAttribLocation(GLuint index, const std::string& name)
+{
+  gl_->glBindAttribLocation(program_, index, name.c_str());
 }
 }

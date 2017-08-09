@@ -9,11 +9,12 @@ namespace dmp
 {
 class ResourceMesh;
 
-class ResourceManager : public GlBase
+class ResourceManager
 {
 public:
-  ResourceManager() = default;
-  ~ResourceManager() override = default;
+  ResourceManager() = delete;
+  explicit ResourceManager(const std::shared_ptr<GlFunctions>& gl);
+  ~ResourceManager() = default;
 
   ResourceManager(const ResourceManager& rhs) = delete;
   ResourceManager& operator=(const ResourceManager& rhs) = delete;
@@ -24,6 +25,8 @@ public:
   std::shared_ptr<ResourceMesh> getMesh(const std::string& filename);
 
 private:
+  std::shared_ptr<GlFunctions> gl_;
+
   std::unordered_map<std::string, std::shared_ptr<ResourceMesh>> meshes_;
 };
 }

@@ -2,6 +2,7 @@
 #define DMP_SCENE_MANAGER_H
 
 #include <memory>
+#include <mutex>
 
 #include <Eigen/Dense>
 
@@ -12,7 +13,7 @@ class SceneObject;
 class SceneManager
 {
 public:
-  SceneManager() = default;
+  SceneManager();
   ~SceneManager() = default;
 
   SceneManager(const SceneManager& rhs) = delete;
@@ -22,12 +23,15 @@ public:
   SceneManager& operator=(SceneManager&& rhs) = delete;
 
   std::shared_ptr<SceneNode> createNode();
-  std::shared_ptr<SceneNode> createNode(const Eigen::Affine3d& transform);
-  std::shared_ptr<SceneNode> createNode(const Eigen::Vector3d& translate);
 
   std::shared_ptr<SceneObject> createMeshObject(const std::string& filename);
 
+  std::shared_ptr<SceneNode> getRoot();
+
 private:
+  std::mutex mutex_;
+
+  std::shared_ptr<SceneNode> root_;
 };
 }
 

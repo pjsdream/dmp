@@ -1,21 +1,10 @@
 #include <dmp/rendering/scene/scene_node.h>
+#include <dmp/rendering/scene/scene_edge.h>
 
 namespace dmp
 {
 SceneNode::SceneNode()
-    : transform_(Eigen::Affine3d::Identity())
 {
-}
-
-SceneNode::SceneNode(const Eigen::Affine3d& transform)
-    : transform_(transform)
-{
-}
-
-SceneNode::SceneNode(const Eigen::Vector3d& translate)
-    : transform_(Eigen::Affine3d::Identity())
-{
-  transform_.translate(translate);
 }
 
 void SceneNode::attachObject(const std::shared_ptr<SceneObject>& object)
@@ -23,8 +12,23 @@ void SceneNode::attachObject(const std::shared_ptr<SceneObject>& object)
   objects_.push_back(object);
 }
 
+const std::vector<SceneEdge>& SceneNode::getEdges()
+{
+  return edges_;
+}
+
 const std::vector<std::shared_ptr<SceneObject>>& SceneNode::getAttachedObjects()
 {
   return objects_;
+}
+
+void SceneNode::createEdge(const std::shared_ptr<SceneNode>& child)
+{
+  edges_.emplace_back(child);
+}
+
+void SceneNode::createEdge(const std::shared_ptr<SceneNode>& child, const Eigen::Affine3d& transform)
+{
+  edges_.emplace_back(child, transform);
 }
 }

@@ -1,8 +1,8 @@
-#version 430 core
+#version 410 core
 
 in vec3 position;
 in vec3 normal;
-in vec2 texture;
+in vec2 tex_coord;
 
 uniform mat4 model;
 uniform mat4 projection;
@@ -12,7 +12,7 @@ out vec3 surface_color;
 
 void main()
 {
-    const vec4 world_position = model * vec4(position, 1.0);
+    vec4 world_position = model * vec4(position, 1.0);
 	
     surface_color = normal;
 

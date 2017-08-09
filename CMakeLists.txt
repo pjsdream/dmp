@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.1.0)
 project(dmp)
 
-# C++14
-set(CMAKE_CXX_STANDARD 14)
+# C++17
+set(CMAKE_CXX_STANDARD 17)
 
 # C++ thread
 find_package(Threads)
@@ -31,7 +31,6 @@ IF (APPLE)
   set(Qt5OpenGL_DIR ${QT_PATH}/lib/cmake/Qt5OpenGL)
 ENDIF (APPLE)
 IF (LINUX)
-  set(QT_PATH ~/Qt/5.9.1/clang_64)
   set(Qt5Widgets_DIR ${QT_PATH})
   set(Qt5OpenGL_DIR ${QT_PATH})
 ENDIF (LINUX)
@@ -71,7 +70,7 @@ set(DMP_SOURCE_FILES
   src/rendering/resource/resource_mesh.cpp
   include/dmp/rendering/resource/resource.h
   include/dmp/rendering/resource/resource_mesh.h
-  src/rendering/shader/light_shader.cpp include/dmp/rendering/shader/light_shader.h)
+  src/rendering/shader/light_shader.cpp include/dmp/rendering/shader/light_shader.h include/dmp/rendering/scene/scene_edge.h src/rendering/scene/scene_edge.cpp src/rendering/request/request_manager.cpp include/dmp/rendering/request/request_manager.h include/dmp/rendering/request/request.h src/rendering/request/request.cpp)
 
 add_executable(dmp ${DMP_SOURCE_FILES})
 target_link_libraries(dmp

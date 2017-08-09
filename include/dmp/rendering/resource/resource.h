@@ -5,13 +5,15 @@
 
 namespace dmp
 {
-class Resource : public GlBase
+class Resource
 {
 public:
-  Resource() = default;
+  Resource() = delete;
+  explicit Resource(const std::shared_ptr<GlFunctions>& gl);
   virtual ~Resource() = default;
 
-private:
+protected:
+  std::shared_ptr<GlFunctions> gl_;
 };
 }
 

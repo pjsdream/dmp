@@ -6,4 +6,14 @@ SceneMeshObject::SceneMeshObject(const std::string& filename)
     : filename_(filename)
 {
 }
+
+bool SceneMeshObject::isMeshObject() const noexcept
+{
+  return true;
+}
+
+std::string SceneMeshObject::getFilename() const
+{
+  return filename_;
+}
 }
