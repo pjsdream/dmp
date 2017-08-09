@@ -4,6 +4,7 @@
 #include <dmp/rendering/gl_base.h>
 
 #include <string>
+#include <memory>
 
 #include <Eigen/Dense>
 

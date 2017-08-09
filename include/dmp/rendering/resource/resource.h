@@ -3,6 +3,8 @@
 
 #include <dmp/rendering/gl_base.h>
 
+#include <memory>
+
 namespace dmp
 {
 class Resource

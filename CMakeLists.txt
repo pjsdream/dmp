@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.1.0)
 project(dmp)
 
+set(CMAKE_BUILD_TYPE Debug)
+
 # C++17
 set(CMAKE_CXX_STANDARD 17)
 
@@ -14,7 +16,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 find_package(Eigen3)
 
 # assimp
-find_package(assimp 4.0.1)
+find_package(assimp)
 
 # yaml-cpp
 find_package(yaml-cpp 0.5.3)
@@ -70,7 +72,7 @@ set(DMP_SOURCE_FILES
   src/rendering/resource/resource_mesh.cpp
   include/dmp/rendering/resource/resource.h
   include/dmp/rendering/resource/resource_mesh.h
-  src/rendering/shader/light_shader.cpp include/dmp/rendering/shader/light_shader.h include/dmp/rendering/scene/scene_edge.h src/rendering/scene/scene_edge.cpp src/rendering/request/request_manager.cpp include/dmp/rendering/request/request_manager.h include/dmp/rendering/request/request.h src/rendering/request/request.cpp)
+  src/rendering/shader/light_shader.cpp include/dmp/rendering/shader/light_shader.h include/dmp/rendering/scene/scene_edge.h src/rendering/scene/scene_edge.cpp src/rendering/request/request_manager.cpp include/dmp/rendering/request/request_manager.h include/dmp/rendering/request/request.h src/rendering/request/request.cpp include/dmp/json/json.h src/json/json.cpp include/dmp/rendering/tf/tf_manager.h include/dmp/rendering/tf/tf.h src/rendering/tf/tf_manager.cpp src/rendering/tf/tf.cpp)
 
 add_executable(dmp ${DMP_SOURCE_FILES})
 target_link_libraries(dmp

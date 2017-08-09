@@ -1,19 +1,15 @@
 #include <dmp/rendering/request/request.h>
+#include <dmp/json/json.h>
 
 namespace dmp
 {
-Request::Request()
-    : action_(Action::Nothing)
+std::shared_ptr<Json> Request::getJson() const noexcept
 {
+  return json_;
 }
 
-void Request::setAction(Action action)
+void Request::setJson(const std::shared_ptr<Json>& json)
 {
-  action_ = action;
-}
-
-void Request::setObjectName(const std::string& name)
-{
-  object_name_ = name;
+  json_ = json;
 }
 }

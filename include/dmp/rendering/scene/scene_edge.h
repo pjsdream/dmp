@@ -3,6 +3,8 @@
 
 #include <Eigen/Dense>
 
+#include <memory>
+
 namespace dmp
 {
 class SceneNode;

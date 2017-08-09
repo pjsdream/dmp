@@ -16,6 +16,7 @@ class SceneNode;
 class SceneObject;
 class ResourceManager;
 class RequestManager;
+class Request;
 class LightShader;
 
 class Renderer : public QOpenGLWidget
@@ -32,12 +33,15 @@ public:
   Renderer(Renderer&& rhs) = delete;
   Renderer& operator=(Renderer&& rhs) = delete;
 
+  void sendRequest(Request&& request);
+
 protected:
   void paintGL() override;
   void resizeGL(int w, int h) override;
   void initializeGL() override;
 
 private:
+  void handleRequest(const Request& request);
   void traverseScene(const std::shared_ptr<SceneNode>& node, const Eigen::Affine3d& transform);
 
   std::shared_ptr<GlFunctions> gl_;

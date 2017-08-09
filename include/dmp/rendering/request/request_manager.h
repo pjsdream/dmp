@@ -14,12 +14,13 @@ public:
   RequestManager() = default;
   ~RequestManager() = default;
 
-  void receiveRequest(const std::shared_ptr<Request>& request);
-  std::vector<std::shared_ptr<Request>> getRequests();
+  void addRequest(Request&& request);
+  void addRequests(std::vector<Request>&& requests);
+  void pullRequests(std::vector<Request>& result);
 
 private:
   std::mutex queue_mutex_;
-  std::vector<std::shared_ptr<Request>> queue_;
+  std::vector<Request> queue_;
 };
 }
 

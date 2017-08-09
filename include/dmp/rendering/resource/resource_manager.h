@@ -4,6 +4,7 @@
 #include <dmp/rendering/gl_base.h>
 
 #include <unordered_map>
+#include <memory>
 
 namespace dmp
 {

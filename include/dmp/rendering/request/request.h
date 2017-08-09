@@ -2,27 +2,25 @@
 #define DMP_REQUEST_H
 
 #include <string>
+#include <memory>
 
 namespace dmp
 {
+class Json;
 class Request
 {
 public:
-  enum class Action
-  {
-    Nothing,
-    Add,
-  };
-
-  Request();
+  Request() = default;
   ~Request() = default;
 
-  void setAction(Action action);
-  void setObjectName(const std::string& name);
+  Request(Request&& rhs) = default;
+  Request& operator=(Request&& rhs) = default;
+
+  std::shared_ptr<Json> getJson() const noexcept;
+  void setJson(const std::shared_ptr<Json>& json);
 
 private:
-  Action action_;
-  std::string object_name_;
+  std::shared_ptr<Json> json_;
 };
 }
 

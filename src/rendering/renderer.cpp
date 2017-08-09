@@ -1,5 +1,6 @@
 #include <dmp/rendering/renderer.h>
 #include <dmp/rendering/request/request_manager.h>
+#include <dmp/rendering/request/request.h>
 #include <dmp/rendering/resource/resource_manager.h>
 #include <dmp/rendering/resource/resource_mesh.h>
 #include <dmp/rendering/scene/scene_manager.h>
@@ -8,6 +9,7 @@
 #include <dmp/rendering/scene/scene_object.h>
 #include <dmp/rendering/scene/scene_mesh_object.h>
 #include <dmp/rendering/shader/light_shader.h>
+#include <dmp/json/json.h>
 
 #include <QTimer>
 
@@ -29,9 +31,21 @@ Renderer::Renderer(QWidget* parent)
 
 Renderer::~Renderer() = default;
 
+void Renderer::sendRequest(Request&& request)
+{
+  request_manager_->addRequest(std::move(request));
+}
+
 void Renderer::paintGL()
 {
   gl_->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  // update scene upon requests
+  std::vector<Request> requests;
+  request_manager_->pullRequests(requests);
+
+  for (const auto& request : requests)
+    handleRequest(request);
 
   // traverse scene
   light_shader_->start();
@@ -39,6 +53,13 @@ void Renderer::paintGL()
   light_shader_->loadView(Eigen::Affine3d::Identity());
   traverseScene(scene_manager_->getRoot(), Eigen::Affine3d::Identity());
   light_shader_->end();
+}
+
+void Renderer::handleRequest(const Request& request)
+{
+  // TODO: parse json and handle request
+  auto json = request.getJson();
+  printf("action: %s\n", json->at("action")->toString().c_str());
 }
 
 void Renderer::traverseScene(const std::shared_ptr<SceneNode>& node, const Eigen::Affine3d& transform)
