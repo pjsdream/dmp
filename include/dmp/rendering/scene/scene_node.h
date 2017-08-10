@@ -9,11 +9,12 @@
 namespace dmp
 {
 class SceneEdge;
-class SceneObject;
+class Resource;
 class SceneNode : public std::enable_shared_from_this<SceneNode>
 {
 public:
-  SceneNode();
+  SceneNode() = default;
+  explicit SceneNode(const std::string& name);
   ~SceneNode() = default;
 
   SceneNode(const SceneNode& rhs) = delete;
@@ -22,19 +23,21 @@ public:
   SceneNode(SceneNode&& rhs) = default;
   SceneNode& operator=(SceneNode&& rhs) = default;
 
-  void attachObject(const std::shared_ptr<SceneObject>& object);
+  void attachResource(const std::shared_ptr<Resource>& resource);
 
   void createEdge(const std::shared_ptr<SceneNode>& child);
   void createEdge(const std::shared_ptr<SceneNode>& child, const Eigen::Affine3d& transform);
 
   const Eigen::Affine3d& getTransform();
   const std::vector<SceneEdge>& getEdges();
-  const std::vector<std::shared_ptr<SceneObject>>& getAttachedObjects();
+  const std::vector<std::shared_ptr<Resource>>& getAttachedResources();
 
 private:
+  std::string name_;
+
   std::vector<SceneEdge> edges_;
 
-  std::vector<std::shared_ptr<SceneObject>> objects_;
+  std::vector<std::shared_ptr<Resource>> resources_;
 };
 }
 

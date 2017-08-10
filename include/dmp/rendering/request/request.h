@@ -4,23 +4,27 @@
 #include <string>
 #include <memory>
 
+#include <dmp/json/json.h>
+
 namespace dmp
 {
-class Json;
 class Request
 {
 public:
   Request() = default;
+  explicit Request(const Json& json);
+  explicit Request(Json&& json);
   ~Request() = default;
 
   Request(Request&& rhs) = default;
   Request& operator=(Request&& rhs) = default;
 
-  std::shared_ptr<Json> getJson() const noexcept;
-  void setJson(const std::shared_ptr<Json>& json);
+  Json getJson() const noexcept;
+  void setJson(const Json& json);
+  void setJson(Json&& json);
 
 private:
-  std::shared_ptr<Json> json_;
+  Json json_;
 };
 }
 

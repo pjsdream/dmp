@@ -41,16 +41,8 @@ protected:
   void initializeGL() override;
 
 private:
-  void handleRequest(const Request& request);
-  void traverseScene(const std::shared_ptr<SceneNode>& node, const Eigen::Affine3d& transform);
-
-  std::shared_ptr<GlFunctions> gl_;
-
-  std::unique_ptr<SceneManager> scene_manager_;
-  std::unique_ptr<ResourceManager> resource_manager_;
-  std::unique_ptr<RequestManager> request_manager_;
-
-  std::unique_ptr<LightShader> light_shader_;
+  class Impl;
+  std::unique_ptr<Impl> impl_;
 };
 }
 

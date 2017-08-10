@@ -1,10 +1,11 @@
 #version 410 core
 
+in vec2 texture_coord;
 in vec3 surface_color;
 
 out vec4 out_color;
 
 void main()
 {
-    out_color = vec4(surface_color, 1.0);
+  out_color = vec4(surface_color, 1.0);
 }

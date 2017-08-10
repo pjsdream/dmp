@@ -1,9 +1,10 @@
-#include <QApplication>
 #include <dmp/rendering/renderer.h>
-#include <dmp/rendering/scene/scene_object.h>
 #include <dmp/rendering/scene/scene_node.h>
 #include <dmp/json/json.h>
 #include <dmp/rendering/request/request.h>
+#include <dmp/planning/planner.h>
+
+#include <QApplication>
 
 #include <thread>
 
@@ -24,20 +25,26 @@ int main(int argc, char** argv)
 
   auto renderer = std::make_shared<dmp::Renderer>();
 
-  auto json = dmp::Json::createObject();
-  json->add("action", dmp::Json::createString("add"));
-  std::thread t([json, renderer]()
-                {
-                  for (int i=0; i<5; i++)
-                  {
-                    dmp::Request req;
-                    req.setJson(json);
-                    renderer->sendRequest(std::move(req));
-                    std::this_thread::sleep_for(std::chrono::seconds(1));
-                  }
-                });
+  auto planner = std::make_shared<dmp::Planner>();
+  planner->setRenderer(renderer);
+
+  {
+    dmp::Json json{};
+    json["action"] = "set frame";
+    json["name"] = "bunny";
+    for (int i=0; i<16; i++)
+      json["transform"].add(dmp::Json(i%5 == 0 ? 1. : 0.));
+    renderer->sendRequest(dmp::Request(std::move(json)));
+  }
+
+  {
+    dmp::Json json{};
+    json["action"] = "attach mesh";
+    json["name"] = "bunny";
+    json["filename"] = "/Users/jaesungp/cpp_workspace/dmp/meshes/bunny.obj";
+    renderer->sendRequest(dmp::Request(std::move(json)));
+  }
 
   app.exec();
-  t.join();
   return 0;
 }

@@ -26,15 +26,17 @@ public:
   Json();
   ~Json() = default;
 
+  explicit Json(int v);
+  explicit Json(bool v);
+  explicit Json(double v);
+  explicit Json(const std::string& v);
+  explicit Json(std::string&& v);
+
+  Json(const Json& rhs) = default;
+  Json& operator=(const Json& rhs) = default;
+
   Json(Json&& rhs) = default;
   Json& operator=(Json&& rhs) = default;
-
-  static std::shared_ptr<Json> createInt(int v);
-  static std::shared_ptr<Json> createBool(bool v);
-  static std::shared_ptr<Json> createDouble(double v);
-  static std::shared_ptr<Json> createString(const std::string& v);
-  static std::shared_ptr<Json> createArray();
-  static std::shared_ptr<Json> createObject();
 
   int toInt();
   bool toBool();
@@ -46,16 +48,25 @@ public:
   void set(double v);
   void set(const std::string& v);
 
-  std::shared_ptr<Json> at(int index);
-  std::shared_ptr<Json> at(const std::string& key);
-  std::shared_ptr<Json> at(std::string&& key);
+  Json& operator[](int index);
+  Json& operator[](const std::string& key);
+  Json& operator[](std::string&& key);
+
+  Json& operator=(int v);
+  Json& operator=(bool v);
+  Json& operator=(double v);
+  Json& operator=(const char* v);
+  Json& operator=(const std::string& v);
+  Json& operator=(std::string&& v);
 
   // for array only
-  void add(const std::shared_ptr<Json>& value);
+  int size();
+  void add(const Json& value);
+  void add(Json&& value);
 
   // for object only
-  void add(const std::string& key, const std::shared_ptr<Json>& value);
   bool containsKey(const std::string& key);
+  bool containsKey(std::string&& key);
 
 private:
   Type type_;
@@ -68,8 +79,8 @@ private:
   };
 
   std::string string_value_;
-  std::vector<std::shared_ptr<Json>> array_;
-  std::unordered_map<std::string, std::shared_ptr<Json>> object_;
+  std::vector<Json> array_;
+  std::unordered_map<std::string, Json> object_;
 };
 }
 

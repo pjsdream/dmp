@@ -7,37 +7,31 @@ Json::Json()
 {
 }
 
-std::shared_ptr<Json> Json::createInt(int v)
+
+Json::Json(int v)
 {
-  auto json = std::make_shared<Json>();
-  json->set(v);
-  return json;
+  type_ = Type::Int;
+  int_value_ = v;
 }
-std::shared_ptr<Json> Json::createBool(bool v)
+Json::Json(bool v)
 {
-  auto json = std::make_shared<Json>();
-  json->set(v);
-  return json;
+  type_ = Type::Bool;
+  bool_value_ = v;
 }
-std::shared_ptr<Json> Json::createDouble(double v)
+Json::Json(double v)
 {
-  auto json = std::make_shared<Json>();
-  json->set(v);
-  return json;
+  type_ = Type::Double;
+  double_value_ = v;
 }
-std::shared_ptr<Json> Json::createString(const std::string& v)
+Json::Json(const std::string& v)
 {
-  auto json = std::make_shared<Json>();
-  json->set(v);
-  return json;
+  type_ = Type::String;
+  string_value_ = v;
 }
-std::shared_ptr<Json> Json::createArray()
+Json::Json(std::string&& v)
 {
-  return std::make_shared<Json>();
-}
-std::shared_ptr<Json> Json::createObject()
-{
-  return std::make_shared<Json>();
+  type_ = Type::String;
+  string_value_ = std::move(v);
 }
 
 int Json::toInt()
@@ -121,7 +115,7 @@ void Json::set(const std::string& v)
   string_value_ = v;
 }
 
-std::shared_ptr<Json> Json::at(int index)
+Json& Json::operator[](int index)
 {
   if (type_ != Type::Array)
   {
@@ -132,7 +126,7 @@ std::shared_ptr<Json> Json::at(int index)
 
   return array_[index];
 }
-std::shared_ptr<Json> Json::at(const std::string& key)
+Json& Json::operator[](const std::string& key)
 {
   if (type_ != Type::Object)
   {
@@ -143,7 +137,7 @@ std::shared_ptr<Json> Json::at(const std::string& key)
 
   return object_[key];
 }
-std::shared_ptr<Json> Json::at(std::string&& key)
+Json& Json::operator[](std::string&& key)
 {
   if (type_ != Type::Object)
   {
@@ -153,10 +147,45 @@ std::shared_ptr<Json> Json::at(std::string&& key)
   }
 
   return object_[key];
+}
+
+Json& Json::operator=(int v)
+{
+  set(v);
+  return *this;
+}
+Json& Json::operator=(bool v)
+{
+  set(v);
+  return *this;
+}
+Json& Json::operator=(double v)
+{
+  set(v);
+  return *this;
+}
+Json& Json::operator=(const char* v)
+{
+  *this = std::string(v);
+  return *this;
+}
+Json& Json::operator=(const std::string& v)
+{
+  set(v);
+  return *this;
+}
+Json& Json::operator=(std::string&& v)
+{
+  set(std::move(v));
+  return *this;
 }
 
 // for array only
-void Json::add(const std::shared_ptr<Json>& value)
+int Json::size()
+{
+  return array_.size();
+}
+void Json::add(const Json& value)
 {
   if (type_ != Type::Array)
   {
@@ -167,9 +196,20 @@ void Json::add(const std::shared_ptr<Json>& value)
 
   array_.push_back(value);
 }
+void Json::add(Json&& value)
+{
+  if (type_ != Type::Array)
+  {
+    string_value_.clear();
+    object_.clear();
+    type_ = Type::Array;
+  }
+
+  array_.push_back(std::move(value));
+}
 
 // for object only
-void Json::add(const std::string& key, const std::shared_ptr<Json>& value)
+bool Json::containsKey(const std::string& key)
 {
   if (type_ != Type::Object)
   {
@@ -178,9 +218,9 @@ void Json::add(const std::string& key, const std::shared_ptr<Json>& value)
     type_ = Type::Object;
   }
 
-  object_[key] = value;
+  return object_.find(key) != object_.cend();
 }
-bool Json::containsKey(const std::string& key)
+bool Json::containsKey(std::string&& key)
 {
   if (type_ != Type::Object)
   {

@@ -21,6 +21,9 @@ find_package(assimp)
 # yaml-cpp
 find_package(yaml-cpp 0.5.3)
 
+# tinyxml2
+set(TINYXML2_SOURCE_FILES lib/tinyxml2/tinyxml2.h lib/tinyxml2/tinyxml2.cpp)
+
 # Qt5
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -51,6 +54,10 @@ include_directories(
 )
 
 set(DMP_SOURCE_FILES
+  # tinyxml2
+  ${TINYXML2_SOURCE_FILES}
+
+  # source files
   include/dmp/rendering/renderer.h
   include/dmp/rendering/shader/shader.h
   include/dmp/rendering/gl_base.h
@@ -62,17 +69,13 @@ set(DMP_SOURCE_FILES
   src/rendering/scene/scene_manager.cpp
   src/rendering/scene/scene_node.cpp
   include/dmp/rendering/scene/scene_node.h
-  include/dmp/rendering/scene/scene_mesh_object.h
-  include/dmp/rendering/scene/scene_object.h
-  src/rendering/scene/scene_mesh_object.cpp
-  src/rendering/scene/scene_object.cpp
   include/dmp/rendering/resource/resource_manager.h
   src/rendering/resource/resource_manager.cpp
   src/rendering/resource/resource.cpp
   src/rendering/resource/resource_mesh.cpp
   include/dmp/rendering/resource/resource.h
   include/dmp/rendering/resource/resource_mesh.h
-  src/rendering/shader/light_shader.cpp include/dmp/rendering/shader/light_shader.h include/dmp/rendering/scene/scene_edge.h src/rendering/scene/scene_edge.cpp src/rendering/request/request_manager.cpp include/dmp/rendering/request/request_manager.h include/dmp/rendering/request/request.h src/rendering/request/request.cpp include/dmp/json/json.h src/json/json.cpp include/dmp/rendering/tf/tf_manager.h include/dmp/rendering/tf/tf.h src/rendering/tf/tf_manager.cpp src/rendering/tf/tf.cpp)
+  src/rendering/shader/light_shader.cpp include/dmp/rendering/shader/light_shader.h include/dmp/rendering/scene/scene_edge.h src/rendering/scene/scene_edge.cpp src/rendering/request/request_manager.cpp include/dmp/rendering/request/request_manager.h include/dmp/rendering/request/request.h src/rendering/request/request.cpp include/dmp/json/json.h src/json/json.cpp src/planning/planner.cpp include/dmp/planning/planner.h include/dmp/robot/robot_model.h src/robot/robot_model.cpp include/dmp/robot/robot_model_loader.h src/robot/robot_model_loader.cpp include/dmp/rendering/resource/resource_texture.h src/rendering/resource/resource_texture.cpp include/dmp/rendering/resource/resource_dynamic_mesh.h src/rendering/resource/resource_dynamic_mesh.cpp)
 
 add_executable(dmp ${DMP_SOURCE_FILES})
 target_link_libraries(dmp

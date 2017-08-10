@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <mutex>
+#include <unordered_map>
 
 #include <Eigen/Dense>
 
@@ -14,7 +15,7 @@ class SceneManager
 {
 public:
   SceneManager();
-  ~SceneManager() = default;
+  ~SceneManager();
 
   SceneManager(const SceneManager& rhs) = delete;
   SceneManager& operator=(const SceneManager& rhs) = delete;
@@ -22,16 +23,15 @@ public:
   SceneManager(SceneManager&& rhs) = delete;
   SceneManager& operator=(SceneManager&& rhs) = delete;
 
-  std::shared_ptr<SceneNode> createNode();
-
-  std::shared_ptr<SceneObject> createMeshObject(const std::string& filename);
+  std::shared_ptr<SceneNode> createNode(const std::string& name);
+  void deleteNode(const std::string& name);
 
   std::shared_ptr<SceneNode> getRoot();
+  std::shared_ptr<SceneNode> getNode(const std::string& name);
 
 private:
-  std::mutex mutex_;
-
   std::shared_ptr<SceneNode> root_;
+  std::unordered_map<std::string, std::shared_ptr<SceneNode>> node_map_;
 };
 }
 

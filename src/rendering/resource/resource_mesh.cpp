@@ -20,7 +20,7 @@ ResourceMesh::ResourceMesh(const std::shared_ptr<GlFunctions>& gl, const std::st
 : Resource(gl), ready_rendering_(false)
 {
   future_raw_mesh_ = std::async(std::launch::async,
-                                [&]()
+                                [=]()
                                 { return asyncLoadMesh(filename); }
   );
 }
@@ -42,10 +42,12 @@ ResourceMesh::RawMesh ResourceMesh::asyncLoadMesh(std::string filename)
   {
     aiMesh* mesh = scene->mMeshes[0];
 
+    raw_mesh.vertex_buffer.reserve(mesh->mNumVertices);
     std::copy((float*) mesh->mVertices,
               (float*) (mesh->mVertices + mesh->mNumVertices),
               std::back_inserter(raw_mesh.vertex_buffer));
 
+    raw_mesh.normal_buffer.reserve(mesh->mNumVertices);
     std::copy((float*) mesh->mNormals,
               (float*) (mesh->mNormals + mesh->mNumVertices),
               std::back_inserter(raw_mesh.normal_buffer));
@@ -83,15 +85,14 @@ void ResourceMesh::draw()
     if (future_raw_mesh_.valid() &&
         future_raw_mesh_.wait_for(0s) == std::future_status::ready)
     {
-      ready_rendering_ = true;
       prepareGlBuffers();
+      ready_rendering_ = true;
     }
   }
 
   if (ready_rendering_)
   {
     gl_->glBindVertexArray(vao_);
-    gl_->glDrawArrays(GL_TRIANGLES, 0, 3);
     gl_->glDrawElements(GL_TRIANGLES, num_faces_ * 3, GL_UNSIGNED_INT, 0);
     gl_->glBindVertexArray(0);
   }
