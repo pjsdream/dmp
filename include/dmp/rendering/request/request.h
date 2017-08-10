@@ -4,27 +4,21 @@
 #include <string>
 #include <memory>
 
-#include <dmp/json/json.h>
-
 namespace dmp
 {
 class Request
 {
 public:
   Request() = default;
-  explicit Request(const Json& json);
-  explicit Request(Json&& json);
-  ~Request() = default;
+  virtual ~Request() = default;
+
+  Request(const Request& rhs) = delete;
+  Request& operator=(const Request& rhs) = delete;
 
   Request(Request&& rhs) = default;
   Request& operator=(Request&& rhs) = default;
 
-  Json getJson() const noexcept;
-  void setJson(const Json& json);
-  void setJson(Json&& json);
-
 private:
-  Json json_;
 };
 }
 

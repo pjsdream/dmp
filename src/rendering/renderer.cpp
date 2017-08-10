@@ -1,6 +1,8 @@
 #include <dmp/rendering/renderer.h>
 #include <dmp/rendering/request/request_manager.h>
 #include <dmp/rendering/request/request.h>
+#include <dmp/rendering/request/request_frame.h>
+#include <dmp/rendering/request/request_mesh.h>
 #include <dmp/rendering/resource/resource_manager.h>
 #include <dmp/rendering/resource/resource_mesh.h>
 #include <dmp/rendering/scene/scene_manager.h>
@@ -22,15 +24,18 @@ public:
   void resizeGL(int w, int h);
   void initializeGL(QOpenGLContext* context);
 
-  void sendRequest(Request&& request);
+  void sendRequest(std::unique_ptr<Request> request);
 
 private:
-  void handleRequest(const Request& request);
-  void traverseScene(const std::shared_ptr<SceneNode>& node, const Eigen::Affine3d& transform);
+  void registerRequestHandlers();
 
-  void setFrame(const std::string& name, const Eigen::Affine3d& transform);
-  void setFrame(const std::string& name, const std::string& parent, const Eigen::Affine3d& transform);
-  void attachMesh(const std::string& name, const std::string& filename);
+  void handleRequest(std::unique_ptr<Request> request);
+  template <typename D>
+  void handleRequestFrame(std::unique_ptr<RequestFrame, D> request);
+  template <typename D>
+  void handleRequestMesh(std::unique_ptr<RequestMesh, D> request);
+
+  void traverseScene(const std::shared_ptr<SceneNode>& node, const Eigen::Affine3d& transform);
 
   std::shared_ptr<GlFunctions> gl_;
 
@@ -39,12 +44,15 @@ private:
   std::unique_ptr<RequestManager> request_manager_;
 
   std::unique_ptr<LightShader> light_shader_;
+
+  std::unordered_map<const std::type_info*, std::function<void(std::unique_ptr<Request>)>> request_handlers_;
 };
 
 Renderer::Renderer(QWidget* parent)
     : QOpenGLWidget(parent),
       impl_(std::make_unique<Impl>())
 {
+  // window management
   resize(800, 600);
   move(100, 100);
   show();
@@ -57,7 +65,7 @@ Renderer::Renderer(QWidget* parent)
 
 Renderer::~Renderer() = default;
 
-void Renderer::sendRequest(Request&& request)
+void Renderer::sendRequest(std::unique_ptr<Request> request)
 {
   impl_->sendRequest(std::move(request));
 }
@@ -79,9 +87,29 @@ void Renderer::initializeGL()
 
 Renderer::Impl::Impl()
 {
+  registerRequestHandlers();
 }
 
-void Renderer::Impl::sendRequest(Request&& request)
+void Renderer::Impl::registerRequestHandlers()
+{
+  printf ("frame %p\n", &typeid(RequestFrame));
+  request_handlers_[&typeid(RequestFrame)] = [=](auto request){ handleRequestFrame(std::unique_ptr<RequestFrame, std::function<void(RequestFrame*)>>(dynamic_cast<RequestFrame*>(request.get()), [](RequestFrame*){})); };
+  request_handlers_[&typeid(RequestMesh)] = [=](auto request){ handleRequestMesh(std::unique_ptr<RequestMesh, std::function<void(RequestMesh*)>>(dynamic_cast<RequestMesh*>(request.get()), [](RequestMesh*){})); };
+}
+
+template <typename D>
+void Renderer::Impl::handleRequestFrame(std::unique_ptr<RequestFrame, D> request)
+{
+  printf("frame\n");
+}
+
+template <typename D>
+void Renderer::Impl::handleRequestMesh(std::unique_ptr<RequestMesh, D> request)
+{
+  printf("mesh\n");
+}
+
+void Renderer::Impl::sendRequest(std::unique_ptr<Request> request)
 {
   request_manager_->addRequest(std::move(request));
 }
@@ -91,11 +119,10 @@ void Renderer::Impl::paintGL()
   gl_->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // update scene upon requests
-  std::vector<Request> requests;
-  request_manager_->pullRequests(requests);
+  std::vector<std::unique_ptr<Request>> requests{request_manager_->pullRequests()};
 
-  for (const auto& request : requests)
-    handleRequest(request);
+  for (auto&& request : requests)
+    handleRequest(std::move(request));
 
   // traverse scene
   light_shader_->start();
@@ -126,34 +153,10 @@ void Renderer::Impl::initializeGL(QOpenGLContext* context)
   light_shader_ = std::make_unique<LightShader>(gl_);
 }
 
-void Renderer::Impl::handleRequest(const Request& request)
+void Renderer::Impl::handleRequest(std::unique_ptr<Request> request)
 {
-  auto json = request.getJson();
-  printf("action: %s\n", json["action"].toString().c_str());
-
-  if (json["action"].toString() == "set frame")
-  {
-    auto name = json["name"].toString();
-    Eigen::Affine3d transform;
-    for (int i=0; i<16; i++)
-      transform.matrix()(i%4, i/4) = json["transform"][i].toDouble();
-    if (json.containsKey("parent"))
-    {
-      auto parent = json["parent"].toString();
-      setFrame(name, parent, transform);
-    }
-    else
-    {
-      setFrame(name, transform);
-    }
-  }
-  else if (json["action"].toString() == "attach mesh")
-  {
-    auto name = json["name"].toString();
-    auto filename = json["filename"].toString();
-    Eigen::Matrix4d transform;
-    attachMesh(name, filename);
-  }
+  printf ("request %p %p\n", &typeid(*request), &typeid(request.get()));
+  request_handlers_[&typeid(*request)](std::move(request));
 }
 
 void Renderer::Impl::traverseScene(const std::shared_ptr<SceneNode>& node, const Eigen::Affine3d& transform)
@@ -170,24 +173,5 @@ void Renderer::Impl::traverseScene(const std::shared_ptr<SceneNode>& node, const
   {
     traverseScene(edge.getChild(), transform * edge.getTransform());
   }
-}
-
-void Renderer::Impl::setFrame(const std::string& name, const Eigen::Affine3d& transform)
-{
-  auto node = scene_manager_->createNode(name);
-  auto root = scene_manager_->getRoot();
-  root->createEdge(node, transform);
-}
-void Renderer::Impl::setFrame(const std::string& name, const std::string& parent, const Eigen::Affine3d& transform)
-{
-  auto node = scene_manager_->createNode(name);
-  auto parent_node = scene_manager_->createNode(parent);
-  parent_node->createEdge(node, transform);
-}
-void Renderer::Impl::attachMesh(const std::string& name, const std::string& filename)
-{
-  auto node = scene_manager_->getNode(name);
-  if (node != nullptr)
-    node->attachResource(resource_manager_->getMesh(filename));
 }
 }

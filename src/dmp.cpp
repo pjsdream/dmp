@@ -2,6 +2,8 @@
 #include <dmp/rendering/scene/scene_node.h>
 #include <dmp/json/json.h>
 #include <dmp/rendering/request/request.h>
+#include <dmp/rendering/request/request_frame.h>
+#include <dmp/rendering/request/request_mesh.h>
 #include <dmp/planning/planner.h>
 
 #include <QApplication>
@@ -28,22 +30,19 @@ int main(int argc, char** argv)
   auto planner = std::make_shared<dmp::Planner>();
   planner->setRenderer(renderer);
 
-  {
-    dmp::Json json{};
-    json["action"] = "set frame";
-    json["name"] = "bunny";
-    for (int i=0; i<16; i++)
-      json["transform"].add(dmp::Json(i%5 == 0 ? 1. : 0.));
-    renderer->sendRequest(dmp::Request(std::move(json)));
-  }
+  auto frame = std::make_unique<dmp::RequestFrame>();
+  frame->action = dmp::RequestFrame::Action::Set;
+  frame->name = "bunny";
+  frame->transform = Eigen::Affine3d::Identity();
+  frame->transform.translate(Eigen::Vector3d(0.5, 0., 0.));
 
-  {
-    dmp::Json json{};
-    json["action"] = "attach mesh";
-    json["name"] = "bunny";
-    json["filename"] = "/Users/jaesungp/cpp_workspace/dmp/meshes/bunny.obj";
-    renderer->sendRequest(dmp::Request(std::move(json)));
-  }
+  auto mesh = std::make_unique<dmp::RequestMesh>();
+  mesh->action = dmp::RequestMesh::Action::Attach;
+  mesh->frame = "bunny";
+  mesh->filename = "/Users/jaesungp/cpp_workspace/dmp/meshes/bunny.obj";
+
+  renderer->sendRequest(std::move(frame));
+  renderer->sendRequest(std::move(mesh));
 
   app.exec();
   return 0;

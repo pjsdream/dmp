@@ -3,13 +3,13 @@
 
 namespace dmp
 {
-void RequestManager::addRequest(Request&& request)
+void RequestManager::addRequest(std::unique_ptr<Request> request)
 {
   std::lock_guard<std::mutex> lock{queue_mutex_};
   queue_.push_back(std::move(request));
 }
 
-void RequestManager::addRequests(std::vector<Request>&& requests)
+void RequestManager::addRequests(std::vector<std::unique_ptr<Request>>&& requests)
 {
   std::lock_guard<std::mutex> lock{queue_mutex_};
 
@@ -24,13 +24,15 @@ void RequestManager::addRequests(std::vector<Request>&& requests)
   }
 }
 
-void RequestManager::pullRequests(std::vector<Request>& result)
+std::vector<std::unique_ptr<Request>> RequestManager::pullRequests()
 {
-  result.clear();
+  std::vector<std::unique_ptr<Request>> result;
 
   {
     std::lock_guard<std::mutex> lock{queue_mutex_};
     std::swap(result, queue_);
   }
+
+  return result;
 }
 }

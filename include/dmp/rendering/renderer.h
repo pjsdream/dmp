@@ -33,7 +33,7 @@ public:
   Renderer(Renderer&& rhs) = delete;
   Renderer& operator=(Renderer&& rhs) = delete;
 
-  void sendRequest(Request&& request);
+  void sendRequest(std::unique_ptr<Request> request);
 
 protected:
   void paintGL() override;
