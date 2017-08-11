@@ -5,10 +5,10 @@ in vec3 normal;
 in vec2 tex_coord;
 in vec3 color;
 
-uniform int has_texture;
-uniform int has_color;
-uniform int has_global_color;
-uniform vec4 global_color;
+uniform bool has_texture;
+uniform bool has_color;
+uniform bool has_global_color;
+uniform vec3 global_color;
 
 uniform mat4 model;
 uniform mat4 projection;
@@ -26,7 +26,7 @@ void main()
   else if (has_color)
     surface_color = color;
   else
-    surface_color = vec4(0.5, 0.5, 0.5, 1);
+    surface_color = vec3(0.5, 0.5, 0.5);
 
   texture_coord = tex_coord;
 

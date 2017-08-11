@@ -30,10 +30,8 @@ private:
   void registerRequestHandlers();
 
   void handleRequest(std::unique_ptr<Request> request);
-  template <typename D>
-  void handleRequestFrame(std::unique_ptr<RequestFrame, D> request);
-  template <typename D>
-  void handleRequestMesh(std::unique_ptr<RequestMesh, D> request);
+  void handleRequestFrame(std::unique_ptr<RequestFrame> request);
+  void handleRequestMesh(std::unique_ptr<RequestMesh> request);
 
   void traverseScene(const std::shared_ptr<SceneNode>& node, const Eigen::Affine3d& transform);
 
@@ -92,21 +90,23 @@ Renderer::Impl::Impl()
 
 void Renderer::Impl::registerRequestHandlers()
 {
-  printf ("frame %p\n", &typeid(RequestFrame));
-  request_handlers_[&typeid(RequestFrame)] = [=](auto request){ handleRequestFrame(std::unique_ptr<RequestFrame, std::function<void(RequestFrame*)>>(dynamic_cast<RequestFrame*>(request.get()), [](RequestFrame*){})); };
-  request_handlers_[&typeid(RequestMesh)] = [=](auto request){ handleRequestMesh(std::unique_ptr<RequestMesh, std::function<void(RequestMesh*)>>(dynamic_cast<RequestMesh*>(request.get()), [](RequestMesh*){})); };
+  request_handlers_[&typeid(RequestFrame)] = [this](auto request){ handleRequestFrame(std::unique_ptr<RequestFrame>(dynamic_cast<RequestFrame*>(request.release()))); };
+  request_handlers_[&typeid(RequestMesh)] = [this](auto request){ handleRequestMesh(std::unique_ptr<RequestMesh>(dynamic_cast<RequestMesh*>(request.release()))); };
 }
 
-template <typename D>
-void Renderer::Impl::handleRequestFrame(std::unique_ptr<RequestFrame, D> request)
+void Renderer::Impl::handleRequest(std::unique_ptr<Request> request)
 {
-  printf("frame\n");
+  request_handlers_[&typeid(*request)](std::move(request));
 }
 
-template <typename D>
-void Renderer::Impl::handleRequestMesh(std::unique_ptr<RequestMesh, D> request)
+void Renderer::Impl::handleRequestFrame(std::unique_ptr<RequestFrame> request)
 {
-  printf("mesh\n");
+  scene_manager_->setFrame(request->parent, request->name, request->transform)
+}
+
+void Renderer::Impl::handleRequestMesh(std::unique_ptr<RequestMesh> request)
+{
+  scene_manager_->attachResource(request->frame, resource_manager_->getMesh(request->filename));
 }
 
 void Renderer::Impl::sendRequest(std::unique_ptr<Request> request)
@@ -151,12 +151,6 @@ void Renderer::Impl::initializeGL(QOpenGLContext* context)
 
   // shaders
   light_shader_ = std::make_unique<LightShader>(gl_);
-}
-
-void Renderer::Impl::handleRequest(std::unique_ptr<Request> request)
-{
-  printf ("request %p %p\n", &typeid(*request), &typeid(request.get()));
-  request_handlers_[&typeid(*request)](std::move(request));
 }
 
 void Renderer::Impl::traverseScene(const std::shared_ptr<SceneNode>& node, const Eigen::Affine3d& transform)
