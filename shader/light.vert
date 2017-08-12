@@ -15,6 +15,8 @@ uniform mat4 projection;
 uniform mat4 view;
 
 out vec2 texture_coord;
+out vec3 surface_position;
+out vec3 surface_normal;
 out vec3 surface_color;
 
 void main()
@@ -27,6 +29,9 @@ void main()
     surface_color = color;
   else
     surface_color = vec3(0.5, 0.5, 0.5);
+
+  surface_position = vec3(world_position);
+  surface_normal = mat3(model) * normal;
 
   texture_coord = tex_coord;
 

@@ -24,19 +24,21 @@ public:
   SceneManager(SceneManager&& rhs) = delete;
   SceneManager& operator=(SceneManager&& rhs) = delete;
 
-  void setFrame(const std::string& from, const std::string& to, Eigen::Affine3d& transform);
+  void setFrame(const std::string& name, const Eigen::Affine3d& transform);
+  void setFrame(const std::string& from, const std::string& to, const Eigen::Affine3d& transform);
   void attachResource(const std::string& name, std::shared_ptr<Resource> resource);
 
   std::vector<std::shared_ptr<SceneNode>> traverseNodes();
 
 private:
   std::shared_ptr<SceneNode> createNode(const std::string& name);
+  std::shared_ptr<SceneNode> getNode(const std::string& name);
   void deleteNode(const std::string& name);
 
-  void traverseNodes(std::vector<std::shared_ptr<SceneNode>>& result);
+  void traverseNodes(std::vector<std::shared_ptr<SceneNode>>& result, const std::string& name);
 
-  std::shared_ptr<SceneNode> root_;
   std::unordered_map<std::string, std::shared_ptr<SceneNode>> node_map_;
+  std::unordered_map<std::string, std::unordered_map<std::string, Eigen::Affine3d>> edges_;
 };
 }
 

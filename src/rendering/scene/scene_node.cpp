@@ -14,23 +14,18 @@ void SceneNode::attachResource(const std::shared_ptr<Resource>& resource)
   resources_.push_back(resource);
 }
 
-const std::vector<SceneEdge>& SceneNode::getEdges()
-{
-  return edges_;
-}
-
 const std::vector<std::shared_ptr<Resource>>& SceneNode::getAttachedResources()
 {
   return resources_;
 }
 
-void SceneNode::createEdge(const std::shared_ptr<SceneNode>& child)
+void SceneNode::setTransform(const Eigen::Affine3d& transform)
 {
-  edges_.emplace_back(child);
+  transform_ = transform;
 }
 
-void SceneNode::createEdge(const std::shared_ptr<SceneNode>& child, const Eigen::Affine3d& transform)
+const Eigen::Affine3d& SceneNode::getTransform()
 {
-  edges_.emplace_back(child, transform);
+  return transform_;
 }
 }

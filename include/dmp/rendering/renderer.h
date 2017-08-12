@@ -9,6 +9,8 @@
 
 #include <Eigen/Dense>
 
+class QMouseEvent;
+
 namespace dmp
 {
 class SceneManager;
@@ -39,6 +41,9 @@ protected:
   void paintGL() override;
   void resizeGL(int w, int h) override;
   void initializeGL() override;
+
+  void mousePressEvent(QMouseEvent* event);
+  void mouseMoveEvent(QMouseEvent* event);
 
 private:
   class Impl;

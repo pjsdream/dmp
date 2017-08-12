@@ -1,4 +1,5 @@
 #include <dmp/rendering/resource/resource_mesh.h>
+#include <dmp/rendering/resource/resource_texture.h>
 
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
@@ -11,13 +12,17 @@ struct ResourceMesh::RawMesh
   std::vector<float> vertex_buffer;
   std::vector<float> normal_buffer;
   std::vector<float> texture_buffer;
+  std::vector<float> color_buffer;
   std::vector<int> face_buffer;
 
   RawMesh(RawMesh&& rhs) = default;
 };
 
 ResourceMesh::ResourceMesh(const std::shared_ptr<GlFunctions>& gl, const std::string& filename)
-: Resource(gl), ready_rendering_(false)
+    : Resource(gl),
+      ready_rendering_(false),
+      color_option_(ColorOption::GlobalColor),
+      global_color_(Eigen::Vector3f(0.8f, 0.8f, 0.8f))
 {
   future_raw_mesh_ = std::async(std::launch::async,
                                 [=]()
@@ -104,10 +109,9 @@ void ResourceMesh::prepareGlBuffers()
 
   gl_->glGenVertexArrays(1, &vao_);
 
-  vbos_.resize(4);
-  gl_->glGenBuffers(4, &vbos_[0]);
+  vbos_.resize(5);
+  gl_->glGenBuffers(5, &vbos_[0]);
 
-  void* p;
   gl_->glBindVertexArray(vao_);
   gl_->glBindBuffer(GL_ARRAY_BUFFER, vbos_[0]);
   gl_->glBufferData(GL_ARRAY_BUFFER,
@@ -127,6 +131,8 @@ void ResourceMesh::prepareGlBuffers()
 
   if (!raw_mesh.texture_buffer.empty())
   {
+    color_option_ = ColorOption::Texture;
+
     gl_->glBindBuffer(GL_ARRAY_BUFFER, vbos_[2]);
     gl_->glBufferData(GL_ARRAY_BUFFER,
                       sizeof(float) * raw_mesh.texture_buffer.size(),
@@ -136,7 +142,21 @@ void ResourceMesh::prepareGlBuffers()
     gl_->glEnableVertexAttribArray(2);
   }
 
-  gl_->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbos_[3]);
+  if (!raw_mesh.color_buffer.empty())
+  {
+    // TODO: mesh that has both texture and color
+    color_option_ = ColorOption::Color;
+
+    gl_->glBindBuffer(GL_ARRAY_BUFFER, vbos_[3]);
+    gl_->glBufferData(GL_ARRAY_BUFFER,
+                      sizeof(float) * raw_mesh.color_buffer.size(),
+                      &raw_mesh.color_buffer[0],
+                      GL_STATIC_DRAW);
+    gl_->glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, (void*) 0);
+    gl_->glEnableVertexAttribArray(3);
+  }
+
+  gl_->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbos_[4]);
   gl_->glBufferData(GL_ELEMENT_ARRAY_BUFFER,
                     sizeof(int) * raw_mesh.face_buffer.size(),
                     &raw_mesh.face_buffer[0],
@@ -147,5 +167,28 @@ void ResourceMesh::prepareGlBuffers()
   gl_->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
   num_faces_ = raw_mesh.face_buffer.size() / 3;
+}
+
+bool ResourceMesh::hasTexture()
+{
+  return color_option_ == ColorOption::Texture;
+}
+std::shared_ptr<ResourceTexture> ResourceMesh::getTexture()
+{
+  return texture_;
+}
+
+bool ResourceMesh::hasColor()
+{
+  return color_option_ == ColorOption::Color;
+}
+
+bool ResourceMesh::hasGlobalColor()
+{
+  return color_option_ == ColorOption::GlobalColor;
+}
+const Eigen::Vector3f& ResourceMesh::getGlobalColor()
+{
+  return global_color_;
 }
 }

@@ -25,9 +25,7 @@ public:
 
   void attachResource(const std::shared_ptr<Resource>& resource);
 
-  void createEdge(const std::shared_ptr<SceneNode>& child);
-  void createEdge(const std::shared_ptr<SceneNode>& child, const Eigen::Affine3d& transform);
-
+  void setTransform(const Eigen::Affine3d& transform);
   const Eigen::Affine3d& getTransform();
   const std::vector<SceneEdge>& getEdges();
   const std::vector<std::shared_ptr<Resource>>& getAttachedResources();
@@ -35,7 +33,7 @@ public:
 private:
   std::string name_;
 
-  std::vector<SceneEdge> edges_;
+  Eigen::Affine3d transform_;
 
   std::vector<std::shared_ptr<Resource>> resources_;
 };

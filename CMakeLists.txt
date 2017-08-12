@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.1.0)
 project(dmp)
 
-set(CMAKE_BUILD_TYPE Debug)
-
 # C++17
 set(CMAKE_CXX_STANDARD 17)
 
@@ -46,6 +44,7 @@ add_definitions(${Qt5OpenGL_DEFINITIONS})
 
 include_directories(
   include
+  lib
   ${EIGEN3_INCLUDE_DIRS}
   ${ASSIMP_INCLUDE_DIRS}
   ${YAML_CPP_INCLUDE_DIR}
@@ -75,7 +74,7 @@ set(DMP_SOURCE_FILES
   src/rendering/resource/resource_mesh.cpp
   include/dmp/rendering/resource/resource.h
   include/dmp/rendering/resource/resource_mesh.h
-  src/rendering/shader/light_shader.cpp include/dmp/rendering/shader/light_shader.h include/dmp/rendering/scene/scene_edge.h src/rendering/scene/scene_edge.cpp src/rendering/request/request_manager.cpp include/dmp/rendering/request/request_manager.h include/dmp/rendering/request/request.h src/rendering/request/request.cpp include/dmp/json/json.h src/json/json.cpp src/planning/planner.cpp include/dmp/planning/planner.h include/dmp/robot/robot_model.h src/robot/robot_model.cpp include/dmp/robot/robot_model_loader.h src/robot/robot_model_loader.cpp include/dmp/rendering/resource/resource_texture.h src/rendering/resource/resource_texture.cpp include/dmp/rendering/resource/resource_dynamic_mesh.h src/rendering/resource/resource_dynamic_mesh.cpp include/dmp/rendering/request/request_frame.h src/rendering/request/request_frame.cpp include/dmp/rendering/request/request_mesh.h src/rendering/request/request_mesh.cpp)
+  src/rendering/shader/light_shader.cpp include/dmp/rendering/shader/light_shader.h include/dmp/rendering/scene/scene_edge.h src/rendering/scene/scene_edge.cpp src/rendering/request/request_manager.cpp include/dmp/rendering/request/request_manager.h include/dmp/rendering/request/request.h src/rendering/request/request.cpp include/dmp/json/json.h src/json/json.cpp src/planning/planner.cpp include/dmp/planning/planner.h include/dmp/robot/robot_model.h src/robot/robot_model.cpp include/dmp/robot/robot_model_loader.h src/robot/robot_model_loader.cpp include/dmp/rendering/resource/resource_texture.h src/rendering/resource/resource_texture.cpp include/dmp/rendering/resource/resource_dynamic_mesh.h src/rendering/resource/resource_dynamic_mesh.cpp include/dmp/rendering/request/request_frame.h src/rendering/request/request_frame.cpp include/dmp/rendering/request/request_mesh.h src/rendering/request/request_mesh.cpp include/dmp/rendering/camera/camera.h src/rendering/camera/camera.cpp include/dmp/rendering/light/light.h include/dmp/rendering/material/material.h src/rendering/light/light.cpp src/rendering/light/light_manager.cpp include/dmp/rendering/light/light_manager.h include/dmp/rendering/request/request_light.h src/rendering/request/request_light.cpp include/dmp/robot/robot_link.h include/dmp/robot/robot_joint.h src/robot/robot_joint.cpp src/robot/robot_link.cpp)
 
 add_executable(dmp ${DMP_SOURCE_FILES})
 target_link_libraries(dmp

@@ -4,7 +4,9 @@
 #include <dmp/rendering/request/request.h>
 #include <dmp/rendering/request/request_frame.h>
 #include <dmp/rendering/request/request_mesh.h>
+#include <dmp/rendering/request/request_light.h>
 #include <dmp/planning/planner.h>
+#include <dmp/robot/robot_model_loader.h>
 
 #include <QApplication>
 
@@ -25,10 +27,16 @@ int main(int argc, char** argv)
   format.setProfile(QSurfaceFormat::CoreProfile);
   QSurfaceFormat::setDefaultFormat(format);
 
+  auto robot_model_loader = dmp::RobotModelLoader{};
+  robot_model_loader.substitutePackageDirectory("/Users/jaesungp/cpp_workspace/fetch_ros");
+  robot_model_loader.load("/Users/jaesungp/cpp_workspace/fetch_ros/fetch_description/robots/fetch.urdf");
+  auto robot_model = robot_model_loader.getRobotModel();
+
   auto renderer = std::make_shared<dmp::Renderer>();
 
   auto planner = std::make_shared<dmp::Planner>();
   planner->setRenderer(renderer);
+  planner->setRobotModel(robot_model);
 
   auto frame = std::make_unique<dmp::RequestFrame>();
   frame->action = dmp::RequestFrame::Action::Set;
@@ -41,8 +49,19 @@ int main(int argc, char** argv)
   mesh->frame = "bunny";
   mesh->filename = "/Users/jaesungp/cpp_workspace/dmp/meshes/bunny.obj";
 
+  auto light = dmp::Light{};
+  light.type = dmp::Light::LightType::Directional;
+  light.position = Eigen::Vector3f(0.f, 0.f, 1.f);
+  light.ambient = Eigen::Vector3f(1.f, 1.f, 1.f);
+  light.diffuse = Eigen::Vector3f(1.f, 1.f, 1.f);
+  light.specular = Eigen::Vector3f(1.f, 1.f, 1.f);
+
+  auto light_req = std::make_unique<dmp::RequestLight>();
+  light_req->setLight(0, std::move(light));
+
   renderer->sendRequest(std::move(frame));
   renderer->sendRequest(std::move(mesh));
+  renderer->sendRequest(std::move(light_req));
 
   app.exec();
   return 0;

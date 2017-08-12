@@ -28,7 +28,9 @@ public:
   void start();
   void end();
 
-  void uniform(GLint location, const Eigen::Matrix4f& matrix);
+  void uniform(GLint location, int v);
+  void uniform(GLint location, const Eigen::Vector3f& v);
+  void uniformMatrix4f(GLint location, const Eigen::Matrix4f& matrix);
 
 protected:
   std::shared_ptr<GlFunctions> gl_;

@@ -4,7 +4,7 @@
 namespace dmp
 {
 ResourceManager::ResourceManager(const std::shared_ptr<GlFunctions>& gl)
-    : gl_(gl)
+    : gl_{gl}
 {
 }
 

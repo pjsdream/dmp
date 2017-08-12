@@ -6,8 +6,11 @@
 #include <string>
 #include <future>
 
+#include <Eigen/Dense>
+
 namespace dmp
 {
+class ResourceTexture;
 class ResourceMesh : public Resource
 {
 public:
@@ -21,11 +24,27 @@ public:
   ResourceMesh(ResourceMesh&& rhs) = delete;
   ResourceMesh& operator=(ResourceMesh&& rhs) = delete;
 
+  bool hasTexture();
+  std::shared_ptr<ResourceTexture> getTexture();
+
+  bool hasColor();
+
+  bool hasGlobalColor();
+  const Eigen::Vector3f& getGlobalColor();
+
   void draw();
 
 private:
-  struct RawMesh;
+  enum class ColorOption
+  {
+    Texture,
+    Color,
+    GlobalColor,
+  };
 
+  ColorOption color_option_;
+
+  struct RawMesh;
   RawMesh asyncLoadMesh(std::string filename);
   std::future<RawMesh> future_raw_mesh_;
 
@@ -36,6 +55,9 @@ private:
   std::vector<GLuint> vbos_;
 
   int num_faces_;
+
+  std::shared_ptr<ResourceTexture> texture_;
+  Eigen::Vector3f global_color_;
 };
 }
 

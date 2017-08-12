@@ -9,7 +9,6 @@
 namespace dmp
 {
 class ResourceMesh;
-
 class ResourceManager
 {
 public:
@@ -26,6 +25,8 @@ public:
   std::shared_ptr<ResourceMesh> getMesh(const std::string& filename);
 
 private:
+  static const int MAX_NUM_LIGHTS = 8;
+
   std::shared_ptr<GlFunctions> gl_;
 
   std::unordered_map<std::string, std::shared_ptr<ResourceMesh>> meshes_;

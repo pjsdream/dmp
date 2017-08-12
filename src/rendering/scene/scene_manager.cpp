@@ -7,8 +7,8 @@
 namespace dmp
 {
 SceneManager::SceneManager()
-    : root_(std::make_shared<SceneNode>())
 {
+  createNode("");
 }
 
 SceneManager::~SceneManager() = default;
@@ -44,20 +44,43 @@ std::shared_ptr<SceneNode> SceneManager::getNode(const std::string& name)
     return node_map_[name];
 }
 
+void SceneManager::setFrame(const std::string& name, const Eigen::Affine3d& transform)
+{
+  setFrame("", name, transform);
+}
+
+void SceneManager::setFrame(const std::string& from, const std::string& to, const Eigen::Affine3d& transform)
+{
+  edges_[from][to] = transform;
+}
+
 void SceneManager::attachResource(const std::string& name, std::shared_ptr<Resource> resource)
 {
-  if (node_map_.find(name) != node_map_.cend())
-    node_map_[name]->attachResource(resource);
+  createNode(name)->attachResource(resource);
 }
 
 std::vector<std::shared_ptr<SceneNode>> SceneManager::traverseNodes()
 {
   std::vector<std::shared_ptr<SceneNode>> result;
-  traverseNodes(result);
+  traverseNodes(result, "");
   return result;
 }
 
-void SceneManager::traverseNodes(std::vector<std::shared_ptr<SceneNode>>& result)
+void SceneManager::traverseNodes(std::vector<std::shared_ptr<SceneNode>>& result, const std::string& name)
 {
+  auto node = getNode(name);
+  auto transform = node->getTransform();
+
+  result.push_back(node);
+
+  for (auto edge : edges_[name])
+  {
+    auto to = edge.first;
+    auto edge_transform = edge.second;
+
+    createNode(to)->setTransform(edge_transform);
+
+    traverseNodes(result, to);
+  }
 }
 }

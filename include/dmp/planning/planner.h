@@ -6,6 +6,7 @@
 namespace dmp
 {
 class Renderer;
+class RobotModel;
 class Planner
 {
 public:
@@ -13,6 +14,7 @@ public:
   ~Planner();
 
   void setRenderer(const std::shared_ptr<Renderer>& renderer);
+  void setRobotModel(const std::shared_ptr<RobotModel>& robot_model);
 
 private:
   class Impl;
