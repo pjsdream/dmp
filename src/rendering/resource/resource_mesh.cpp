@@ -15,6 +15,8 @@ struct ResourceMesh::RawMesh
   std::vector<float> color_buffer;
   std::vector<int> face_buffer;
 
+  std::string texture_filename;
+
   RawMesh(RawMesh&& rhs) = default;
 };
 
@@ -62,11 +64,15 @@ ResourceMesh::RawMesh ResourceMesh::asyncLoadMesh(std::string filename)
       raw_mesh.texture_buffer.resize(mesh->mNumVertices * 2);
       for (int i = 0; i < mesh->mNumVertices; i++)
       {
-        raw_mesh.texture_buffer[i * 2 + 0] =
-            mesh->mTextureCoords[0][i][0];
-        raw_mesh.texture_buffer[i * 2 + 1] =
-            mesh->mTextureCoords[0][i][1];
+        raw_mesh.texture_buffer[i * 2 + 0] = mesh->mTextureCoords[0][i][0];
+        raw_mesh.texture_buffer[i * 2 + 1] = 1 - mesh->mTextureCoords[0][i][1];
       }
+
+      auto material = scene->mMaterials[0];
+      aiString path;
+      material->GetTexture(aiTextureType_DIFFUSE, 0, &path);
+
+      raw_mesh.texture_filename = getDirectory(filename) + "/" + path.C_Str();
     }
 
     raw_mesh.face_buffer.resize(mesh->mNumFaces * 3);
@@ -140,9 +146,13 @@ void ResourceMesh::prepareGlBuffers()
                       GL_STATIC_DRAW);
     gl_->glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*) 0);
     gl_->glEnableVertexAttribArray(2);
+
+    // load texture
+    texture_ = std::make_shared<ResourceTexture>(gl_);
+    texture_->loadTexture(raw_mesh.texture_filename);
   }
 
-  if (!raw_mesh.color_buffer.empty())
+  else if (!raw_mesh.color_buffer.empty())
   {
     // TODO: mesh that has both texture and color
     color_option_ = ColorOption::Color;
@@ -154,6 +164,11 @@ void ResourceMesh::prepareGlBuffers()
                       GL_STATIC_DRAW);
     gl_->glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, (void*) 0);
     gl_->glEnableVertexAttribArray(3);
+  }
+
+  else
+  {
+    color_option_ = ColorOption::GlobalColor;
   }
 
   gl_->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbos_[4]);
@@ -187,8 +202,14 @@ bool ResourceMesh::hasGlobalColor()
 {
   return color_option_ == ColorOption::GlobalColor;
 }
+
 const Eigen::Vector3f& ResourceMesh::getGlobalColor()
 {
   return global_color_;
+}
+
+std::string ResourceMesh::getDirectory(const std::string filename)
+{
+  return filename.substr(0, filename.find_last_of('/'));
 }
 }

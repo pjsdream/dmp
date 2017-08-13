@@ -17,6 +17,8 @@ struct Material
   vec3 diffuse;
   vec3 specular;
 
+  sampler2D texture;
+
   float shininess;
 };
 
@@ -24,6 +26,7 @@ uniform vec3 eye_position;
 uniform DirectionalLight directional_lights[8];
 
 uniform bool has_material;
+uniform bool has_texture;
 uniform Material material;
 
 in vec2 texture_coord;
@@ -46,6 +49,12 @@ void main()
     material_final_diffuse = material.diffuse;
     material_final_specular = material.specular;
     material_final_shininess = material.shininess;
+  }
+
+  if (has_texture)
+  {
+    material_final_diffuse = texture(material.texture, texture_coord).rgb;
+    material_final_ambient = material_final_diffuse * 0.2;
   }
 
   vec3 N = normalize(surface_normal);
@@ -72,7 +81,6 @@ void main()
       vec3 specular = directional_lights[i].specular * material_final_specular * specular_strength;
 
       total_color += ambient + diffuse + specular;
-      //total_color += vec3(VdotR);
     }
   }
 

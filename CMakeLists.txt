@@ -22,6 +22,9 @@ find_package(yaml-cpp 0.5.3)
 # tinyxml2
 set(TINYXML2_SOURCE_FILES lib/tinyxml2/tinyxml2.h lib/tinyxml2/tinyxml2.cpp)
 
+# lodepng
+set(LODEPNG_SOURCE_FILES lib/lodepng/lodepng.h lib/lodepng/lodepng.cpp)
+
 # Qt5
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -55,6 +58,9 @@ include_directories(
 set(DMP_SOURCE_FILES
   # tinyxml2
   ${TINYXML2_SOURCE_FILES}
+
+  # lodepng
+  ${LODEPNG_SOURCE_FILES}
 
   # source files
   include/dmp/rendering/renderer.h

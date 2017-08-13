@@ -11,8 +11,8 @@ Camera::Camera()
     , sensitivity_zoom_(0.001)
     , fovy_(60.)
     , aspect_(4. / 3.)
-    , near_(0.01)
-    , far_(100.)
+    , near_(-10.)
+    , far_(10.)
     , projection_type_(ProjectionType::Ortho)
 {
 }

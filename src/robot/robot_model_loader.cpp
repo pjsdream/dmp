@@ -1,11 +1,13 @@
 #include <dmp/robot/robot_model_loader.h>
 #include <dmp/robot/robot_model.h>
+#include <dmp/robot/robot_link.h>
+#include <dmp/robot/robot_joint.h>
 
 #include <tinyxml2/tinyxml2.h>
 
 namespace dmp
 {
-void RobotModelLoader::substitutePackageDirectory(const std::string& directory)
+void RobotModelLoader::setSubstitutePackageDirectory(const std::string& directory)
 {
   package_directory_ = directory;
 }
@@ -70,7 +72,7 @@ void RobotModelLoader::load(const std::string& filename)
         if (auto geometry = visual->FirstChildElement("geometry"))
         {
           if (auto mesh = geometry->FirstChildElement("mesh"))
-            link.visual.geometry_filename = mesh->Attribute("filename");
+            link.visual.geometry_filename = substitutePackageDirectory(mesh->Attribute("filename"));
         }
 
         if (auto material = visual->FirstChildElement("material"))
@@ -79,6 +81,7 @@ void RobotModelLoader::load(const std::string& filename)
 
           if (auto color = material->FirstChildElement("color"))
           {
+            link.visual.has_material = true;
             sscanf(color->Attribute("rgba"),
                    "%lf%lf%lf%lf",
                    &link.visual.material_color[0],
@@ -86,6 +89,8 @@ void RobotModelLoader::load(const std::string& filename)
                    &link.visual.material_color[2],
                    &link.visual.material_color[3]);
           }
+          else
+            link.visual.has_material = false;
         }
       }
 
@@ -96,7 +101,7 @@ void RobotModelLoader::load(const std::string& filename)
         if (auto geometry = collision->FirstChildElement("geometry"))
         {
           if (auto mesh = geometry->FirstChildElement("mesh"))
-            link.collision.geometry_filename = mesh->Attribute("filename");
+            link.collision.geometry_filename = substitutePackageDirectory(mesh->Attribute("filename"));
         }
       }
 
@@ -160,47 +165,108 @@ void RobotModelLoader::load(const std::string& filename)
     // must not reach here
     return std::string("");
   }();
+
+  setAllJointsActive();
+}
+
+void RobotModelLoader::setAllJointsActive()
+{
+  active_joints_.clear();
+  for (auto joint : joints_)
+    active_joints_.insert(joint.first);
+}
+
+void RobotModelLoader::setActiveJoints(const std::vector<std::string>& active_joints)
+{
+  active_joints_ = std::unordered_set<std::string>(active_joints.begin(), active_joints.end());
+}
+
+void RobotModelLoader::setJointValues(const std::unordered_map<std::string, double>& joint_values)
+{
+  joint_values_ = joint_values;
 }
 
 std::shared_ptr<RobotModel> RobotModelLoader::getRobotModel()
 {
-  active_joints_.clear();
-  for (auto link : links_)
-    active_joints_.insert(link.first);
+  auto root = std::make_shared<RobotLink>();
+  root->setName(root_name_);
+  traverse(root, root_name_, Eigen::Affine3d::Identity());
 
-  traverse(root_name_, Eigen::Affine3d::Identity());
-
-  return std::shared_ptr<RobotModel>();
+  auto robot_model = std::make_shared<RobotModel>();
+  robot_model->setRoot(root);
+  return robot_model;
 }
 
-std::shared_ptr<RobotModel> RobotModelLoader::getRobotModel(const std::vector<std::string>& active_joints)
-{
-  active_joints_ = std::unordered_set<std::string>(active_joints.begin(), active_joints.end());
-
-  // TODO
-  return std::shared_ptr<RobotModel>();
-}
-
-void RobotModelLoader::traverse(const std::string& link_name, const Eigen::Affine3d& transform)
+void RobotModelLoader::traverse(const std::shared_ptr<RobotLink>& node,
+                                const std::string& link_name,
+                                const Eigen::Affine3d& transform)
 {
   auto link = links_[link_name];
 
+  if (link.visual.has_material)
+    node->addVisualMesh(link.visual.geometry_filename,
+                                   originToTransform(link.visual.origin),
+                        Eigen::Vector4d(link.visual.material_color));
+  else
+    node->addVisualMesh(link.visual.geometry_filename, originToTransform(link.visual.origin));
+
   for (auto joint_name : children_joints_[link_name])
   {
-    auto joint = joints_[joint_name];
-    auto child_link_name = joint.child;
+    auto raw_joint = joints_[joint_name];
+    auto child_link_name = raw_joint.child;
+    auto child_link = links_[child_link_name];
 
+    auto robot_joint = createRobotJointFromRaw(raw_joint);
+
+    std::shared_ptr<RobotLink> next_node;
     Eigen::Affine3d next_transform;
     if (active_joints_.find(joint_name) != active_joints_.cend())
     {
       next_transform = Eigen::Affine3d::Identity();
+      next_node = std::make_shared<RobotLink>();
+      next_node->setName(child_link.name);
+
+      robot_joint->setParentLink(node);
+      robot_joint->setChildLink(next_node);
+      node->addChildJoint(robot_joint);
+      next_node->setParentJoint(robot_joint);
     }
     else
     {
-      // TODO
-      next_transform = transform;
+      next_node = node;
+      // TODO: transform times something
+      next_transform = transform * robot_joint->getTransform(joint_values_[joint_name]);
     }
-    traverse(child_link_name, next_transform);
+    traverse(next_node, child_link_name, next_transform);
   }
+}
+
+std::string RobotModelLoader::substitutePackageDirectory(const std::string& filename)
+{
+  if (filename.substr(0, 10) == "package://")
+    return package_directory_ + "/" + filename.substr(10);
+}
+
+Eigen::Affine3d RobotModelLoader::originToTransform(const double origin[6])
+{
+  // xyz rpy
+  Eigen::Affine3d transform = Eigen::Affine3d::Identity();
+  transform.rotate(Eigen::AngleAxisd(origin[3], Eigen::Vector3d(0, 0, 1)));
+  transform.rotate(Eigen::AngleAxisd(origin[4], Eigen::Vector3d(0, 1, 0)));
+  transform.rotate(Eigen::AngleAxisd(origin[5], Eigen::Vector3d(1, 0, 0)));
+  transform.translate(Eigen::Vector3d(origin[0], origin[1], origin[2]));
+
+  return transform;
+}
+
+std::shared_ptr<RobotJoint> RobotModelLoader::createRobotJointFromRaw(const Joint& raw_joint)
+{
+  auto joint = std::make_shared<RobotJoint>(raw_joint.type);
+  joint->setName(raw_joint.name);
+  joint->setOrigin(originToTransform(raw_joint.origin));
+  joint->setAxis(Eigen::Vector3d(raw_joint.axis));
+  joint->setLimit(raw_joint.limit.lower, raw_joint.limit.upper);
+
+  return joint;
 }
 }

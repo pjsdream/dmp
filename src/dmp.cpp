@@ -28,8 +28,8 @@ int main(int argc, char** argv)
   QSurfaceFormat::setDefaultFormat(format);
 
   auto robot_model_loader = dmp::RobotModelLoader{};
-  robot_model_loader.substitutePackageDirectory("/Users/jaesungp/cpp_workspace/fetch_ros");
-  robot_model_loader.load("/Users/jaesungp/cpp_workspace/fetch_ros/fetch_description/robots/fetch.urdf");
+  robot_model_loader.setSubstitutePackageDirectory("/home/jaesungp/catkin_ws/src/fetch_ros");
+  robot_model_loader.load("/home/jaesungp/catkin_ws/src/fetch_ros/fetch_description/robots/fetch.urdf");
   auto robot_model = robot_model_loader.getRobotModel();
 
   auto renderer = std::make_shared<dmp::Renderer>();
@@ -37,17 +37,6 @@ int main(int argc, char** argv)
   auto planner = std::make_shared<dmp::Planner>();
   planner->setRenderer(renderer);
   planner->setRobotModel(robot_model);
-
-  auto frame = std::make_unique<dmp::RequestFrame>();
-  frame->action = dmp::RequestFrame::Action::Set;
-  frame->name = "bunny";
-  frame->transform = Eigen::Affine3d::Identity();
-  frame->transform.translate(Eigen::Vector3d(0.5, 0., 0.));
-
-  auto mesh = std::make_unique<dmp::RequestMesh>();
-  mesh->action = dmp::RequestMesh::Action::Attach;
-  mesh->frame = "bunny";
-  mesh->filename = "/Users/jaesungp/cpp_workspace/dmp/meshes/bunny.obj";
 
   auto light = dmp::Light{};
   light.type = dmp::Light::LightType::Directional;
@@ -59,8 +48,6 @@ int main(int argc, char** argv)
   auto light_req = std::make_unique<dmp::RequestLight>();
   light_req->setLight(0, std::move(light));
 
-  renderer->sendRequest(std::move(frame));
-  renderer->sendRequest(std::move(mesh));
   renderer->sendRequest(std::move(light_req));
 
   app.exec();

@@ -12,7 +12,11 @@ public:
   ResourceTexture(const std::shared_ptr<GlFunctions>& gl);
   ~ResourceTexture() override;
 
+  void loadTexture(const std::string& filename);
+  void bind();
+
 private:
+  GLuint texture_id_;
 };
 }
 

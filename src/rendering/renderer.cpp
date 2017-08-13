@@ -37,8 +37,6 @@ public:
   void mouseMoveEvent(QMouseEvent* event);
 
 private:
-  void registerRequestHandlers();
-
   void handleRequest(std::unique_ptr<Request> request);
   void handleRequestFrame(std::unique_ptr<RequestFrame> request);
   void handleRequestMesh(std::unique_ptr<RequestMesh> request);
@@ -91,6 +89,7 @@ void Renderer::paintGL()
 void Renderer::resizeGL(int w, int h)
 {
   impl_->resizeGL(w, h);
+  update();
 }
 
 void Renderer::initializeGL()
@@ -116,23 +115,17 @@ Renderer::Impl::Impl()
       request_manager_(std::make_unique<RequestManager>()),
       light_manager_(std::make_unique<LightManager>())
 {
-  registerRequestHandlers();
-}
-
-void Renderer::Impl::registerRequestHandlers()
-{
-  request_handlers_[&typeid(RequestFrame)] = [this](auto request)
-  { handleRequestFrame(std::unique_ptr<RequestFrame>(dynamic_cast<RequestFrame*>(request.release()))); };
-  request_handlers_[&typeid(RequestMesh)] = [this](auto request)
-  { handleRequestMesh(std::unique_ptr<RequestMesh>(dynamic_cast<RequestMesh*>(request.release()))); };
-  request_handlers_[&typeid(RequestLight)] = [this](auto request)
-  { handleRequestLight(std::unique_ptr<RequestLight>(dynamic_cast<RequestLight*>(request.release()))); };
 }
 
 void Renderer::Impl::handleRequest(std::unique_ptr<Request> request)
 {
-  auto f = request_handlers_[&typeid(*request)];
-  f(std::move(request));
+  Request* bare_pointer = request.release();
+  if (RequestFrame* request_frame = dynamic_cast<RequestFrame*>(bare_pointer))
+    handleRequestFrame(std::unique_ptr<RequestFrame>(request_frame));
+  else if (RequestMesh* request_mesh = dynamic_cast<RequestMesh*>(bare_pointer))
+    handleRequestMesh(std::unique_ptr<RequestMesh>(request_mesh));
+  else if (RequestLight* request_light = dynamic_cast<RequestLight*>(bare_pointer))
+    handleRequestLight(std::unique_ptr<RequestLight>(request_light));
 }
 
 void Renderer::Impl::handleRequestFrame(std::unique_ptr<RequestFrame> request)
@@ -207,7 +200,7 @@ void Renderer::Impl::paintGL()
 
       // select color option for shader
       if (mesh->hasTexture())
-        light_shader_->hasTexture();
+        light_shader_->hasTexture(mesh->getTexture());
       else if (mesh->hasColor())
         light_shader_->hasColor();
       else if (mesh->hasGlobalColor())
@@ -224,6 +217,7 @@ void Renderer::Impl::paintGL()
 void Renderer::Impl::resizeGL(int w, int h)
 {
   gl_->glViewport(0, 0, w, h);
+  camera_->setAspect((double)w / h);
 }
 
 void Renderer::Impl::initializeGL(QOpenGLContext* context)

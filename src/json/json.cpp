@@ -2,6 +2,7 @@
 
 namespace dmp
 {
+/*
 Json::Json()
     : type_(Type::Undefined)
 {
@@ -231,4 +232,5 @@ bool Json::containsKey(std::string&& key)
 
   return object_.find(key) != object_.cend();
 }
+*/
 }

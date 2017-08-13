@@ -12,6 +12,7 @@ RequestLight::~RequestLight() = default;
 void RequestLight::setLight(int index, Light&& light)
 {
   action_ = Action::Set;
+  index_ = index;
   light_ = std::move(light);
 }
 

@@ -8,6 +8,7 @@ namespace dmp
 class Camera;
 class Light;
 class Material;
+class ResourceTexture;
 class LightShader : public Shader
 {
 public:
@@ -23,7 +24,7 @@ public:
   void loadLight(int index, const std::shared_ptr<Light>& light);
   void loadMaterial(const std::shared_ptr<Material>& material);
 
-  void hasTexture();
+  void hasTexture(const std::shared_ptr<ResourceTexture>& texture);
   void hasColor();
   void hasGlobalColor(const Eigen::Vector3f& color);
 
@@ -70,6 +71,7 @@ private:
     GLint diffuse;
     GLint specular;
     GLint shininess;
+    GLint texture;
   };
   LocMaterial loc_material_;
 };

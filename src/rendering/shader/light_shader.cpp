@@ -2,6 +2,7 @@
 #include <dmp/rendering/camera/camera.h>
 #include <dmp/rendering/light/light.h>
 #include <dmp/rendering/material/material.h>
+#include <dmp/rendering/resource/resource_texture.h>
 
 namespace dmp
 {
@@ -9,7 +10,7 @@ LightShader::LightShader(const std::shared_ptr<GlFunctions>& gl)
     : Shader(gl)
 {
   // TODO: define PROJECT_SOURCE_DIR in a common header file
-  const static std::string PROJECT_SOURCE_DIR = "/Users/jaesungp/cpp_workspace/dmp";
+  const static std::string PROJECT_SOURCE_DIR = "/home/jaesungp/cpp_workspace/dmp";
   loadShader(PROJECT_SOURCE_DIR + "/shader/light.vert", ShaderType::Vertex);
   loadShader(PROJECT_SOURCE_DIR + "/shader/light.frag", ShaderType::Fragment);
 
@@ -48,6 +49,7 @@ void LightShader::setUniformLocations()
   loc_material_.diffuse = getUniformLocation("material.diffuse");
   loc_material_.specular = getUniformLocation("material.specular");
   loc_material_.shininess = getUniformLocation("material.shininess");
+  loc_material_.texture = getUniformLocation("material.texture");
 }
 
 void LightShader::bindAttribLocations()
@@ -58,7 +60,7 @@ void LightShader::bindAttribLocations()
   bindAttribLocation(3, "color");
 }
 
-void LightShader::hasTexture()
+void LightShader::hasTexture(const std::shared_ptr<ResourceTexture>& texture)
 {
   if (color_option_ != ColorOption::Texture)
   {
@@ -68,6 +70,8 @@ void LightShader::hasTexture()
     uniform(loc_has_global_color_, 0);
     uniform(loc_has_material_, 0);
   }
+  texture->bind();
+  uniform(loc_material_.texture, 0);
 }
 void LightShader::hasColor()
 {

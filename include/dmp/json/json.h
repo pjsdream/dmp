@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 #include <unordered_map>
-
+/*
 namespace dmp
 {
 class Json
@@ -83,5 +83,5 @@ private:
   std::unordered_map<std::string, Json> object_;
 };
 }
-
+*/
 #endif //DMP_JSON_H

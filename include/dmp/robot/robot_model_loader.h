@@ -12,18 +12,22 @@
 namespace dmp
 {
 class RobotModel;
+class RobotLink;
+class RobotJoint;
 class RobotModelLoader
 {
 public:
   RobotModelLoader() = default;
   ~RobotModelLoader() = default;
 
-  void substitutePackageDirectory(const std::string& directory);
-
+  void setSubstitutePackageDirectory(const std::string& directory);
   void load(const std::string& filename);
 
+  void setAllJointsActive();
+  void setActiveJoints(const std::vector<std::string>& active_joints);
+  void setJointValues(const std::unordered_map<std::string, double>& joint_values);
+
   std::shared_ptr<RobotModel> getRobotModel();
-  std::shared_ptr<RobotModel> getRobotModel(const std::vector<std::string>& active_joints);
 
 private:
   std::string package_directory_;
@@ -41,6 +45,7 @@ private:
     {
       double origin[6];
       std::string geometry_filename;
+      bool has_material;
       double material_color[4];
     };
 
@@ -85,7 +90,12 @@ private:
   std::string root_name_;
 
   std::unordered_set<std::string> active_joints_;
-  void traverse(const std::string& link_name, const Eigen::Affine3d& transform);
+  std::unordered_map<std::string, double> joint_values_;
+  void traverse(const std::shared_ptr<RobotLink>& node, const std::string& link_name, const Eigen::Affine3d& transform);
+
+  std::string substitutePackageDirectory(const std::string& filename);
+  Eigen::Affine3d originToTransform(const double origin[6]);
+  std::shared_ptr<RobotJoint> createRobotJointFromRaw(const Joint& raw_joint);
 };
 }
 

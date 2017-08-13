@@ -48,6 +48,8 @@ private:
   RawMesh asyncLoadMesh(std::string filename);
   std::future<RawMesh> future_raw_mesh_;
 
+  std::string getDirectory(const std::string filename);
+
   void prepareGlBuffers();
 
   bool ready_rendering_;

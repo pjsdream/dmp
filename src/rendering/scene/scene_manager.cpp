@@ -62,6 +62,7 @@ void SceneManager::attachResource(const std::string& name, std::shared_ptr<Resou
 std::vector<std::shared_ptr<SceneNode>> SceneManager::traverseNodes()
 {
   std::vector<std::shared_ptr<SceneNode>> result;
+  createNode("")->setTransform(Eigen::Affine3d::Identity());
   traverseNodes(result, "");
   return result;
 }
@@ -78,7 +79,7 @@ void SceneManager::traverseNodes(std::vector<std::shared_ptr<SceneNode>>& result
     auto to = edge.first;
     auto edge_transform = edge.second;
 
-    createNode(to)->setTransform(edge_transform);
+    createNode(to)->setTransform(transform * edge_transform);
 
     traverseNodes(result, to);
   }
