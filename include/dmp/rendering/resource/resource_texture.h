@@ -5,6 +5,7 @@
 
 namespace dmp
 {
+struct TextureLoaderRawTexture;
 class ResourceTexture : public Resource
 {
 public:
@@ -12,7 +13,7 @@ public:
   ResourceTexture(const std::shared_ptr<GlFunctions>& gl);
   ~ResourceTexture() override;
 
-  void loadTexture(const std::string& filename);
+  void loadTexture(TextureLoaderRawTexture&& texture);
   void bind();
 
 private:

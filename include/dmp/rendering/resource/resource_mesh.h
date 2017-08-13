@@ -10,6 +10,8 @@
 
 namespace dmp
 {
+struct MeshLoaderRawMesh;
+struct TextureLoaderRawTexture;
 class ResourceTexture;
 class ResourceMesh : public Resource
 {
@@ -44,15 +46,13 @@ private:
 
   ColorOption color_option_;
 
-  struct RawMesh;
-  RawMesh asyncLoadMesh(std::string filename);
-  std::future<RawMesh> future_raw_mesh_;
-
-  std::string getDirectory(const std::string filename);
+  std::future<MeshLoaderRawMesh> future_raw_mesh_;
+  std::future<TextureLoaderRawTexture> future_texture_;
 
   void prepareGlBuffers();
 
   bool ready_rendering_;
+  bool ready_texture_;
   GLuint vao_;
   std::vector<GLuint> vbos_;
 
