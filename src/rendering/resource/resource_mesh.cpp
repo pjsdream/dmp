@@ -5,6 +5,14 @@
 
 namespace dmp
 {
+ResourceMesh::ResourceMesh(const std::shared_ptr<GlFunctions>& gl)
+    : Resource(gl),
+      ready_rendering_(true),
+      color_option_(ColorOption::GlobalColor),
+      global_color_(Eigen::Vector3f(0.8f, 0.8f, 0.8f))
+{
+}
+
 ResourceMesh::ResourceMesh(const std::shared_ptr<GlFunctions>& gl, const std::string& filename)
     : Resource(gl),
       ready_rendering_(false),
@@ -53,10 +61,8 @@ void ResourceMesh::draw()
   }
 }
 
-void ResourceMesh::prepareGlBuffers()
+void ResourceMesh::loadMesh(MeshLoaderRawMesh&& raw_mesh)
 {
-  auto raw_mesh = future_raw_mesh_.get();
-
   gl_->glGenVertexArrays(1, &vao_);
 
   vbos_.resize(5);
@@ -93,7 +99,8 @@ void ResourceMesh::prepareGlBuffers()
     gl_->glEnableVertexAttribArray(2);
 
     // load texture
-    future_texture_ = TextureLoader::asyncLoadTexture(raw_mesh.texture_filename);
+    if (!raw_mesh.texture_filename.empty())
+      future_texture_ = TextureLoader::asyncLoadTexture(raw_mesh.texture_filename);
   }
 
   else if (!raw_mesh.color_buffer.empty())
@@ -128,6 +135,12 @@ void ResourceMesh::prepareGlBuffers()
   num_faces_ = raw_mesh.face_buffer.size() / 3;
 }
 
+void ResourceMesh::prepareGlBuffers()
+{
+  auto raw_mesh = future_raw_mesh_.get();
+  loadMesh(std::move(raw_mesh));
+}
+
 bool ResourceMesh::hasTexture()
 {
   return color_option_ == ColorOption::Texture;
@@ -135,6 +148,11 @@ bool ResourceMesh::hasTexture()
 std::shared_ptr<ResourceTexture> ResourceMesh::getTexture()
 {
   return texture_;
+}
+void ResourceMesh::setTexture(const std::shared_ptr<ResourceTexture>& texture)
+{
+  color_option_ = ColorOption::Texture;
+  texture_ = texture;
 }
 
 bool ResourceMesh::hasColor()

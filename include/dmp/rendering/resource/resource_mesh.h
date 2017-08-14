@@ -17,6 +17,7 @@ class ResourceMesh : public Resource
 {
 public:
   ResourceMesh() = delete;
+  explicit ResourceMesh(const std::shared_ptr<GlFunctions>& gl);
   explicit ResourceMesh(const std::shared_ptr<GlFunctions>& gl, const std::string& fileneame);
   ~ResourceMesh() override;
 
@@ -26,8 +27,11 @@ public:
   ResourceMesh(ResourceMesh&& rhs) = delete;
   ResourceMesh& operator=(ResourceMesh&& rhs) = delete;
 
+  void loadMesh(MeshLoaderRawMesh&& raw_mesh);
+
   bool hasTexture();
   std::shared_ptr<ResourceTexture> getTexture();
+  void setTexture(const std::shared_ptr<ResourceTexture>& texture);
 
   bool hasColor();
 

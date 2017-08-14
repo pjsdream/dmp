@@ -4,6 +4,8 @@
 #include <dmp/rendering/request/request_frame.h>
 #include <dmp/rendering/request/request_mesh.h>
 #include <dmp/rendering/request/request_light.h>
+#include <dmp/rendering/request/request_custom_texture.h>
+#include <dmp/rendering/request/request_custom_mesh.h>
 #include <dmp/rendering/resource/resource_manager.h>
 #include <dmp/rendering/resource/resource_mesh.h>
 #include <dmp/rendering/scene/scene_manager.h>
@@ -13,11 +15,13 @@
 #include <dmp/rendering/camera/camera.h>
 #include <dmp/rendering/light/light_manager.h>
 #include <dmp/rendering/light/light.h>
+#include <dmp/utils/texture_loader.h>
 
 #include <QTimer>
 #include <QMouseEvent>
 
 #include <iostream>
+#include <include/dmp/utils/mesh_loader.h>
 
 namespace dmp
 {
@@ -41,6 +45,8 @@ private:
   void handleRequestFrame(std::unique_ptr<RequestFrame> request);
   void handleRequestMesh(std::unique_ptr<RequestMesh> request);
   void handleRequestLight(std::unique_ptr<RequestLight> request);
+  void handleRequestCustomTexture(std::unique_ptr<RequestCustomTexture> request);
+  void handleRequestCustomMesh(std::unique_ptr<RequestCustomMesh> request);
 
   std::shared_ptr<GlFunctions> gl_;
 
@@ -126,6 +132,10 @@ void Renderer::Impl::handleRequest(std::unique_ptr<Request> request)
     handleRequestMesh(std::unique_ptr<RequestMesh>(request_mesh));
   else if (RequestLight* request_light = dynamic_cast<RequestLight*>(bare_pointer))
     handleRequestLight(std::unique_ptr<RequestLight>(request_light));
+  else if (RequestCustomTexture* request_custom_texture = dynamic_cast<RequestCustomTexture*>(bare_pointer))
+    handleRequestCustomTexture(std::unique_ptr<RequestCustomTexture>(request_custom_texture));
+  else if (RequestCustomMesh* request_custom_mesh = dynamic_cast<RequestCustomMesh*>(bare_pointer))
+    handleRequestCustomMesh(std::unique_ptr<RequestCustomMesh>(request_custom_mesh));
 }
 
 void Renderer::Impl::handleRequestFrame(std::unique_ptr<RequestFrame> request)
@@ -157,6 +167,35 @@ void Renderer::Impl::handleRequestLight(std::unique_ptr<RequestLight> request)
     }
     break;
   }
+}
+
+void Renderer::Impl::handleRequestCustomTexture(std::unique_ptr<RequestCustomTexture> request)
+{
+  TextureLoaderRawTexture texture;
+  texture.width = request->w;
+  texture.height = request->h;
+  texture.image = std::move(request->image);
+
+  resource_manager_->createTexture(request->name, std::move(texture));
+}
+
+void Renderer::Impl::handleRequestCustomMesh(std::unique_ptr<RequestCustomMesh> request)
+{
+  MeshLoaderRawMesh raw_mesh;
+  raw_mesh.vertex_buffer = std::move(request->vertex_buffer);
+  raw_mesh.normal_buffer = std::move(request->normal_buffer);
+  raw_mesh.texture_buffer = std::move(request->texture_buffer);
+  raw_mesh.color_buffer = std::move(request->color_buffer);
+  raw_mesh.face_buffer = std::move(request->face_buffer);
+
+  auto mesh = resource_manager_->createMesh(request->name, std::move(raw_mesh));
+
+  if (!request->texture_name.empty()) {
+    auto texture = resource_manager_->getTexture(request->texture_name);
+    mesh->setTexture(texture);
+  }
+
+  scene_manager_->attachResource(request->frame, mesh);
 }
 
 void Renderer::Impl::sendRequest(std::unique_ptr<Request> request)
@@ -222,8 +261,7 @@ void Renderer::Impl::resizeGL(int w, int h)
 
 void Renderer::Impl::initializeGL(QOpenGLContext* context)
 {
-  auto deleter = [](GlFunctions*)
-  {};
+  auto deleter = [](GlFunctions*){};
   gl_.reset(context->versionFunctions<GlFunctions>(), deleter);
 
   gl_->glClearColor(0.8f, 0.8f, 0.8f, 0.f);
