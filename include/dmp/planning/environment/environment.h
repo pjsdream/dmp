@@ -6,11 +6,12 @@
 
 namespace dmp
 {
+class Object;
 class Environment
 {
 public:
 private:
-  std::vector<std::shared_ptr<Shape>> shapes_;
+  std::vector<std::shared_ptr<Object>> objects_;
 };
 }
 

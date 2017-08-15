@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 #include <unordered_map>
-/*
+
 namespace dmp
 {
 class Json
@@ -26,6 +26,7 @@ public:
   Json();
   ~Json() = default;
 
+  explicit Json(long long v);
   explicit Json(int v);
   explicit Json(bool v);
   explicit Json(double v);
@@ -38,13 +39,14 @@ public:
   Json(Json&& rhs) = default;
   Json& operator=(Json&& rhs) = default;
 
-  int toInt();
+  long long toInt();
   bool toBool();
   double toDouble();
   std::string toString();
 
   void set(bool v);
   void set(int v);
+  void set(long long v);
   void set(double v);
   void set(const std::string& v);
 
@@ -60,7 +62,7 @@ public:
   Json& operator=(std::string&& v);
 
   // for array only
-  int size();
+  unsigned long size();
   void add(const Json& value);
   void add(Json&& value);
 
@@ -68,20 +70,23 @@ public:
   bool containsKey(const std::string& key);
   bool containsKey(std::string&& key);
 
+  // for array/object
+  void clear();
+
 private:
   Type type_;
 
   union
   {
-    int int_value_;
+    long long int_value_;
     bool bool_value_;
     double double_value_;
   };
 
   std::string string_value_;
   std::vector<Json> array_;
-  std::unordered_map<std::string, Json> object_;
+  std::unordered_map<std::string, std::shared_ptr<Json>> object_;
 };
 }
-*/
+
 #endif //DMP_JSON_H
