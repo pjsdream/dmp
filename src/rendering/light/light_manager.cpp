@@ -3,7 +3,7 @@
 
 namespace dmp
 {
-std::shared_ptr<Light> LightManager::setLight(int index, const Light& light)
+void LightManager::setLight(int index, const Light& light)
 {
   *getLight(index) = light;
 }

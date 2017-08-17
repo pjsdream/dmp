@@ -13,7 +13,7 @@ public:
   LightManager() = default;
   ~LightManager() = default;
 
-  std::shared_ptr<Light> setLight(int index, const Light& light);
+  void setLight(int index, const Light& light);
   void deleteLight(int index);
 
   const std::unordered_map<int, std::shared_ptr<Light>>& getLights();

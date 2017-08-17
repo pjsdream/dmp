@@ -146,31 +146,37 @@ Json& Json::operator[](std::string&& key)
 Json& Json::operator=(int v)
 {
   set(v);
+  return *this;
 }
 
 Json& Json::operator=(bool v)
 {
   set(v);
+  return *this;
 }
 
 Json& Json::operator=(double v)
 {
   set(v);
+  return *this;
 }
 
 Json& Json::operator=(const char* v)
 {
   set(std::string(v));
+  return *this;
 }
 
 Json& Json::operator=(const std::string& v)
 {
   set(v);
+  return *this;
 }
 
 Json& Json::operator=(std::string&& v)
 {
   set(std::move(v));
+  return *this;
 }
 
 unsigned long Json::size()
