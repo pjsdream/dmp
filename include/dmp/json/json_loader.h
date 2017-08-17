@@ -11,7 +11,13 @@ class JsonLoader
 {
 public:
   std::shared_ptr<Json> loadJson(const std::string& filename);
+
 private:
+  std::shared_ptr<Json> parseJsonFromString(int& x);
+
+  static bool isWhitespace(char x);
+
+  std::string json_string_;
 };
 }
 
