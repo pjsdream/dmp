@@ -10,7 +10,7 @@ LightShader::LightShader(const std::shared_ptr<GlFunctions>& gl)
     : Shader(gl)
 {
   // TODO: define PROJECT_SOURCE_DIR in a common header file
-  const static std::string PROJECT_SOURCE_DIR = "/Users/jaesungp/cpp_workspace/dmp";
+  const static std::string PROJECT_SOURCE_DIR = "/home/jaesungp/cpp_workspace/dmp";
   loadShader(PROJECT_SOURCE_DIR + "/shader/light.vert", ShaderType::Vertex);
   loadShader(PROJECT_SOURCE_DIR + "/shader/light.frag", ShaderType::Fragment);
 

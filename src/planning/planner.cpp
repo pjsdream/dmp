@@ -19,6 +19,7 @@ public:
 
   void setRenderer(const std::shared_ptr<Renderer>& renderer);
   void setRobotModel(const std::shared_ptr<RobotModel>& robot_model);
+  void setEnvironment(const std::shared_ptr<Environment>& environment);
 
 private:
   void renderingTraverse(const std::shared_ptr<RobotLink>& link);

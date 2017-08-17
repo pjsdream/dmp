@@ -130,16 +130,29 @@ void Json::set(const std::string& v)
 
 Json& Json::operator[](int index)
 {
+  type_ = Type::Array;
+  object_.clear();
+
   return array_[index];
 }
 
 Json& Json::operator[](const std::string& key)
 {
+  type_ = Type::Object;
+  array_.clear();
+
+  if (object_.find(key) == object_.cend())
+    object_[key] = std::make_shared<Json>();
   return *object_[key];
 }
 
 Json& Json::operator[](std::string&& key)
 {
+  type_ = Type::Object;
+  array_.clear();
+
+  if (object_.find(key) == object_.cend())
+    object_[key] = std::make_shared<Json>();
   return *object_[key];
 }
 
@@ -226,5 +239,61 @@ void Json::clear()
 {
   array_.clear();
   object_.clear();
+}
+
+std::string Json::toPrettyString()
+{
+  return toPrettyString(0, false);
+}
+
+std::string Json::toPrettyString(int indent, bool indent_at_beginning)
+{
+  switch (type_)
+  {
+    case Type::Int:
+      return (indent_at_beginning ? std::string(indent, ' ') : "") + std::to_string(int_value_);
+
+    case Type::Bool:
+      return (indent_at_beginning ? std::string(indent, ' ') : "") + (bool_value_ ? "true" : "false");
+
+    case Type::Double:
+      return (indent_at_beginning ? std::string(indent, ' ') : "") + std::to_string(double_value_);
+
+    case Type::String:
+      return (indent_at_beginning ? std::string(indent, ' ') : "") + "\"" + string_value_+ "\"";
+
+    case Type::Array:
+    {
+      std::string result = indent_at_beginning ? std::string(indent, ' ') + "[\n" : "[\n";
+      for (int i=0; i<array_.size(); i++)
+      {
+        result += array_[i].toPrettyString(indent + 1, true);
+        if (i < array_.size() - 1)
+          result += ",\n";
+      }
+      result += "\n" + std::string(indent, ' ') + "]";
+
+      return result;
+    }
+
+    case Type::Object:
+    {
+      std::string result = indent_at_beginning ? std::string(indent, ' ') + "{\n" : "{\n";
+      int cnt = 0;
+      for (auto kv : object_)
+      {
+        result += std::string(indent+1, ' ') + "\"" + kv.first + "\": " + kv.second->toPrettyString(indent + 1, false);
+        if (cnt < object_.size() - 1)
+          result += ",\n";
+        cnt++;
+      }
+      result += "\n" + std::string(indent, ' ') + "}";
+
+      return result;
+    }
+
+    default:
+      return "(undefined)";
+  }
 }
 }

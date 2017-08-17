@@ -39,6 +39,8 @@ public:
   Json(Json&& rhs) = default;
   Json& operator=(Json&& rhs) = default;
 
+  std::string toPrettyString();
+
   long long toInt();
   bool toBool();
   double toDouble();
@@ -75,6 +77,8 @@ public:
 
 private:
   Type type_;
+
+  std::string toPrettyString(int indent, bool indent_at_beginning);
 
   union
   {

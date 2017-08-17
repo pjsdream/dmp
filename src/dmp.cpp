@@ -7,6 +7,7 @@
 #include <dmp/rendering/request/request_light.h>
 #include <dmp/planning/planner.h>
 #include <dmp/robot/robot_model_loader.h>
+#include <dmp/planning/environment/environment_loader.h>
 
 #include <QApplication>
 
@@ -28,9 +29,12 @@ int main(int argc, char** argv)
   QSurfaceFormat::setDefaultFormat(format);
 
   auto robot_model_loader = dmp::RobotModelLoader{};
-  robot_model_loader.setSubstitutePackageDirectory("/Users/jaesungp/catkin_ws/src/fetch_ros");
-  robot_model_loader.load("/Users/jaesungp/catkin_ws/src/fetch_ros/fetch_description/robots/fetch.urdf");
+  robot_model_loader.setSubstitutePackageDirectory("/home/jaesungp/catkin_ws/src/fetch_ros");
+  robot_model_loader.load("/home/jaesungp/catkin_ws/src/fetch_ros/fetch_description/robots/fetch.urdf");
   auto robot_model = robot_model_loader.getRobotModel();
+
+  dmp::EnvironmentLoader environment_loader;
+  auto environment = environment_loader.loadEnvironment("/home/jaesungp/cpp_workspace/dmp/config/environment.json");
 
   auto renderer = std::make_shared<dmp::Renderer>();
 
