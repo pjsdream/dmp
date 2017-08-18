@@ -93,6 +93,16 @@ std::string Json::toString()
   }
 }
 
+const std::vector<Json>& Json::toArray() const
+{
+  return array_;
+}
+
+std::vector<Json>& Json::toArray()
+{
+  return array_;
+}
+
 void Json::set(bool v)
 {
   clear();

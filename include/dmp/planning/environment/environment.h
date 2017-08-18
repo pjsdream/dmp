@@ -10,6 +10,10 @@ class Object;
 class Environment
 {
 public:
+  void addObject(const std::shared_ptr<Object>& object);
+
+  const std::vector<std::shared_ptr<Object>>& getObjects();
+
 private:
   std::vector<std::shared_ptr<Object>> objects_;
 };

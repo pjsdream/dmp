@@ -18,6 +18,7 @@ struct Light
   Eigen::Vector3f ambient;
   Eigen::Vector3f diffuse;
   Eigen::Vector3f specular;
+  Eigen::Vector3f attenuation;
 };
 }
 

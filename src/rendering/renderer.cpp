@@ -187,6 +187,8 @@ void Renderer::Impl::handleRequestCustomMesh(std::unique_ptr<RequestCustomMesh> 
   raw_mesh.texture_buffer = std::move(request->texture_buffer);
   raw_mesh.color_buffer = std::move(request->color_buffer);
   raw_mesh.face_buffer = std::move(request->face_buffer);
+  raw_mesh.has_global_color = request->hasGlobalColor();
+  raw_mesh.global_color = request->getGlobalColor();
 
   auto mesh = resource_manager_->createMesh(request->name, std::move(raw_mesh));
 

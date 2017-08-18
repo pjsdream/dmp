@@ -45,6 +45,8 @@ public:
   bool toBool();
   double toDouble();
   std::string toString();
+  const std::vector<Json>& toArray() const;
+  std::vector<Json>& toArray();
 
   void set(bool v);
   void set(int v);

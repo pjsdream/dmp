@@ -11,7 +11,12 @@ public:
   Sphere();
   ~Sphere() override;
 
+  void setRadius(double radius);
+
+  double getRadius();
+
 private:
+  double radius_;
 };
 }
 

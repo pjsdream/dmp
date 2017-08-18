@@ -117,6 +117,12 @@ void ResourceMesh::loadMesh(MeshLoaderRawMesh&& raw_mesh)
     gl_->glEnableVertexAttribArray(3);
   }
 
+  else if (raw_mesh.has_global_color)
+  {
+    color_option_ = ColorOption::GlobalColor;
+    global_color_ = raw_mesh.global_color;
+  }
+
   else
   {
     color_option_ = ColorOption::GlobalColor;

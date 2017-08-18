@@ -53,17 +53,18 @@ private:
   GLint loc_has_color_;
   GLint loc_has_global_color_;
   GLint loc_global_color_;
-  GLint loc_has_material_;
 
-  struct LocDirectionalLight
+  struct LocLight
   {
     GLint use;
+    GLint type;
     GLint position;
     GLint ambient;
     GLint diffuse;
     GLint specular;
+    GLint attenuation;
   };
-  LocDirectionalLight loc_directional_lights_[NUM_LIGHTS];
+  LocLight loc_lights_[NUM_LIGHTS];
 
   struct LocMaterial
   {
@@ -71,9 +72,11 @@ private:
     GLint diffuse;
     GLint specular;
     GLint shininess;
-    GLint texture;
   };
   LocMaterial loc_material_;
+
+  GLint loc_has_material_;
+  GLint loc_material_texture_;
 };
 }
 

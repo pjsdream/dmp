@@ -11,7 +11,12 @@ public:
   Cube();
   ~Cube() override;
 
+  void setSize(const Eigen::Vector3d& size);
+
+  const Eigen::Vector3d& getSize();
+
 private:
+  Eigen::Vector3d size_;
 };
 }
 

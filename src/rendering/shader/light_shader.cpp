@@ -37,19 +37,22 @@ void LightShader::setUniformLocations()
 
   for (int i=0; i<NUM_LIGHTS; i++)
   {
-    const std::string varname = std::string("directional_lights[") + std::to_string(i) + "]";
-    loc_directional_lights_[i].use = getUniformLocation(varname + ".use");
-    loc_directional_lights_[i].position = getUniformLocation(varname + ".position");
-    loc_directional_lights_[i].ambient = getUniformLocation(varname + ".ambient");
-    loc_directional_lights_[i].diffuse = getUniformLocation(varname + ".diffuse");
-    loc_directional_lights_[i].specular = getUniformLocation(varname + ".specular");
+    const std::string varname = std::string("lights[") + std::to_string(i) + "]";
+    loc_lights_[i].use = getUniformLocation(varname + ".use");
+    loc_lights_[i].type = getUniformLocation(varname + ".type");
+    loc_lights_[i].position = getUniformLocation(varname + ".position");
+    loc_lights_[i].ambient = getUniformLocation(varname + ".ambient");
+    loc_lights_[i].diffuse = getUniformLocation(varname + ".diffuse");
+    loc_lights_[i].specular = getUniformLocation(varname + ".specular");
+    loc_lights_[i].attenuation = getUniformLocation(varname + ".attenuation");
   }
 
   loc_material_.ambient = getUniformLocation("material.ambient");
   loc_material_.diffuse = getUniformLocation("material.diffuse");
   loc_material_.specular = getUniformLocation("material.specular");
   loc_material_.shininess = getUniformLocation("material.shininess");
-  loc_material_.texture = getUniformLocation("material.texture");
+
+  loc_material_texture_ = getUniformLocation("material_texture");
 }
 
 void LightShader::bindAttribLocations()
@@ -71,7 +74,7 @@ void LightShader::hasTexture(const std::shared_ptr<ResourceTexture>& texture)
     uniform(loc_has_material_, 0);
   }
   texture->bind();
-  uniform(loc_material_.texture, 0);
+  uniform(loc_material_texture_, 0);
 }
 void LightShader::hasColor()
 {
@@ -133,11 +136,24 @@ void LightShader::loadLight(int index, const std::shared_ptr<Light>& light)
 {
   if (index >= 0 && index < NUM_LIGHTS)
   {
-    uniform(loc_directional_lights_[index].use, 1);
-    uniform(loc_directional_lights_[index].position, light->position);
-    uniform(loc_directional_lights_[index].ambient, light->ambient);
-    uniform(loc_directional_lights_[index].diffuse, light->diffuse);
-    uniform(loc_directional_lights_[index].specular, light->specular);
+    uniform(loc_lights_[index].use, 1);
+    uniform(loc_lights_[index].position, light->position);
+    uniform(loc_lights_[index].ambient, light->ambient);
+    uniform(loc_lights_[index].diffuse, light->diffuse);
+    uniform(loc_lights_[index].specular, light->specular);
+
+    switch (light->type)
+    {
+      case Light::LightType::Directional:
+        uniform(loc_lights_[index].type, 0);
+        break;
+      case Light::LightType::Point:
+        uniform(loc_lights_[index].type, 1);
+        uniform(loc_lights_[index].attenuation, light->attenuation);
+        break;
+      default:
+        uniform(loc_lights_[index].type, 1);
+    }
   }
 }
 

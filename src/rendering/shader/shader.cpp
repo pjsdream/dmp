@@ -103,6 +103,11 @@ void Shader::uniform(GLint location, int v)
   gl_->glUniform1i(location, v);
 }
 
+void Shader::uniform(GLint location, float v)
+{
+  gl_->glUniform1f(location, v);
+}
+
 void Shader::uniform(GLint location, const Eigen::Vector3f& v)
 {
   gl_->glUniform3fv(location, 1, v.data());

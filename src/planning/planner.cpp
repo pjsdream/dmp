@@ -3,6 +3,12 @@
 #include <dmp/robot/robot_model.h>
 #include <dmp/robot/robot_link.h>
 #include <dmp/robot/robot_joint.h>
+#include <dmp/planning/environment/environment.h>
+#include <dmp/planning/environment/object.h>
+#include <dmp/shape/shape.h>
+#include <dmp/shape/cube.h>
+#include <dmp/shape/cylinder.h>
+#include <dmp/shape/sphere.h>
 
 #include <dmp/rendering/request/request_frame.h>
 #include <dmp/rendering/request/request_mesh.h>
@@ -26,6 +32,7 @@ private:
 
   std::shared_ptr<Renderer> renderer_;
   std::shared_ptr<RobotModel> robot_model_;
+  std::shared_ptr<Environment> environment_;
 };
 
 void Planner::Impl::setRenderer(const std::shared_ptr<Renderer>& renderer)
@@ -104,6 +111,49 @@ void Planner::Impl::renderingTraverse(const std::shared_ptr<RobotLink>& link)
   }
 }
 
+void Planner::Impl::setEnvironment(const std::shared_ptr<Environment>& environment)
+{
+  environment_ = environment;
+
+  // drawing environment
+  auto objects = environment_->getObjects();
+  for (auto object : objects)
+  {
+    auto shape = object->getShape();
+    auto color = object->getColor();
+
+    // frame
+    auto frame = std::make_unique<RequestFrame>();
+    frame->action = RequestFrame::Action::Set;
+    frame->name = "object_" + std::to_string(std::rand());
+    frame->transform = shape->getTransform();
+
+    // shape
+    auto custom_mesh = std::make_unique<RequestCustomMesh>();
+    custom_mesh->name = frame->name;
+    custom_mesh->frame = frame->name;
+
+    if (auto cube = dynamic_cast<Cube*>(shape.get()))
+    {
+      custom_mesh->createCube(cube->getSize());
+      custom_mesh->setGlobalColor(Eigen::Vector3f(color(0), color(1), color(2)));
+    }
+    else if (auto cylinder = dynamic_cast<Cylinder*>(shape.get()))
+    {
+      custom_mesh->createCylinder(cylinder->getRadius(), cylinder->getHeight());
+      custom_mesh->setGlobalColor(Eigen::Vector3f(color(0), color(1), color(2)));
+    }
+    else if (auto sphere = dynamic_cast<Sphere*>(shape.get()))
+    {
+      custom_mesh->createSphere(sphere->getRadius());
+      custom_mesh->setGlobalColor(Eigen::Vector3f(color(0), color(1), color(2)));
+    }
+
+    renderer_->sendRequest(std::move(frame));
+    renderer_->sendRequest(std::move(custom_mesh));
+  }
+}
+
 Planner::Planner()
     : impl_(std::make_unique<Impl>())
 {
@@ -119,5 +169,10 @@ void Planner::setRenderer(const std::shared_ptr<Renderer>& renderer)
 void Planner::setRobotModel(const std::shared_ptr<RobotModel>& robot_model)
 {
   impl_->setRobotModel(robot_model);
+}
+
+void Planner::setEnvironment(const std::shared_ptr<Environment>& environment)
+{
+  impl_->setEnvironment(environment);
 }
 }

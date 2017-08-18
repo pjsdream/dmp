@@ -5,6 +5,8 @@
 #include <vector>
 #include <string>
 
+#include <Eigen/Dense>
+
 namespace dmp
 {
 struct MeshLoaderRawMesh
@@ -14,6 +16,9 @@ struct MeshLoaderRawMesh
   std::vector<float> texture_buffer;
   std::vector<float> color_buffer;
   std::vector<int> face_buffer;
+
+  bool has_global_color;
+  Eigen::Vector3f global_color;
 
   std::string texture_filename;
 

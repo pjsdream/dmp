@@ -41,18 +41,52 @@ int main(int argc, char** argv)
   auto planner = std::make_shared<dmp::Planner>();
   planner->setRenderer(renderer);
   planner->setRobotModel(robot_model);
+  planner->setEnvironment(environment);
 
-  auto light = dmp::Light{};
-  light.type = dmp::Light::LightType::Directional;
-  light.position = Eigen::Vector3f(0.f, 0.f, 1.f);
-  light.ambient = Eigen::Vector3f(1.f, 1.f, 1.f);
-  light.diffuse = Eigen::Vector3f(1.f, 1.f, 1.f);
-  light.specular = Eigen::Vector3f(1.f, 1.f, 1.f);
+  auto addLight = [&](int index, auto position, auto ambient, auto diffuse, auto specular)
+  {
+    auto light = dmp::Light{};
+    light.type = dmp::Light::LightType::Directional;
+    light.position = position;
+    light.ambient = ambient;
+    light.diffuse = diffuse;
+    light.specular = specular;
 
-  auto light_req = std::make_unique<dmp::RequestLight>();
-  light_req->setLight(0, std::move(light));
+    auto light_req = std::make_unique<dmp::RequestLight>();
+    light_req->setLight(index, std::move(light));
 
-  renderer->sendRequest(std::move(light_req));
+    renderer->sendRequest(std::move(light_req));
+  };
+
+  addLight(0,
+           Eigen::Vector3f(0., 0., 1.),
+           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
+           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
+           Eigen::Vector3f(0.1f, 0.1f, 0.1f));
+
+  addLight(1,
+           Eigen::Vector3f(-1., 0., 1.),
+           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
+           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
+           Eigen::Vector3f(0.1f, 0.1f, 0.1f));
+
+  addLight(2,
+           Eigen::Vector3f(1., 0., 1.),
+           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
+           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
+           Eigen::Vector3f(0.1f, 0.1f, 0.1f));
+
+  addLight(3,
+           Eigen::Vector3f(0., -1., 1.),
+           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
+           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
+           Eigen::Vector3f(0.1f, 0.1f, 0.1f));
+
+  addLight(4,
+           Eigen::Vector3f(0., 1., 1.),
+           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
+           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
+           Eigen::Vector3f(0.1f, 0.1f, 0.1f));
 
   app.exec();
   return 0;

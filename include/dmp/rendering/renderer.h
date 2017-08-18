@@ -42,8 +42,8 @@ protected:
   void resizeGL(int w, int h) override;
   void initializeGL() override;
 
-  void mousePressEvent(QMouseEvent* event);
-  void mouseMoveEvent(QMouseEvent* event);
+  void mousePressEvent(QMouseEvent* event) override;
+  void mouseMoveEvent(QMouseEvent* event) override;
 
 private:
   class Impl;
