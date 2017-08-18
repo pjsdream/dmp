@@ -68,6 +68,10 @@ vec3 colorPointLight(Light light, Material material, vec3 N, vec3 V)
   float diffuse_strength = clamp(NdotL, 0.f, 1.f);
   float specular_strength = pow( clamp(VdotR, 0.f, 1.f), material.shininess );
 
+  // attenuation
+  float distance = length(light.position - surface_position);
+  float attenuation = 1.0 / (light.attenuation[0] + light.attenuation[1] * distance + light.attenuation[2] * (distance * distance));
+
   vec3 ambient = light.ambient * material.ambient;
   vec3 diffuse = light.diffuse * material.diffuse * diffuse_strength;
   vec3 specular = light.specular * material.specular * specular_strength;

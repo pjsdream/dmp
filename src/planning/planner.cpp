@@ -85,7 +85,7 @@ void Planner::Impl::renderingTraverse(const std::shared_ptr<RobotLink>& link)
   {
     auto frame = std::make_unique<RequestFrame>();
     frame->action = RequestFrame::Action::Set;
-    frame->name = link->getName() + "_" + visual.filename;
+    frame->name = link->getName() + ":" + visual.filename;
     frame->parent = link->getName();
     frame->transform = visual.transform;
     renderer_->sendRequest(std::move(frame));
@@ -93,7 +93,7 @@ void Planner::Impl::renderingTraverse(const std::shared_ptr<RobotLink>& link)
     auto req = std::make_unique<RequestMesh>();
     req->action = RequestMesh::Action::Attach;
     req->filename = visual.filename;
-    req->frame = link->getName();
+    req->frame = link->getName() + ":" + visual.filename;
     renderer_->sendRequest(std::move(req));
   }
 

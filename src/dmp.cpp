@@ -8,6 +8,7 @@
 #include <dmp/planning/planner.h>
 #include <dmp/robot/robot_model_loader.h>
 #include <dmp/planning/environment/environment_loader.h>
+#include <dmp/planning/motion/motion_loader.h>
 
 #include <QApplication>
 
@@ -36,6 +37,9 @@ int main(int argc, char** argv)
   dmp::EnvironmentLoader environment_loader;
   auto environment = environment_loader.loadEnvironment("/home/jaesungp/cpp_workspace/dmp/config/environment.json");
 
+  dmp::MotionLoader motion_loader;
+  motion_loader.load("/home/jaesungp/cpp_workspace/dmp/config/motion.json");
+
   auto renderer = std::make_shared<dmp::Renderer>();
 
   auto planner = std::make_shared<dmp::Planner>();
@@ -43,14 +47,15 @@ int main(int argc, char** argv)
   planner->setRobotModel(robot_model);
   planner->setEnvironment(environment);
 
-  auto addLight = [&](int index, auto position, auto ambient, auto diffuse, auto specular)
+  auto addLight = [&](int index, auto type, auto position, auto ambient, auto diffuse, auto specular, auto attenuation)
   {
     auto light = dmp::Light{};
-    light.type = dmp::Light::LightType::Directional;
+    light.type = type;
     light.position = position;
     light.ambient = ambient;
     light.diffuse = diffuse;
     light.specular = specular;
+    light.attenuation = attenuation;
 
     auto light_req = std::make_unique<dmp::RequestLight>();
     light_req->setLight(index, std::move(light));
@@ -59,34 +64,44 @@ int main(int argc, char** argv)
   };
 
   addLight(0,
+           dmp::Light::LightType::Directional,
            Eigen::Vector3f(0., 0., 1.),
            Eigen::Vector3f(0.1f, 0.1f, 0.1f),
            Eigen::Vector3f(0.1f, 0.1f, 0.1f),
-           Eigen::Vector3f(0.1f, 0.1f, 0.1f));
+           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
+           Eigen::Vector3f(1.f, 0.07f, 0.017f));
 
   addLight(1,
-           Eigen::Vector3f(-1., 0., 1.),
+           dmp::Light::LightType::Point,
+           Eigen::Vector3f(2., -2., 2.),
            Eigen::Vector3f(0.1f, 0.1f, 0.1f),
            Eigen::Vector3f(0.1f, 0.1f, 0.1f),
-           Eigen::Vector3f(0.1f, 0.1f, 0.1f));
+           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
+           Eigen::Vector3f(1.f, 0.07f, 0.017f));
 
   addLight(2,
-           Eigen::Vector3f(1., 0., 1.),
+           dmp::Light::LightType::Point,
+           Eigen::Vector3f(2., 2., 2.),
            Eigen::Vector3f(0.1f, 0.1f, 0.1f),
            Eigen::Vector3f(0.1f, 0.1f, 0.1f),
-           Eigen::Vector3f(0.1f, 0.1f, 0.1f));
+           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
+           Eigen::Vector3f(1.f, 0.07f, 0.017f));
 
   addLight(3,
-           Eigen::Vector3f(0., -1., 1.),
+           dmp::Light::LightType::Point,
+           Eigen::Vector3f(0., -2., 2.),
            Eigen::Vector3f(0.1f, 0.1f, 0.1f),
            Eigen::Vector3f(0.1f, 0.1f, 0.1f),
-           Eigen::Vector3f(0.1f, 0.1f, 0.1f));
+           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
+           Eigen::Vector3f(1.f, 0.07f, 0.017f));
 
   addLight(4,
-           Eigen::Vector3f(0., 1., 1.),
+           dmp::Light::LightType::Point,
+           Eigen::Vector3f(0., 2., 2.),
            Eigen::Vector3f(0.1f, 0.1f, 0.1f),
            Eigen::Vector3f(0.1f, 0.1f, 0.1f),
-           Eigen::Vector3f(0.1f, 0.1f, 0.1f));
+           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
+           Eigen::Vector3f(1.f, 0.07f, 0.017f));
 
   app.exec();
   return 0;

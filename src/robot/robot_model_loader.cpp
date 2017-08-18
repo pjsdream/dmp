@@ -203,12 +203,15 @@ void RobotModelLoader::traverse(const std::shared_ptr<RobotLink>& node,
 {
   auto link = links_[link_name];
 
-  if (link.visual.has_material)
-    node->addVisualMesh(link.visual.geometry_filename,
-                                   originToTransform(link.visual.origin),
-                        Eigen::Vector4d(link.visual.material_color));
-  else
-    node->addVisualMesh(link.visual.geometry_filename, originToTransform(link.visual.origin));
+  if (!link.visual.geometry_filename.empty())
+  {
+    if (link.visual.has_material)
+      node->addVisualMesh(link.visual.geometry_filename,
+                          transform * originToTransform(link.visual.origin),
+                          Eigen::Vector4d(link.visual.material_color));
+    else
+      node->addVisualMesh(link.visual.geometry_filename, transform * originToTransform(link.visual.origin));
+  }
 
   for (auto joint_name : children_joints_[link_name])
   {
@@ -234,7 +237,6 @@ void RobotModelLoader::traverse(const std::shared_ptr<RobotLink>& node,
     else
     {
       next_node = node;
-      // TODO: transform times something
       next_transform = transform * robot_joint->getTransform(joint_values_[joint_name]);
     }
     traverse(next_node, child_link_name, next_transform);
@@ -251,10 +253,10 @@ Eigen::Affine3d RobotModelLoader::originToTransform(const double origin[6])
 {
   // xyz rpy
   Eigen::Affine3d transform = Eigen::Affine3d::Identity();
+  transform.translate(Eigen::Vector3d(origin[0], origin[1], origin[2]));
   transform.rotate(Eigen::AngleAxisd(origin[3], Eigen::Vector3d(0, 0, 1)));
   transform.rotate(Eigen::AngleAxisd(origin[4], Eigen::Vector3d(0, 1, 0)));
   transform.rotate(Eigen::AngleAxisd(origin[5], Eigen::Vector3d(1, 0, 0)));
-  transform.translate(Eigen::Vector3d(origin[0], origin[1], origin[2]));
 
   return transform;
 }
