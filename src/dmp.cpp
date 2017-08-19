@@ -30,15 +30,15 @@ int main(int argc, char** argv)
   QSurfaceFormat::setDefaultFormat(format);
 
   auto robot_model_loader = dmp::RobotModelLoader{};
-  robot_model_loader.setSubstitutePackageDirectory("/home/jaesungp/catkin_ws/src/fetch_ros");
-  robot_model_loader.load("/home/jaesungp/catkin_ws/src/fetch_ros/fetch_description/robots/fetch.urdf");
+  robot_model_loader.setSubstitutePackageDirectory("/Users/jaesungp/catkin_ws/src/fetch_ros");
+  robot_model_loader.load("/Users/jaesungp/catkin_ws/src/fetch_ros/fetch_description/robots/fetch.urdf");
   auto robot_model = robot_model_loader.getRobotModel();
 
   dmp::EnvironmentLoader environment_loader;
-  auto environment = environment_loader.loadEnvironment("/home/jaesungp/cpp_workspace/dmp/config/environment.json");
+  auto environment = environment_loader.loadEnvironment("/Users/jaesungp/cpp_workspace/dmp/config/environment.json");
 
   dmp::MotionLoader motion_loader;
-  motion_loader.load("/home/jaesungp/cpp_workspace/dmp/config/motion.json");
+  motion_loader.load("/Users/jaesungp/cpp_workspace/dmp/config/motion.json");
 
   auto renderer = std::make_shared<dmp::Renderer>();
 
@@ -75,32 +75,32 @@ int main(int argc, char** argv)
            dmp::Light::LightType::Point,
            Eigen::Vector3f(2., -2., 2.),
            Eigen::Vector3f(0.1f, 0.1f, 0.1f),
-           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
-           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
+           Eigen::Vector3f(0.25f, 0.25f, 0.25f),
+           Eigen::Vector3f(0.15f, 0.15f, 0.15f),
            Eigen::Vector3f(1.f, 0.07f, 0.017f));
 
   addLight(2,
            dmp::Light::LightType::Point,
            Eigen::Vector3f(2., 2., 2.),
            Eigen::Vector3f(0.1f, 0.1f, 0.1f),
-           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
-           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
+           Eigen::Vector3f(0.25f, 0.25f, 0.25f),
+           Eigen::Vector3f(0.15f, 0.15f, 0.15f),
            Eigen::Vector3f(1.f, 0.07f, 0.017f));
 
   addLight(3,
            dmp::Light::LightType::Point,
            Eigen::Vector3f(0., -2., 2.),
            Eigen::Vector3f(0.1f, 0.1f, 0.1f),
-           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
-           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
+           Eigen::Vector3f(0.25f, 0.25f, 0.25f),
+           Eigen::Vector3f(0.15f, 0.15f, 0.15f),
            Eigen::Vector3f(1.f, 0.07f, 0.017f));
 
   addLight(4,
            dmp::Light::LightType::Point,
            Eigen::Vector3f(0., 2., 2.),
            Eigen::Vector3f(0.1f, 0.1f, 0.1f),
-           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
-           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
+           Eigen::Vector3f(0.25f, 0.25f, 0.25f),
+           Eigen::Vector3f(0.15f, 0.15f, 0.15f),
            Eigen::Vector3f(1.f, 0.07f, 0.017f));
 
   app.exec();

@@ -76,9 +76,7 @@ vec3 colorPointLight(Light light, Material material, vec3 N, vec3 V)
   vec3 diffuse = light.diffuse * material.diffuse * diffuse_strength;
   vec3 specular = light.specular * material.specular * specular_strength;
 
-  // TODO: attenuation
-
-  return ambient + diffuse + specular;
+  return (ambient + diffuse + specular) * attenuation;
 }
 
 void main()
@@ -89,7 +87,7 @@ void main()
     point_material = material;
   else
   {
-    point_material.ambient = surface_color * 0.2f;
+    point_material.ambient = surface_color;
     point_material.diffuse = surface_color;
     point_material.specular = vec3(1.f, 1.f, 1.f) * 0.01f;
     point_material.shininess = 100.f;

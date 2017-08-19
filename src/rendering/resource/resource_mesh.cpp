@@ -8,6 +8,7 @@ namespace dmp
 ResourceMesh::ResourceMesh(const std::shared_ptr<GlFunctions>& gl)
     : Resource(gl),
       ready_rendering_(true),
+      ready_texture_(true),
       color_option_(ColorOption::GlobalColor),
       global_color_(Eigen::Vector3f(0.8f, 0.8f, 0.8f))
 {
@@ -16,6 +17,7 @@ ResourceMesh::ResourceMesh(const std::shared_ptr<GlFunctions>& gl)
 ResourceMesh::ResourceMesh(const std::shared_ptr<GlFunctions>& gl, const std::string& filename)
     : Resource(gl),
       ready_rendering_(false),
+      ready_texture_(true),
       color_option_(ColorOption::GlobalColor),
       global_color_(Eigen::Vector3f(0.8f, 0.8f, 0.8f))
 {
@@ -29,7 +31,7 @@ ResourceMesh::~ResourceMesh()
 
 void ResourceMesh::draw()
 {
-  using namespace std::literals;
+  using namespace std::literals::chrono_literals;
 
   if (!ready_rendering_)
   {
@@ -100,7 +102,10 @@ void ResourceMesh::loadMesh(MeshLoaderRawMesh&& raw_mesh)
 
     // load texture
     if (!raw_mesh.texture_filename.empty())
+    {
+      ready_texture_ = false;
       future_texture_ = TextureLoader::asyncLoadTexture(raw_mesh.texture_filename);
+    }
   }
 
   else if (!raw_mesh.color_buffer.empty())
