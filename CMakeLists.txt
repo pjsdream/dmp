@@ -11,13 +11,13 @@ find_package(Threads)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # eigen
-find_package(Eigen3)
+find_package(Eigen3 REQUIRED)
 
 # assimp
-find_package(assimp)
+find_package(assimp REQUIRED)
 
-# yaml-cpp
-find_package(yaml-cpp 0.5.3)
+# yaml-cpp (not using curently)
+# find_package(yaml-cpp 0.5.3)
 
 # tinyxml2
 set(TINYXML2_SOURCE_FILES lib/tinyxml2/tinyxml2.h lib/tinyxml2/tinyxml2.cpp)
@@ -36,10 +36,11 @@ IF (APPLE)
   set(Qt5Widgets_DIR ${QT_PATH}/lib/cmake/Qt5Widgets)
   set(Qt5OpenGL_DIR ${QT_PATH}/lib/cmake/Qt5OpenGL)
 ENDIF (APPLE)
-IF (LINUX)
-  set(Qt5Widgets_DIR ${QT_PATH})
-  set(Qt5OpenGL_DIR ${QT_PATH})
-ENDIF (LINUX)
+IF (UNIX AND NOT APPLE)
+  set(QT_PATH /playpen/jaesungp/Qt/5.9.1/gcc_64)
+  set(Qt5Widgets_DIR ${QT_PATH}/lib/cmake/Qt5Widgets)
+  set(Qt5OpenGL_DIR ${QT_PATH}/lib/cmake/Qt5OpenGL)
+ENDIF (UNIX AND NOT APPLE)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5OpenGL REQUIRED)
 add_definitions(${Qt5Widgets_DEFINITIONS})
@@ -50,7 +51,7 @@ include_directories(
   lib
   ${EIGEN3_INCLUDE_DIRS}
   ${ASSIMP_INCLUDE_DIRS}
-  ${YAML_CPP_INCLUDE_DIR}
+  #${YAML_CPP_INCLUDE_DIR}
   ${Qt5Widgets_INCLUDE_DIRS}
   ${Qt5OpenGL_INCLUDE_DIRS}
 )
@@ -106,7 +107,7 @@ target_link_libraries(dmp
   Threads::Threads
   ${catkin_LIBRARIES}
   ${ASSIMP_LIBRARIES}
-  ${YAML_CPP_LIBRARIES}
+  #${YAML_CPP_LIBRARIES}
   ${Qt5Widgets_LIBRARIES}
   ${Qt5OpenGL_LIBRARIES}
   )
