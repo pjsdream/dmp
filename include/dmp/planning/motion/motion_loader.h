@@ -3,15 +3,17 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 #include <Eigen/Dense>
 
 namespace dmp
 {
+class Motion;
 class MotionLoader
 {
 public:
-  void load(const std::string& filename);
+  std::shared_ptr<Motion> load(const std::string& filename);
 
 private:
   std::vector<std::string> navigation_joints_;

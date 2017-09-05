@@ -5,6 +5,7 @@
 #include <dmp/robot/robot_joint.h>
 #include <dmp/planning/environment/environment.h>
 #include <dmp/planning/environment/object.h>
+#include <dmp/planning/motion/motion.h>
 #include <dmp/shape/shape.h>
 #include <dmp/shape/cube.h>
 #include <dmp/shape/cylinder.h>
@@ -25,6 +26,7 @@ public:
 
   void setRenderer(const std::shared_ptr<Renderer>& renderer);
   void setRobotModel(const std::shared_ptr<RobotModel>& robot_model);
+  void setMotion(const std::shared_ptr<Motion>& motion);
   void setEnvironment(const std::shared_ptr<Environment>& environment);
 
 private:
@@ -33,6 +35,7 @@ private:
   std::shared_ptr<Renderer> renderer_;
   std::shared_ptr<RobotModel> robot_model_;
   std::shared_ptr<Environment> environment_;
+  std::shared_ptr<Motion> motion_;
 };
 
 void Planner::Impl::setRenderer(const std::shared_ptr<Renderer>& renderer)
@@ -111,6 +114,11 @@ void Planner::Impl::renderingTraverse(const std::shared_ptr<RobotLink>& link)
   }
 }
 
+void Planner::Impl::setMotion(const std::shared_ptr<Motion>& motion)
+{
+  motion_ = motion;
+}
+
 void Planner::Impl::setEnvironment(const std::shared_ptr<Environment>& environment)
 {
   environment_ = environment;
@@ -169,6 +177,11 @@ void Planner::setRenderer(const std::shared_ptr<Renderer>& renderer)
 void Planner::setRobotModel(const std::shared_ptr<RobotModel>& robot_model)
 {
   impl_->setRobotModel(robot_model);
+}
+
+void Planner::setMotion(const std::shared_ptr<Motion>& motion)
+{
+  impl_->setMotion(motion);
 }
 
 void Planner::setEnvironment(const std::shared_ptr<Environment>& environment)

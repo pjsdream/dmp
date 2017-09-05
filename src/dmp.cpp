@@ -30,21 +30,22 @@ int main(int argc, char** argv)
   QSurfaceFormat::setDefaultFormat(format);
 
   auto robot_model_loader = dmp::RobotModelLoader{};
-  robot_model_loader.setSubstitutePackageDirectory("/Users/jaesungp/catkin_ws/src/fetch_ros");
-  robot_model_loader.load("/Users/jaesungp/catkin_ws/src/fetch_ros/fetch_description/robots/fetch.urdf");
+  robot_model_loader.setSubstitutePackageDirectory("/playpen/jaesungp/catkin_ws/src/fetch_ros");
+  robot_model_loader.load("/playpen/jaesungp/catkin_ws/src/fetch_ros/fetch_description/robots/fetch.urdf");
   auto robot_model = robot_model_loader.getRobotModel();
 
   dmp::EnvironmentLoader environment_loader;
-  auto environment = environment_loader.loadEnvironment("/Users/jaesungp/cpp_workspace/dmp/config/environment.json");
+  auto environment = environment_loader.loadEnvironment("/playpen/jaesungp/cpp_workspace/dmp/config/environment.json");
 
   dmp::MotionLoader motion_loader;
-  motion_loader.load("/Users/jaesungp/cpp_workspace/dmp/config/motion.json");
+  auto motion = motion_loader.load("/playpen/jaesungp/cpp_workspace/dmp/config/motion.json");
 
   auto renderer = std::make_shared<dmp::Renderer>();
 
   auto planner = std::make_shared<dmp::Planner>();
   planner->setRenderer(renderer);
   planner->setRobotModel(robot_model);
+  planner->setMotion(motion);
   planner->setEnvironment(environment);
 
   auto addLight = [&](int index, auto type, auto position, auto ambient, auto diffuse, auto specular, auto attenuation)

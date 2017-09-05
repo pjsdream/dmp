@@ -8,6 +8,7 @@ namespace dmp
 class Renderer;
 class RobotModel;
 class Environment;
+class Motion;
 class Planner
 {
 public:
@@ -16,6 +17,7 @@ public:
 
   void setRenderer(const std::shared_ptr<Renderer>& renderer);
   void setRobotModel(const std::shared_ptr<RobotModel>& robot_model);
+  void setMotion(const std::shared_ptr<Motion>& motion);
   void setEnvironment(const std::shared_ptr<Environment>& environment);
 
 private:

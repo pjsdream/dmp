@@ -1,10 +1,11 @@
 #include <dmp/planning/motion/motion_loader.h>
+#include <dmp/planning/motion/motion.h>
 #include <dmp/json/json_loader.h>
 #include <dmp/json/json.h>
 
 namespace dmp
 {
-void MotionLoader::load(const std::string& filename)
+std::shared_ptr<Motion> MotionLoader::load(const std::string& filename)
 {
   JsonLoader json_loader;
   Json json{json_loader.loadJson(filename)};
@@ -30,5 +31,11 @@ void MotionLoader::load(const std::string& filename)
                                               gripping_position["xyz"][1].toDouble(),
                                               gripping_position["xyz"][2].toDouble());
   gripping_position_width_ = gripping_position["width"].toDouble();
+
+  auto motion = std::make_shared<Motion>();
+  motion->setNavigationJoints(navigation_joints_);
+  motion->setBodyJoints(body_joints_);
+  motion->setGripper(gripper_joints_, gripping_position_link_, gripping_position_offset_, gripping_position_width_);
+  return motion;
 }
 }

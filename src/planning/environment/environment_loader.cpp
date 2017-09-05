@@ -10,7 +10,7 @@
 
 namespace dmp
 {
-std::shared_ptr<Environment> EnvironmentLoader::loadEnvironment(const std::string& filename)
+std::shared_ptr<Environment> EnvironmentLoader::loadEnvironment(const std::string &filename)
 {
   JsonLoader json_loader;
   Json json{json_loader.loadJson(filename)};
@@ -45,7 +45,8 @@ std::shared_ptr<Environment> EnvironmentLoader::loadEnvironment(const std::strin
     if (shape_type == "cube")
     {
       auto cube = std::make_shared<Cube>();
-      Eigen::Vector3d size{geometry["size"][0].toDouble(), geometry["size"][1].toDouble(), geometry["size"][2].toDouble()};
+      Eigen::Vector3d
+          size{geometry["size"][0].toDouble(), geometry["size"][1].toDouble(), geometry["size"][2].toDouble()};
       cube->setSize(size);
       shape = cube;
     }
