@@ -8,6 +8,11 @@ void RobotLink::setName(const std::string& name)
   name_ = name;
 }
 
+const std::string& RobotLink::getName() const
+{
+  return name_;
+}
+
 void RobotLink::setParentJoint(const std::shared_ptr<RobotJoint>& parent)
 {
   parent_ = parent;
@@ -16,6 +21,11 @@ void RobotLink::setParentJoint(const std::shared_ptr<RobotJoint>& parent)
 void RobotLink::addChildJoint(const std::shared_ptr<RobotJoint>& child)
 {
   children_.push_back(child);
+}
+
+const std::vector<std::shared_ptr<RobotJoint>>& RobotLink::getChildJoints() const
+{
+  return children_;
 }
 
 void RobotLink::addVisualMesh(const std::string& filename, const Eigen::Affine3d& transform)
@@ -41,18 +51,8 @@ void RobotLink::addVisualMesh(const std::string& filename,
   visuals_.push_back(visual);
 }
 
-const std::string& RobotLink::getName()
-{
-  return name_;
-}
-
-const std::vector<RobotLink::Visual>& RobotLink::getVisuals()
+const std::vector<RobotLink::Visual>& RobotLink::getVisuals() const
 {
   return visuals_;
-}
-
-const std::vector<std::shared_ptr<RobotJoint>>& RobotLink::getChildJoints()
-{
-  return children_;
 }
 }

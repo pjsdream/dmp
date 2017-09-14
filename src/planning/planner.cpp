@@ -1,4 +1,5 @@
 #include <dmp/planning/planner.h>
+#include <dmp/planning/planning_option.h>
 #include <dmp/rendering/renderer.h>
 #include <dmp/robot/robot_model.h>
 #include <dmp/robot/robot_link.h>
@@ -21,22 +22,39 @@ namespace dmp
 class Planner::Impl
 {
 public:
-  Impl() = default;
+  Impl() = delete;
+  explicit Impl(const PlanningOption& option);
   ~Impl() = default;
+
+  Impl(const Impl& rhs) = delete;
+  Impl& operator = (const Impl& rhs) = delete;
+
+  Impl(Impl&& rhs) = delete;
+  Impl& operator = (Impl&& rhs) = delete;
+
+  void plan();
+
+private:
+  void renderingTraverse(const std::shared_ptr<RobotLink>& link);
 
   void setRenderer(const std::shared_ptr<Renderer>& renderer);
   void setRobotModel(const std::shared_ptr<RobotModel>& robot_model);
   void setMotion(const std::shared_ptr<Motion>& motion);
   void setEnvironment(const std::shared_ptr<Environment>& environment);
 
-private:
-  void renderingTraverse(const std::shared_ptr<RobotLink>& link);
-
   std::shared_ptr<Renderer> renderer_;
   std::shared_ptr<RobotModel> robot_model_;
   std::shared_ptr<Environment> environment_;
   std::shared_ptr<Motion> motion_;
 };
+
+Planner::Impl::Impl(const PlanningOption& option)
+{
+  setRenderer(option.getRenderer());
+  setRobotModel(option.getRobotModel());
+  setEnvironment(option.getEnvironment());
+  setMotion(option.getMotion());
+}
 
 void Planner::Impl::setRenderer(const std::shared_ptr<Renderer>& renderer)
 {
@@ -71,7 +89,7 @@ void Planner::Impl::setRobotModel(const std::shared_ptr<RobotModel>& robot_model
   robot_model_ = robot_model;
 
   // draw robot model
-  auto link = robot_model_->getRoot();
+  const auto& link = robot_model_->getRoot();
 
   auto frame = std::make_unique<RequestFrame>();
   frame->action = RequestFrame::Action::Set;
@@ -84,7 +102,7 @@ void Planner::Impl::setRobotModel(const std::shared_ptr<RobotModel>& robot_model
 
 void Planner::Impl::renderingTraverse(const std::shared_ptr<RobotLink>& link)
 {
-  for (auto visual : link->getVisuals())
+  for (const auto& visual : link->getVisuals())
   {
     auto frame = std::make_unique<RequestFrame>();
     frame->action = RequestFrame::Action::Set;
@@ -100,7 +118,7 @@ void Planner::Impl::renderingTraverse(const std::shared_ptr<RobotLink>& link)
     renderer_->sendRequest(std::move(req));
   }
 
-  for (auto joint : link->getChildJoints())
+  for (const auto& joint : link->getChildJoints())
   {
     auto frame = std::make_unique<RequestFrame>();
     frame->action = RequestFrame::Action::Set;
@@ -124,11 +142,11 @@ void Planner::Impl::setEnvironment(const std::shared_ptr<Environment>& environme
   environment_ = environment;
 
   // drawing environment
-  auto objects = environment_->getObjects();
-  for (auto object : objects)
+  const auto& objects = environment_->getObjects();
+  for (const auto& object : objects)
   {
-    auto shape = object->getShape();
-    auto color = object->getColor();
+    const auto& shape = object->getShape();
+    const auto& color = object->getColor();
 
     // frame
     auto frame = std::make_unique<RequestFrame>();
@@ -162,30 +180,19 @@ void Planner::Impl::setEnvironment(const std::shared_ptr<Environment>& environme
   }
 }
 
-Planner::Planner()
-    : impl_(std::make_unique<Impl>())
+void Planner::Impl::plan()
+{
+}
+
+Planner::Planner(const PlanningOption& option)
+    : impl_(std::make_unique<Impl>(option))
 {
 }
 
 Planner::~Planner() = default;
 
-void Planner::setRenderer(const std::shared_ptr<Renderer>& renderer)
+void Planner::plan()
 {
-  impl_->setRenderer(renderer);
-}
-
-void Planner::setRobotModel(const std::shared_ptr<RobotModel>& robot_model)
-{
-  impl_->setRobotModel(robot_model);
-}
-
-void Planner::setMotion(const std::shared_ptr<Motion>& motion)
-{
-  impl_->setMotion(motion);
-}
-
-void Planner::setEnvironment(const std::shared_ptr<Environment>& environment)
-{
-  impl_->setEnvironment(environment);
+  impl_->plan();
 }
 }

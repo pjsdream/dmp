@@ -6,6 +6,7 @@
 #include <dmp/rendering/request/request_mesh.h>
 #include <dmp/rendering/request/request_light.h>
 #include <dmp/planning/planner.h>
+#include <dmp/planning/planning_option.h>
 #include <dmp/robot/robot_model_loader.h>
 #include <dmp/planning/environment/environment_loader.h>
 #include <dmp/planning/motion/motion_loader.h>
@@ -42,11 +43,14 @@ int main(int argc, char** argv)
 
   auto renderer = std::make_shared<dmp::Renderer>();
 
-  auto planner = std::make_shared<dmp::Planner>();
-  planner->setRenderer(renderer);
-  planner->setRobotModel(robot_model);
-  planner->setMotion(motion);
-  planner->setEnvironment(environment);
+  dmp::PlanningOption option;
+  option.setRenderer(renderer);
+  option.setRobotModel(robot_model);
+  option.setMotion(motion);
+  option.setEnvironment(environment);
+
+  auto planner = std::make_shared<dmp::Planner>(option);
+  planner->plan();
 
   auto addLight = [&](int index, auto type, auto position, auto ambient, auto diffuse, auto specular, auto attenuation)
   {

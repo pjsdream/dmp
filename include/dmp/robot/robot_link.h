@@ -22,16 +22,15 @@ public:
   };
 
   void setName(const std::string& name);
+  const std::string& getName() const;
 
   void setParentJoint(const std::shared_ptr<RobotJoint>& parent);
   void addChildJoint(const std::shared_ptr<RobotJoint>& chlid);
+  const std::vector<std::shared_ptr<RobotJoint>>& getChildJoints() const;
 
   void addVisualMesh(const std::string& filename, const Eigen::Affine3d& transform);
   void addVisualMesh(const std::string& filename, const Eigen::Affine3d& transform, const Eigen::Vector4d& color);
-
-  const std::string& getName();
-  const std::vector<Visual>& getVisuals();
-  const std::vector<std::shared_ptr<RobotJoint>>& getChildJoints();
+  const std::vector<Visual>& getVisuals() const;
 
 private:
   std::string name_;

@@ -5,20 +5,21 @@
 
 namespace dmp
 {
-class Renderer;
-class RobotModel;
-class Environment;
-class Motion;
+class PlanningOption;
 class Planner
 {
 public:
-  Planner();
+  Planner() = delete;
+  explicit Planner(const PlanningOption& option);
   ~Planner();
 
-  void setRenderer(const std::shared_ptr<Renderer>& renderer);
-  void setRobotModel(const std::shared_ptr<RobotModel>& robot_model);
-  void setMotion(const std::shared_ptr<Motion>& motion);
-  void setEnvironment(const std::shared_ptr<Environment>& environment);
+  Planner(const Planner& rhs) = delete;
+  Planner& operator = (const Planner& rhs) = delete;
+
+  Planner(Planner&& rhs) = default;
+  Planner& operator = (Planner&& rhs) = default;
+
+  void plan();
 
 private:
   class Impl;

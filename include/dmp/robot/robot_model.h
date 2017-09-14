@@ -10,11 +10,17 @@ class RobotModel
 {
 public:
   RobotModel() = default;
-  RobotModel(const std::shared_ptr<RobotLink>& root);
+  explicit RobotModel(const std::shared_ptr<RobotLink>& root);
   ~RobotModel() = default;
 
+  RobotModel(const RobotModel& rhs) = default;
+  RobotModel& operator=(const RobotModel& rhs) = default;
+
+  RobotModel(RobotModel&& rhs) = default;
+  RobotModel& operator=(RobotModel&& rhs) = default;
+
   void setRoot(const std::shared_ptr<RobotLink>& root);
-  std::shared_ptr<RobotLink> getRoot();
+  const std::shared_ptr<RobotLink>& getRoot() const;
 
 private:
   std::shared_ptr<RobotLink> root_;

@@ -12,7 +12,7 @@ class Environment
 public:
   void addObject(const std::shared_ptr<Object>& object);
 
-  const std::vector<std::shared_ptr<Object>>& getObjects();
+  const std::vector<std::shared_ptr<Object>>& getObjects() const;
 
 private:
   std::vector<std::shared_ptr<Object>> objects_;

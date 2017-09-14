@@ -13,7 +13,7 @@ void RobotModel::setRoot(const std::shared_ptr<RobotLink>& root)
   root_ = root;
 }
 
-std::shared_ptr<RobotLink> RobotModel::getRoot()
+const std::shared_ptr<RobotLink>& RobotModel::getRoot() const
 {
   return root_;
 }

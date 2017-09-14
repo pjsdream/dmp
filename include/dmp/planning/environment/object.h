@@ -12,10 +12,10 @@ class Object
 {
 public:
   void setShape(const std::shared_ptr<Shape>& shape);
-  void setColor(const Eigen::Vector4f& color);
+  const std::shared_ptr<Shape>& getShape() const;
 
-  const std::shared_ptr<Shape>& getShape();
-  const Eigen::Vector4f& getColor();
+  void setColor(const Eigen::Vector4f& color);
+  const Eigen::Vector4f& getColor() const;
 
 private:
   std::shared_ptr<Shape> shape_;

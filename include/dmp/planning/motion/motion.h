@@ -11,10 +11,10 @@ class Motion
 {
 public:
   void setNavigationJoints(const std::vector<std::string>& navigation_joints);
-  void setBodyJoints(const std::vector<std::string> &body_joints);
-  void setGripper(const std::vector<std::string> &gripper_joints,
-                  const std::string &link,
-                  const Eigen::Vector3d &xyz,
+  void setBodyJoints(const std::vector<std::string>& body_joints);
+  void setGripper(const std::vector<std::string>& gripper_joints,
+                  const std::string& link,
+                  const Eigen::Vector3d& xyz,
                   double width);
 
 private:
