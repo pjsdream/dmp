@@ -2,19 +2,29 @@
 
 namespace dmp
 {
-Sphere::Sphere()
-    : Shape(), radius_(1.)
+Sphere::Sphere() noexcept
+    : Shape(Shape::Type::Sphere), radius_(1.), position_(Eigen::Vector3d::Zero())
 {
 }
 
 Sphere::~Sphere() = default;
 
-void Sphere::setRadius(double radius)
+void Sphere::setPosition(const Eigen::Vector3d& position) noexcept
+{
+  position_ = position;
+}
+
+const Eigen::Vector3d& Sphere::getPosition() const noexcept
+{
+  return position_;
+}
+
+void Sphere::setRadius(double radius) noexcept
 {
   radius_ = radius;
 }
 
-double Sphere::getRadius()
+double Sphere::getRadius() const noexcept
 {
   return radius_;
 }

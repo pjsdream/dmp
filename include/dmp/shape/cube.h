@@ -8,14 +8,17 @@ namespace dmp
 class Cube : public Shape
 {
 public:
-  Cube();
+  Cube() noexcept;
   ~Cube() override;
 
-  void setSize(const Eigen::Vector3d& size);
+  void setSize(const Eigen::Vector3d& size) noexcept;
+  const Eigen::Vector3d& getSize() const noexcept;
 
-  const Eigen::Vector3d& getSize();
+  void setTransform(const Eigen::Affine3d& transform) noexcept;
+  const Eigen::Affine3d& getTransform() const noexcept;
 
 private:
+  Eigen::Affine3d transform_;
   Eigen::Vector3d size_;
 };
 }

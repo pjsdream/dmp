@@ -48,24 +48,26 @@ std::shared_ptr<Environment> EnvironmentLoader::loadEnvironment(const std::strin
       Eigen::Vector3d
           size{geometry["size"][0].toDouble(), geometry["size"][1].toDouble(), geometry["size"][2].toDouble()};
       cube->setSize(size);
+      cube->setTransform(transform);
       shape = cube;
     }
     else if (shape_type == "sphere")
     {
       auto sphere = std::make_shared<Sphere>();
       sphere->setRadius(geometry["radius"].toDouble());
+      sphere->setPosition(transform.translation());
       shape = sphere;
     }
     else if (shape_type == "cylinder")
     {
       auto cylinder = std::make_shared<Cylinder>();
       cylinder->setDimension(geometry["radius"].toDouble(), geometry["height"].toDouble());
+      cylinder->setTransform(transform);
       shape = cylinder;
     }
 
     if (shape != nullptr)
     {
-      shape->setTransform(transform);
       object->setColor(rgba);
       object->setShape(shape);
       environment->addObject(object);

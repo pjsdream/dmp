@@ -2,21 +2,38 @@
 #define DMP_SHAPE_H
 
 #include <Eigen/Dense>
+#include <memory>
 
 namespace dmp
 {
+class DistanceQuery;
+
 class Shape
 {
 public:
-  Shape();
+  enum class Type
+  {
+    AABB,
+    Cube,
+    Cylinder,
+    Sphere,
+  };
+
+  Shape() = delete;
+  explicit Shape(Type type) noexcept;
   virtual ~Shape();
 
-  void setTransform(const Eigen::Affine3d& transform);
+  Type getType() const noexcept;
 
-  const Eigen::Affine3d& getTransform();
+  // Precondition: downcast is possible.
+  template<typename T>
+  const T& as() const
+  {
+    return static_cast<const T&>(*this);
+  }
 
 private:
-  Eigen::Affine3d transform_;
+  const Type type_;
 };
 }
 

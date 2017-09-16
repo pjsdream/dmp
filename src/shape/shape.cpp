@@ -1,21 +1,17 @@
 #include <dmp/shape/shape.h>
+#include <dmp/shape/distance_query.h>
 
 namespace dmp
 {
-Shape::Shape()
-    : transform_(Eigen::Affine3d::Identity())
+Shape::Shape(Type type) noexcept
+    : type_(type)
 {
 }
 
 Shape::~Shape() = default;
 
-void Shape::setTransform(const Eigen::Affine3d& transform)
+Shape::Type Shape::getType() const noexcept
 {
-  transform_ = transform;
-}
-
-const Eigen::Affine3d& Shape::getTransform()
-{
-  return transform_;
+  return type_;
 }
 }

@@ -8,14 +8,17 @@ namespace dmp
 class Sphere : public Shape
 {
 public:
-  Sphere();
+  Sphere() noexcept;
   ~Sphere() override;
 
-  void setRadius(double radius);
+  void setPosition(const Eigen::Vector3d& position) noexcept;
+  const Eigen::Vector3d& getPosition() const noexcept;
 
-  double getRadius();
+  void setRadius(double radius) noexcept;
+  double getRadius() const noexcept;
 
 private:
+  Eigen::Vector3d position_;
   double radius_;
 };
 }

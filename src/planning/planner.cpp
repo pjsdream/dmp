@@ -152,7 +152,7 @@ void Planner::Impl::setEnvironment(const std::shared_ptr<Environment>& environme
     auto frame = std::make_unique<RequestFrame>();
     frame->action = RequestFrame::Action::Set;
     frame->name = "object_" + std::to_string(std::rand());
-    frame->transform = shape->getTransform();
+    frame->transform = Eigen::Affine3d::Identity();
 
     // shape
     auto custom_mesh = std::make_unique<RequestCustomMesh>();
@@ -163,16 +163,22 @@ void Planner::Impl::setEnvironment(const std::shared_ptr<Environment>& environme
     {
       custom_mesh->createCube(cube->getSize());
       custom_mesh->setGlobalColor(Eigen::Vector3f(color(0), color(1), color(2)));
+
+      frame->transform = cube->getTransform();
     }
     else if (auto cylinder = dynamic_cast<Cylinder*>(shape.get()))
     {
       custom_mesh->createCylinder(cylinder->getRadius(), cylinder->getHeight());
       custom_mesh->setGlobalColor(Eigen::Vector3f(color(0), color(1), color(2)));
+
+      frame->transform = cylinder->getTransform();
     }
     else if (auto sphere = dynamic_cast<Sphere*>(shape.get()))
     {
       custom_mesh->createSphere(sphere->getRadius());
       custom_mesh->setGlobalColor(Eigen::Vector3f(color(0), color(1), color(2)));
+
+      frame->transform.translate(sphere->getPosition());
     }
 
     renderer_->sendRequest(std::move(frame));

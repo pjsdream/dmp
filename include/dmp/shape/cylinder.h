@@ -8,15 +8,18 @@ namespace dmp
 class Cylinder : public Shape
 {
 public:
-  Cylinder();
+  Cylinder() noexcept;
   ~Cylinder() override;
 
-  void setDimension(double radius, double height);
+  void setTransform(const Eigen::Affine3d& transform) noexcept;
+  const Eigen::Affine3d& getTransform() const noexcept;
 
-  double getRadius();
-  double getHeight();
+  void setDimension(double radius, double height) noexcept;
+  double getRadius() const noexcept;
+  double getHeight() const noexcept;
 
 private:
+  Eigen::Affine3d transform_;
   double radius_;
   double height_;
 };

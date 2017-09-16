@@ -10,6 +10,10 @@
 #include <dmp/robot/robot_model_loader.h>
 #include <dmp/planning/environment/environment_loader.h>
 #include <dmp/planning/motion/motion_loader.h>
+#include <dmp/shape/distance_query.h>
+#include <dmp/shape/cube.h>
+#include <dmp/shape/cylinder.h>
+#include <dmp/shape/sphere.h>
 
 #include <QApplication>
 
