@@ -27,14 +27,17 @@ public:
   ~Impl() = default;
 
   Impl(const Impl& rhs) = delete;
-  Impl& operator = (const Impl& rhs) = delete;
+  Impl& operator=(const Impl& rhs) = delete;
 
   Impl(Impl&& rhs) = delete;
-  Impl& operator = (Impl&& rhs) = delete;
+  Impl& operator=(Impl&& rhs) = delete;
 
   void plan();
 
 private:
+  void drawGround();
+  void drawRobotModel();
+  void drawEnvironment();
   void renderingTraverse(const std::shared_ptr<RobotLink>& link);
 
   void setRenderer(const std::shared_ptr<Renderer>& renderer);
@@ -54,12 +57,38 @@ Planner::Impl::Impl(const PlanningOption& option)
   setRobotModel(option.getRobotModel());
   setEnvironment(option.getEnvironment());
   setMotion(option.getMotion());
+
+  drawGround();
+  drawRobotModel();
+  drawEnvironment();
 }
 
 void Planner::Impl::setRenderer(const std::shared_ptr<Renderer>& renderer)
 {
   renderer_ = renderer;
+}
 
+void Planner::Impl::setRobotModel(const std::shared_ptr<RobotModel>& robot_model)
+{
+  robot_model_ = robot_model;
+}
+
+void Planner::Impl::setMotion(const std::shared_ptr<Motion>& motion)
+{
+  motion_ = motion;
+}
+
+void Planner::Impl::setEnvironment(const std::shared_ptr<Environment>& environment)
+{
+  environment_ = environment;
+}
+
+void Planner::Impl::plan()
+{
+}
+
+void Planner::Impl::drawGround()
+{
   // draw ground
   auto frame = std::make_unique<RequestFrame>();
   frame->name = "ground";
@@ -84,10 +113,8 @@ void Planner::Impl::setRenderer(const std::shared_ptr<Renderer>& renderer)
   renderer_->sendRequest(std::move(custom_mesh));
 }
 
-void Planner::Impl::setRobotModel(const std::shared_ptr<RobotModel>& robot_model)
+void Planner::Impl::drawRobotModel()
 {
-  robot_model_ = robot_model;
-
   // draw robot model
   const auto& link = robot_model_->getRoot();
 
@@ -100,47 +127,8 @@ void Planner::Impl::setRobotModel(const std::shared_ptr<RobotModel>& robot_model
   renderingTraverse(link);
 }
 
-void Planner::Impl::renderingTraverse(const std::shared_ptr<RobotLink>& link)
+void Planner::Impl::drawEnvironment()
 {
-  for (const auto& visual : link->getVisuals())
-  {
-    auto frame = std::make_unique<RequestFrame>();
-    frame->action = RequestFrame::Action::Set;
-    frame->name = link->getName() + ":" + visual.filename;
-    frame->parent = link->getName();
-    frame->transform = visual.transform;
-    renderer_->sendRequest(std::move(frame));
-
-    auto req = std::make_unique<RequestMesh>();
-    req->action = RequestMesh::Action::Attach;
-    req->filename = visual.filename;
-    req->frame = link->getName() + ":" + visual.filename;
-    renderer_->sendRequest(std::move(req));
-  }
-
-  for (const auto& joint : link->getChildJoints())
-  {
-    auto frame = std::make_unique<RequestFrame>();
-    frame->action = RequestFrame::Action::Set;
-    frame->name = joint->getChildLink()->getName();
-    frame->parent = link->getName();
-    frame->transform = joint->getTransform(0.);
-
-    renderer_->sendRequest(std::move(frame));
-
-    renderingTraverse(joint->getChildLink());
-  }
-}
-
-void Planner::Impl::setMotion(const std::shared_ptr<Motion>& motion)
-{
-  motion_ = motion;
-}
-
-void Planner::Impl::setEnvironment(const std::shared_ptr<Environment>& environment)
-{
-  environment_ = environment;
-
   // drawing environment
   const auto& objects = environment_->getObjects();
   for (const auto& object : objects)
@@ -186,10 +174,41 @@ void Planner::Impl::setEnvironment(const std::shared_ptr<Environment>& environme
   }
 }
 
-void Planner::Impl::plan()
+void Planner::Impl::renderingTraverse(const std::shared_ptr<RobotLink>& link)
 {
+  for (const auto& visual : link->getVisuals())
+  {
+    auto frame = std::make_unique<RequestFrame>();
+    frame->action = RequestFrame::Action::Set;
+    frame->name = link->getName() + ":" + visual.filename;
+    frame->parent = link->getName();
+    frame->transform = visual.transform;
+    renderer_->sendRequest(std::move(frame));
+
+    auto req = std::make_unique<RequestMesh>();
+    req->action = RequestMesh::Action::Attach;
+    req->filename = visual.filename;
+    req->frame = link->getName() + ":" + visual.filename;
+    renderer_->sendRequest(std::move(req));
+  }
+
+  for (const auto& joint : link->getChildJoints())
+  {
+    auto frame = std::make_unique<RequestFrame>();
+    frame->action = RequestFrame::Action::Set;
+    frame->name = joint->getChildLink()->getName();
+    frame->parent = link->getName();
+    frame->transform = joint->getTransform(0.);
+
+    renderer_->sendRequest(std::move(frame));
+
+    renderingTraverse(joint->getChildLink());
+  }
 }
 
+//
+// Planner to pImpl
+//
 Planner::Planner(const PlanningOption& option)
     : impl_(std::make_unique<Impl>(option))
 {
