@@ -159,8 +159,14 @@ void DistanceQuery::evaluate(const Sphere& object1, const Sphere& object2)
   auto r_sum = r1 + r2;
 
   if (r_sum * r_sum < d_square)
+  {
     distance_ = std::sqrt(d_square) - r_sum;
+    penetration_depth_ = 0.;
+  }
   else
+  {
     distance_ = 0.;
+    penetration_depth_ = std::sqrt(d_square) - r_sum;
+  }
 }
 }
