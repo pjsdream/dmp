@@ -79,6 +79,24 @@ vec3 colorPointLight(Light light, Material material, vec3 N, vec3 V)
   return (ambient + diffuse + specular) * attenuation;
 }
 
+vec3 fog(vec3 color)
+{
+  const float near = 0.7f;
+  const float far = 0.9f;
+  const vec3 background_color = vec3(0.8f, 0.8f, 0.8f);
+
+  float depth = gl_FragCoord.z;
+
+  if (depth > far)
+    return background_color;
+  else if (depth > near)
+  {
+    float t = (depth - near) / (far - near);
+    return (1.f - t) * color + t * background_color;
+  }
+  return color;
+}
+
 void main()
 {
   Material point_material;
@@ -115,5 +133,5 @@ void main()
     }
   }
 
-  out_color = vec4(total_color, 1.0);
+  out_color = vec4(fog(total_color), 1.0);
 }

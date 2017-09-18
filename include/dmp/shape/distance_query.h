@@ -22,6 +22,7 @@ public:
   void evaluate();
 
   double getDistance() const noexcept;
+  double getPenetrationDepth() const noexcept;
 
 private:
   const Shape& object1_;
@@ -30,27 +31,28 @@ private:
   template<typename T>
   void dispatchFirst(const T& object1);
 
-  void dispatchSecond(const AABB& object1, const AABB& object2);
-  void dispatchSecond(const AABB& object1, const Cube& object2);
-  void dispatchSecond(const AABB& object1, const Cylinder& object2);
-  void dispatchSecond(const AABB& object1, const Sphere& object2);
+  void evaluate(const AABB& object1, const AABB& object2);
+  void evaluate(const AABB& object1, const Cube& object2);
+  void evaluate(const AABB& object1, const Cylinder& object2);
+  void evaluate(const AABB& object1, const Sphere& object2);
 
-  void dispatchSecond(const Cube& object1, const AABB& object2);
-  void dispatchSecond(const Cube& object1, const Cube& object2);
-  void dispatchSecond(const Cube& object1, const Cylinder& object2);
-  void dispatchSecond(const Cube& object1, const Sphere& object2);
+  void evaluate(const Cube& object1, const AABB& object2);
+  void evaluate(const Cube& object1, const Cube& object2);
+  void evaluate(const Cube& object1, const Cylinder& object2);
+  void evaluate(const Cube& object1, const Sphere& object2);
 
-  void dispatchSecond(const Cylinder& object1, const AABB& object2);
-  void dispatchSecond(const Cylinder& object1, const Cube& object2);
-  void dispatchSecond(const Cylinder& object1, const Cylinder& object2);
-  void dispatchSecond(const Cylinder& object1, const Sphere& object2);
+  void evaluate(const Cylinder& object1, const AABB& object2);
+  void evaluate(const Cylinder& object1, const Cube& object2);
+  void evaluate(const Cylinder& object1, const Cylinder& object2);
+  void evaluate(const Cylinder& object1, const Sphere& object2);
 
-  void dispatchSecond(const Sphere& object1, const AABB& object2);
-  void dispatchSecond(const Sphere& object1, const Cube& object2);
-  void dispatchSecond(const Sphere& object1, const Cylinder& object2);
-  void dispatchSecond(const Sphere& object1, const Sphere& object2);
+  void evaluate(const Sphere& object1, const AABB& object2);
+  void evaluate(const Sphere& object1, const Cube& object2);
+  void evaluate(const Sphere& object1, const Cylinder& object2);
+  void evaluate(const Sphere& object1, const Sphere& object2);
 
   double distance_;
+  double penetration_depth_;
 };
 }
 

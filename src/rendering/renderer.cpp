@@ -268,6 +268,7 @@ void Renderer::Impl::initializeGL(QOpenGLContext* context)
 
   gl_->glClearColor(0.8f, 0.8f, 0.8f, 0.f);
   gl_->glEnable(GL_DEPTH_TEST);
+  gl_->glEnable(GL_MULTISAMPLE);
 
   resource_manager_ = std::make_unique<ResourceManager>(gl_);
 

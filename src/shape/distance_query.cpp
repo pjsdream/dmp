@@ -37,16 +37,16 @@ void DistanceQuery::dispatchFirst(const T& object1)
   switch (object2_.getType())
   {
     case Shape::Type::AABB:
-      dispatchSecond(object1, object2_.as<AABB>());
+      evaluate(object1, object2_.as<AABB>());
       break;
     case Shape::Type::Cube:
-      dispatchSecond(object1, object2_.as<Cube>());
+      evaluate(object1, object2_.as<Cube>());
       break;
     case Shape::Type::Cylinder:
-      dispatchSecond(object1, object2_.as<Cylinder>());
+      evaluate(object1, object2_.as<Cylinder>());
       break;
     case Shape::Type::Sphere:
-      dispatchSecond(object1, object2_.as<Sphere>());
+      evaluate(object1, object2_.as<Sphere>());
       break;
   }
 }
@@ -56,25 +56,30 @@ double DistanceQuery::getDistance() const noexcept
   return distance_;
 }
 
+double DistanceQuery::getPenetrationDepth() const noexcept
+{
+  return penetration_depth_;
+}
+
 //
 // AABB
 //
-void DistanceQuery::dispatchSecond(const AABB& object1, const AABB& object2)
+void DistanceQuery::evaluate(const AABB& object1, const AABB& object2)
 {
   // TODO
 }
 
-void DistanceQuery::dispatchSecond(const AABB& object1, const Cube& object2)
+void DistanceQuery::evaluate(const AABB& object1, const Cube& object2)
 {
   // TODO
 }
 
-void DistanceQuery::dispatchSecond(const AABB& object1, const Cylinder& object2)
+void DistanceQuery::evaluate(const AABB& object1, const Cylinder& object2)
 {
   // TODO
 }
 
-void DistanceQuery::dispatchSecond(const AABB& object1, const Sphere& object2)
+void DistanceQuery::evaluate(const AABB& object1, const Sphere& object2)
 {
   // TODO
 }
@@ -83,22 +88,22 @@ void DistanceQuery::dispatchSecond(const AABB& object1, const Sphere& object2)
 //
 // Cube (OBB)
 //
-void DistanceQuery::dispatchSecond(const Cube& object1, const AABB& object2)
+void DistanceQuery::evaluate(const Cube& object1, const AABB& object2)
 {
-  dispatchSecond(object2, object1);
+  evaluate(object2, object1);
 }
 
-void DistanceQuery::dispatchSecond(const Cube& object1, const Cube& object2)
-{
-  // TODO
-}
-
-void DistanceQuery::dispatchSecond(const Cube& object1, const Cylinder& object2)
+void DistanceQuery::evaluate(const Cube& object1, const Cube& object2)
 {
   // TODO
 }
 
-void DistanceQuery::dispatchSecond(const Cube& object1, const Sphere& object2)
+void DistanceQuery::evaluate(const Cube& object1, const Cylinder& object2)
+{
+  // TODO
+}
+
+void DistanceQuery::evaluate(const Cube& object1, const Sphere& object2)
 {
   // TODO
 }
@@ -107,22 +112,22 @@ void DistanceQuery::dispatchSecond(const Cube& object1, const Sphere& object2)
 //
 // Cylinder
 //
-void DistanceQuery::dispatchSecond(const Cylinder& object1, const AABB& object2)
+void DistanceQuery::evaluate(const Cylinder& object1, const AABB& object2)
 {
-  dispatchSecond(object2, object1);
+  evaluate(object2, object1);
 }
 
-void DistanceQuery::dispatchSecond(const Cylinder& object1, const Cube& object2)
+void DistanceQuery::evaluate(const Cylinder& object1, const Cube& object2)
 {
-  dispatchSecond(object2, object1);
+  evaluate(object2, object1);
 }
 
-void DistanceQuery::dispatchSecond(const Cylinder& object1, const Cylinder& object2)
+void DistanceQuery::evaluate(const Cylinder& object1, const Cylinder& object2)
 {
   // TODO
 }
 
-void DistanceQuery::dispatchSecond(const Cylinder& object1, const Sphere& object2)
+void DistanceQuery::evaluate(const Cylinder& object1, const Sphere& object2)
 {
   // TODO
 }
@@ -131,22 +136,22 @@ void DistanceQuery::dispatchSecond(const Cylinder& object1, const Sphere& object
 //
 // Sphere
 //
-void DistanceQuery::dispatchSecond(const Sphere& object1, const AABB& object2)
+void DistanceQuery::evaluate(const Sphere& object1, const AABB& object2)
 {
-  dispatchSecond(object2, object1);
+  evaluate(object2, object1);
 }
 
-void DistanceQuery::dispatchSecond(const Sphere& object1, const Cube& object2)
+void DistanceQuery::evaluate(const Sphere& object1, const Cube& object2)
 {
-  dispatchSecond(object2, object1);
+  evaluate(object2, object1);
 }
 
-void DistanceQuery::dispatchSecond(const Sphere& object1, const Cylinder& object2)
+void DistanceQuery::evaluate(const Sphere& object1, const Cylinder& object2)
 {
-  dispatchSecond(object2, object1);
+  evaluate(object2, object1);
 }
 
-void DistanceQuery::dispatchSecond(const Sphere& object1, const Sphere& object2)
+void DistanceQuery::evaluate(const Sphere& object1, const Sphere& object2)
 {
   auto d_square = (object1.getPosition() - object2.getPosition()).squaredNorm();
   auto r1 = object1.getRadius();

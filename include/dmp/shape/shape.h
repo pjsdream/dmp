@@ -25,8 +25,8 @@ public:
 
   Type getType() const noexcept;
 
-  // Precondition: downcast is possible.
-  template<typename T>
+  // Precondition: downcast is possible, as the object actually refers to the derived class
+  template<typename T, typename = typename std::enable_if_t<std::is_base_of<Shape, T>::value>>
   const T& as() const
   {
     return static_cast<const T&>(*this);

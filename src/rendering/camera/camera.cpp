@@ -76,11 +76,11 @@ void Camera::translatePixel(int dx, int dy)
   const Eigen::Vector3d u = up_.cross(n).normalized();
   const Eigen::Vector3d v = n.cross(u);
 
-  eye_ += u * sensitivity_translation_ * -dx;
-  eye_ -= v * sensitivity_translation_ * -dy;
+  eye_ += sensitivity_translation_ * -dx * u;
+  eye_ -= sensitivity_translation_ * -dy * v;
 
-  center_ += u * sensitivity_translation_ * -dx;
-  center_ -= v * sensitivity_translation_ * -dy;
+  center_ += sensitivity_translation_ * -dx * u;
+  center_ -= sensitivity_translation_ * -dy * v;
 }
 
 void Camera::rotatePixel(int dx, int dy)
@@ -89,8 +89,20 @@ void Camera::rotatePixel(int dx, int dy)
   const Eigen::Vector3d u = up_.cross(n).normalized();
   const Eigen::Vector3d v = n.cross(u);
 
+  double y_diff = - sensitivity_rotation_ * dy;
+
+  // y angle
+  const double angle = std::acos(up_.dot(n));
+  const double angle_delta = 0.01;
+
+  if (angle + y_diff < angle_delta)
+    y_diff = angle_delta - angle;
+
+  else if (angle + y_diff > M_PI - angle_delta)
+    y_diff = M_PI - angle_delta - angle;
+
   Eigen::AngleAxisd rotation_x( - sensitivity_rotation_ * dx, up_ );
-  Eigen::AngleAxisd rotation_y( - sensitivity_rotation_ * dy, u );
+  Eigen::AngleAxisd rotation_y( y_diff, u );
 
   eye_ = center_ + rotation_x * (eye_ - center_);
   eye_ = center_ + rotation_y * (eye_ - center_);
@@ -106,10 +118,10 @@ void Camera::zoomPixel(int dx, int dy)
   const double minimum_distance = 0.01;
 
   if ((eye_ - center_).norm() - distance >= minimum_distance)
-    eye_ -= n * distance;
+    eye_ -= distance * n;
 
   else
-    eye_ = n * minimum_distance;
+    eye_ = center_ + minimum_distance * n;
 }
 
 Eigen::Matrix4d Camera::projectionMatrix() const

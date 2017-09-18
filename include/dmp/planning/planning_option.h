@@ -9,11 +9,18 @@ class RobotModel;
 class Environment;
 class Motion;
 class Renderer;
+
 class PlanningOption
 {
 public:
   PlanningOption();
   ~PlanningOption();
+
+  PlanningOption(const PlanningOption& rhs) = default;
+  PlanningOption& operator=(const PlanningOption& rhs) = default;
+
+  PlanningOption(PlanningOption&& rhs) = default;
+  PlanningOption& operator=(PlanningOption&& rhs) = default;
 
   void setRobotModel(const std::shared_ptr<RobotModel>& robot_model);
   std::shared_ptr<RobotModel> getRobotModel() const;
