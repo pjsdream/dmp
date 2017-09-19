@@ -20,21 +20,31 @@ public:
   };
 
   RobotJoint() = delete;
-  explicit RobotJoint(JointType type);
-  explicit RobotJoint(const std::string& type);
+  explicit RobotJoint(JointType type) noexcept;
+  explicit RobotJoint(const std::string& type) noexcept;
   ~RobotJoint() = default;
 
-  void setParentLink(const std::shared_ptr<RobotLink>& parent);
-  void setChildLink(const std::shared_ptr<RobotLink>& child);
+  std::string getJointTypeAsString() const noexcept;
 
-  void setName(const std::string& name);
-  void setOrigin(const Eigen::Affine3d& origin);
-  void setAxis(const Eigen::Vector3d& axis);
-  void setLimit(double lower, double upper);
+  void setParentLink(const std::shared_ptr<RobotLink>& parent) noexcept;
+  void setChildLink(const std::shared_ptr<RobotLink>& child) noexcept;
 
-  Eigen::Affine3d getTransform(double joint_value);
+  void setName(const std::string& name) noexcept;
+  const std::string& getName() const noexcept;
 
-  std::shared_ptr<RobotLink> getChildLink();
+  void setOrigin(const Eigen::Affine3d& origin) noexcept;
+  const Eigen::Affine3d& getOrigin() const noexcept;
+
+  void setAxis(const Eigen::Vector3d& axis) noexcept;
+  const Eigen::Vector3d& getAxis() const noexcept;
+
+  void setLimit(double lower, double upper) noexcept;
+  double getLower() const noexcept;
+  double getUpper() const noexcept;
+
+  Eigen::Affine3d getTransform(double joint_value) const;
+
+  std::shared_ptr<RobotLink> getChildLink() const noexcept;
 
 private:
   JointType type_;

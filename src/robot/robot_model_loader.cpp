@@ -96,12 +96,24 @@ void RobotModelLoader::load(const std::string& filename)
 
       if (auto collision = it->FirstChildElement("collision"))
       {
-        readOrigin(link.collision.origin, collision);
-
-        if (auto geometry = collision->FirstChildElement("geometry"))
+        while (collision != 0)
         {
-          if (auto mesh = geometry->FirstChildElement("mesh"))
-            link.collision.geometry_filename = substitutePackageDirectory(mesh->Attribute("filename"));
+          // read link collision
+          Link::Collision link_collision;
+
+          readOrigin(link_collision.origin, collision);
+
+          if (auto geometry = collision->FirstChildElement("geometry"))
+          {
+            if (auto mesh = geometry->FirstChildElement("mesh"))
+              link_collision.geometry_filename = substitutePackageDirectory(mesh->Attribute("filename"));
+          }
+
+          // add link collision
+          link.collisions.push_back(link_collision);
+
+          // iterate to the next collision element
+          collision = collision->NextSiblingElement("collision");
         }
       }
 
@@ -212,6 +224,9 @@ void RobotModelLoader::traverse(const std::shared_ptr<RobotLink>& node,
     else
       node->addVisualMesh(link.visual.geometry_filename, transform * originToTransform(link.visual.origin));
   }
+
+  for (const auto& collision : link.collisions)
+    node->addCollisionMesh(collision.geometry_filename, originToTransform(collision.origin));
 
   for (auto joint_name : children_joints_[link_name])
   {

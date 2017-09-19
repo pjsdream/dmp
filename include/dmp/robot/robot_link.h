@@ -21,6 +21,12 @@ public:
     Eigen::Vector4d color;
   };
 
+  struct Collision
+  {
+    std::string filename;
+    Eigen::Affine3d transform;
+  };
+
   void setName(const std::string& name);
   const std::string& getName() const;
 
@@ -30,7 +36,10 @@ public:
 
   void addVisualMesh(const std::string& filename, const Eigen::Affine3d& transform);
   void addVisualMesh(const std::string& filename, const Eigen::Affine3d& transform, const Eigen::Vector4d& color);
-  const std::vector<Visual>& getVisuals() const;
+  const std::vector<Visual>& getVisuals() const noexcept;
+
+  void addCollisionMesh(const std::string& filename, const Eigen::Affine3d& transform) noexcept;
+  const std::vector<Collision>& getCollisions() const noexcept;
 
 private:
   std::string name_;
@@ -39,6 +48,7 @@ private:
   std::vector<std::shared_ptr<RobotJoint>> children_;
 
   std::vector<Visual> visuals_;
+  std::vector<Visual> collisions_;
 };
 }
 

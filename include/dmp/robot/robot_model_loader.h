@@ -20,6 +20,12 @@ public:
   RobotModelLoader() = default;
   ~RobotModelLoader() = default;
 
+  RobotModelLoader(const RobotModelLoader& rhs) = default;
+  RobotModelLoader& operator=(const RobotModelLoader& rhs) = default;
+
+  RobotModelLoader(RobotModelLoader&& rhs) = default;
+  RobotModelLoader& operator=(RobotModelLoader&& rhs) = default;
+
   void setSubstitutePackageDirectory(const std::string& directory);
   void load(const std::string& filename);
 
@@ -58,7 +64,7 @@ private:
     std::string name;
     Inertial inertial;
     Visual visual;
-    Collision collision;
+    std::vector<Collision> collisions;
   };
 
   struct Joint

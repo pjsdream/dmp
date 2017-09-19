@@ -51,8 +51,22 @@ void RobotLink::addVisualMesh(const std::string& filename,
   visuals_.push_back(visual);
 }
 
-const std::vector<RobotLink::Visual>& RobotLink::getVisuals() const
+const std::vector<RobotLink::Visual>& RobotLink::getVisuals() const noexcept
 {
   return visuals_;
+}
+
+void RobotLink::addCollisionMesh(const std::string& filename, const Eigen::Affine3d& transform) noexcept
+{
+  Collision collision;
+  collision.filename = filename;
+  collision.transform = transform;
+
+  collisions_.push_back(collision);
+}
+
+const std::vector<Collision>& RobotLink::getCollisions() const noexcept
+{
+  return collisions_;
 }
 }
