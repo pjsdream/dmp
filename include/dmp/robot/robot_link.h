@@ -48,7 +48,7 @@ private:
   std::vector<std::shared_ptr<RobotJoint>> children_;
 
   std::vector<Visual> visuals_;
-  std::vector<Visual> collisions_;
+  std::vector<Collision> collisions_;
 };
 }
 

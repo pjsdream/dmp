@@ -65,7 +65,7 @@ void RobotLink::addCollisionMesh(const std::string& filename, const Eigen::Affin
   collisions_.push_back(collision);
 }
 
-const std::vector<Collision>& RobotLink::getCollisions() const noexcept
+const std::vector<RobotLink::Collision>& RobotLink::getCollisions() const noexcept
 {
   return collisions_;
 }
