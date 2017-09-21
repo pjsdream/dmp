@@ -5,10 +5,13 @@
 
 namespace dmp
 {
+class AABB;
+
 class Cube : public Shape
 {
 public:
   Cube() noexcept;
+  Cube(const AABB& aabb) noexcept;
   ~Cube() override;
 
   void setSize(const Eigen::Vector3d& size) noexcept;

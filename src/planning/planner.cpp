@@ -7,15 +7,19 @@
 #include <dmp/planning/environment/environment.h>
 #include <dmp/planning/environment/object.h>
 #include <dmp/planning/motion/motion.h>
+#include <dmp/shape/aabb.h>
 #include <dmp/shape/shape.h>
 #include <dmp/shape/cube.h>
 #include <dmp/shape/cylinder.h>
 #include <dmp/shape/sphere.h>
+#include <dmp/shape/bounding_volume_factory.h>
 
 #include <dmp/rendering/request/request_frame.h>
 #include <dmp/rendering/request/request_mesh.h>
 #include <dmp/rendering/request/request_custom_texture.h>
 #include <dmp/rendering/request/request_custom_mesh.h>
+
+#include <dmp/utils/mesh_loader.h>
 
 #include <iostream>
 
@@ -50,6 +54,8 @@ private:
   std::shared_ptr<RobotModel> robot_model_;
   std::shared_ptr<Environment> environment_;
   std::shared_ptr<Motion> motion_;
+
+  std::vector<std::vector<std::shared_ptr<Shape>>> bounding_volumes_;
 };
 
 Planner::Impl::Impl(const PlanningOption& option)
@@ -73,7 +79,37 @@ void Planner::Impl::setRobotModel(const std::shared_ptr<RobotModel>& robot_model
 {
   robot_model_ = robot_model;
 
-  // TODO: import bounding volumes
+  const auto num_links = robot_model_->numLinks();
+  for (int i = 0; i < num_links; i++)
+  {
+    const auto& link = robot_model_->getLink(i);
+
+    // TODO: refactoring the code. better storage for bounding volumes
+    bounding_volumes_.emplace_back(std::vector<std::shared_ptr<Shape>>());
+
+    for (const auto& collision : link.getCollisions())
+    {
+      auto future_raw_mesh = MeshLoader::loadMesh(collision.filename);
+      const auto& raw_mesh = future_raw_mesh.get();
+
+      const auto num_vertices = raw_mesh.vertex_buffer.size() / 3;
+
+      // allocate vertex vector
+      VectorEigen<Eigen::Vector3d> points(num_vertices);
+      for (int j = 0; j < num_vertices; j++)
+      {
+        points[j] = collision.transform * Eigen::Vector3d(raw_mesh.vertex_buffer[3 * j],
+                                                          raw_mesh.vertex_buffer[3 * j + 1],
+                                                          raw_mesh.vertex_buffer[3 * j + 2]);
+      }
+
+      // create bounding volume through factory function
+      auto bounding_volume = BoundingVolumeFactory::newBoundingVolumeFromPoints(points);
+
+      // TODO: save computed bounding volume to a storage
+      bounding_volumes_[i].push_back(bounding_volume);
+    }
+  }
 }
 
 void Planner::Impl::setMotion(const std::shared_ptr<Motion>& motion)
@@ -120,7 +156,7 @@ void Planner::Impl::drawRobotModel()
 {
   auto num_links = robot_model_->numLinks();
 
-  for (int i=0; i<num_links; i++)
+  for (int i = 0; i < num_links; i++)
   {
     const auto& link = robot_model_->getLink(i);
 
@@ -159,6 +195,46 @@ void Planner::Impl::drawRobotModel()
       mesh->filename = visual.filename;
       mesh->frame = frame_name + "_" + visual.filename;
       renderer_->sendRequest(std::move(mesh));
+    }
+
+    // collision mesh requests
+    // TODO: send requests at once. Currently, it's sending one by one.
+    for (const auto& collision : link.getCollisions())
+    {
+      auto frame = std::make_unique<RequestFrame>();
+      frame->action = RequestFrame::Action::Set;
+      frame->name = frame_name + "_" + collision.filename;
+      frame->parent = frame_name;
+      frame->transform = collision.transform;
+      renderer_->sendRequest(std::move(frame));
+
+      auto mesh = std::make_unique<RequestMesh>();
+      mesh->action = RequestMesh::Action::Attach;
+      mesh->filename = collision.filename;
+      mesh->frame = frame_name + "_" + collision.filename;
+      renderer_->sendRequest(std::move(mesh));
+    }
+
+    // TODO: refactoring the code
+    // TODO: collision shape requests
+    for (int j = 0; j < bounding_volumes_[i].size(); j++)
+    {
+      const auto& aabb = bounding_volumes_[i][j]->as<AABB>();
+
+      auto frame = std::make_unique<RequestFrame>();
+      frame->action = RequestFrame::Action::Set;
+      frame->name = frame_name + "_" + "aabb_" + std::to_string(i) + "_" + std::to_string(j);
+      frame->parent = frame_name;
+      frame->transform = Eigen::Affine3d::Identity();
+      frame->transform.translate((aabb.getMin() + aabb.getMax()) * .5);
+      renderer_->sendRequest(std::move(frame));
+
+      auto custom_mesh = std::make_unique<RequestCustomMesh>();
+      custom_mesh->name = "aabb_" + std::to_string(i) + "_" + std::to_string(j);
+      custom_mesh->frame = frame_name + "_" + "aabb_" + std::to_string(i) + "_" + std::to_string(j);
+      custom_mesh->createCube(aabb.getMax() - aabb.getMin());
+      custom_mesh->setGlobalColor(Eigen::Vector3f(0.8f, 0.8f, 0.8f));
+      renderer_->sendRequest(std::move(custom_mesh));
     }
   }
 }

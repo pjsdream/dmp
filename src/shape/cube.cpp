@@ -1,10 +1,17 @@
 #include <dmp/shape/cube.h>
+#include <dmp/shape/aabb.h>
 
 namespace dmp
 {
 Cube::Cube() noexcept
     : Shape(Shape::Type::Cube), size_(Eigen::Vector3d(1., 1., 1.)), transform_(Eigen::Affine3d::Identity())
 {
+}
+
+Cube::Cube(const AABB& aabb) noexcept
+: Shape(Shape::Type::Cube), size_(aabb.getMax() - aabb.getMin()), transform_(Eigen::Affine3d::Identity())
+{
+  transform_.translate((aabb.getMin() + aabb.getMax()) * .5);
 }
 
 Cube::~Cube() = default;

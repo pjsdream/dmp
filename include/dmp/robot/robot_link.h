@@ -36,6 +36,7 @@ public:
   const std::vector<Visual> getVisuals() const noexcept;
 
   void addCollision(const std::string& filename, const Eigen::Affine3d& transform);
+  const std::vector<Collision> getCollisions() const noexcept;
 
 private:
   std::string name_;

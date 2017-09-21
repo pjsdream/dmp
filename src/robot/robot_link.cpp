@@ -49,4 +49,9 @@ void RobotLink::addCollision(const std::string& filename, const Eigen::Affine3d&
 
   collisions_.emplace_back(collision);
 }
+
+const std::vector<RobotLink::Collision> RobotLink::getCollisions() const noexcept
+{
+  return collisions_;
+}
 }
