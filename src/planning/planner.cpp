@@ -8,7 +8,6 @@
 #include <dmp/planning/environment/object.h>
 #include <dmp/planning/motion/motion.h>
 #include <dmp/shape/aabb.h>
-#include <dmp/shape/shape.h>
 #include <dmp/shape/cube.h>
 #include <dmp/shape/cylinder.h>
 #include <dmp/shape/sphere.h>
