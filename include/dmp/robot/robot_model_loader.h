@@ -11,9 +11,10 @@
 
 namespace dmp
 {
+class TreeRobotModel;
+class TreeRobotLink;
+class TreeRobotJoint;
 class RobotModel;
-class RobotLink;
-class RobotJoint;
 class RobotModelLoader
 {
 public:
@@ -97,11 +98,11 @@ private:
 
   std::unordered_set<std::string> active_joints_;
   std::unordered_map<std::string, double> joint_values_;
-  void traverse(const std::shared_ptr<RobotLink>& node, const std::string& link_name, const Eigen::Affine3d& transform);
+  void traverse(const std::shared_ptr<TreeRobotLink>& node, const std::string& link_name, const Eigen::Affine3d& transform);
 
   std::string substitutePackageDirectory(const std::string& filename);
   Eigen::Affine3d originToTransform(const double origin[6]);
-  std::shared_ptr<RobotJoint> createRobotJointFromRaw(const Joint& raw_joint);
+  std::shared_ptr<TreeRobotJoint> createTreeRobotJointFromRaw(const Joint& raw_joint);
 };
 }
 

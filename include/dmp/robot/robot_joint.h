@@ -1,33 +1,28 @@
 #ifndef DMP_ROBOT_JOINT_H
 #define DMP_ROBOT_JOINT_H
 
-#include <memory>
-
 #include <Eigen/Dense>
 
 namespace dmp
 {
-class RobotLink;
 class RobotJoint
 {
 public:
-  enum class JointType
+  enum class Type
   {
     Fixed,
     Continuous,
     Revolute,
     Prismatic,
+    Undefined,
   };
 
-  RobotJoint() = delete;
-  explicit RobotJoint(JointType type) noexcept;
-  explicit RobotJoint(const std::string& type) noexcept;
-  ~RobotJoint() = default;
+  static Type getJointType(std::string type) noexcept;
 
-  std::string getJointTypeAsString() const noexcept;
+  RobotJoint() noexcept;
+  explicit RobotJoint(std::string type) noexcept;
 
-  void setParentLink(const std::shared_ptr<RobotLink>& parent) noexcept;
-  void setChildLink(const std::shared_ptr<RobotLink>& child) noexcept;
+  Eigen::Affine3d getJointTransform(double joint_value = 0.) const;
 
   void setName(const std::string& name) noexcept;
   const std::string& getName() const noexcept;
@@ -38,30 +33,17 @@ public:
   void setAxis(const Eigen::Vector3d& axis) noexcept;
   const Eigen::Vector3d& getAxis() const noexcept;
 
-  void setLimit(double lower, double upper) noexcept;
+  void setLimits(double lower, double upper) noexcept;
   double getLower() const noexcept;
   double getUpper() const noexcept;
 
-  Eigen::Affine3d getTransform(double joint_value) const;
-
-  std::shared_ptr<RobotLink> getChildLink() const noexcept;
-
 private:
-  JointType type_;
-
-  std::weak_ptr<RobotLink> parent_;
-  std::shared_ptr<RobotLink> child_;
-
+  Type type_;
   std::string name_;
   Eigen::Affine3d origin_;
   Eigen::Vector3d axis_;
-
-  struct Limit
-  {
-    double lower;
-    double upper;
-  };
-  Limit limit_;
+  double lower_;
+  double upper_;
 };
 }
 

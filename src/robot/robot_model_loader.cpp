@@ -1,7 +1,8 @@
 #include <dmp/robot/robot_model_loader.h>
+#include <dmp/robot/tree_robot_model.h>
+#include <dmp/robot/tree_robot_link.h>
+#include <dmp/robot/tree_robot_joint.h>
 #include <dmp/robot/robot_model.h>
-#include <dmp/robot/robot_link.h>
-#include <dmp/robot/robot_joint.h>
 
 #include <tinyxml2/tinyxml2.h>
 
@@ -200,16 +201,18 @@ void RobotModelLoader::setJointValues(const std::unordered_map<std::string, doub
 
 std::shared_ptr<RobotModel> RobotModelLoader::getRobotModel()
 {
-  auto root = std::make_shared<RobotLink>();
+  auto root = std::make_shared<TreeRobotLink>();
   root->setName(root_name_);
   traverse(root, root_name_, Eigen::Affine3d::Identity());
 
-  auto robot_model = std::make_shared<RobotModel>();
-  robot_model->setRoot(root);
+  auto tree_robot_model = std::make_shared<TreeRobotModel>();
+  tree_robot_model->setRoot(root);
+
+  auto robot_model = std::make_shared<RobotModel>(*tree_robot_model);
   return robot_model;
 }
 
-void RobotModelLoader::traverse(const std::shared_ptr<RobotLink>& node,
+void RobotModelLoader::traverse(const std::shared_ptr<TreeRobotLink>& node,
                                 const std::string& link_name,
                                 const Eigen::Affine3d& transform)
 {
@@ -234,14 +237,14 @@ void RobotModelLoader::traverse(const std::shared_ptr<RobotLink>& node,
     auto child_link_name = raw_joint.child;
     auto child_link = links_[child_link_name];
 
-    auto robot_joint = createRobotJointFromRaw(raw_joint);
+    auto robot_joint = createTreeRobotJointFromRaw(raw_joint);
 
-    std::shared_ptr<RobotLink> next_node;
+    std::shared_ptr<TreeRobotLink> next_node;
     Eigen::Affine3d next_transform;
     if (active_joints_.find(joint_name) != active_joints_.cend())
     {
       next_transform = Eigen::Affine3d::Identity();
-      next_node = std::make_shared<RobotLink>();
+      next_node = std::make_shared<TreeRobotLink>();
       next_node->setName(child_link.name);
 
       robot_joint->setParentLink(node);
@@ -276,9 +279,9 @@ Eigen::Affine3d RobotModelLoader::originToTransform(const double origin[6])
   return transform;
 }
 
-std::shared_ptr<RobotJoint> RobotModelLoader::createRobotJointFromRaw(const Joint& raw_joint)
+std::shared_ptr<TreeRobotJoint> RobotModelLoader::createTreeRobotJointFromRaw(const Joint& raw_joint)
 {
-  auto joint = std::make_shared<RobotJoint>(raw_joint.type);
+  auto joint = std::make_shared<TreeRobotJoint>(raw_joint.type);
   joint->setName(raw_joint.name);
   joint->setOrigin(originToTransform(raw_joint.origin));
   joint->setAxis(Eigen::Vector3d(raw_joint.axis));

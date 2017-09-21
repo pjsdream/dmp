@@ -8,6 +8,7 @@
 #include <dmp/planning/planner.h>
 #include <dmp/planning/planning_option.h>
 #include <dmp/robot/robot_model_loader.h>
+#include <dmp/robot/robot_model.h>
 #include <dmp/planning/environment/environment_loader.h>
 #include <dmp/planning/motion/motion_loader.h>
 #include <dmp/shape/distance_query.h>

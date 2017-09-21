@@ -1,48 +1,60 @@
 #include <dmp/robot/robot_joint.h>
-#include <dmp/robot/robot_link.h>
 
 namespace dmp
 {
-RobotJoint::RobotJoint(JointType type) noexcept
-    : type_(type)
+RobotJoint::RobotJoint() noexcept
+    : type_(RobotJoint::Type::Undefined)
 {
 }
 
-RobotJoint::RobotJoint(const std::string& type) noexcept
+RobotJoint::RobotJoint(std::string type) noexcept
+    : type_(getJointType(std::move(type)))
 {
-  if (type == "fixed")
-    type_ = JointType::Fixed;
-  else if (type == "continuous")
-    type_ = JointType::Continuous;
-  else if (type == "revolute")
-    type_ = JointType::Revolute;
-  else if (type == "prismatic")
-    type_ = JointType::Prismatic;
 }
 
-std::string RobotJoint::getJointTypeAsString() const noexcept
+Eigen::Affine3d RobotJoint::getJointTransform(double joint_value) const
 {
   switch (type_)
   {
-    case JointType::Fixed:
-      return "fixed";
-    case JointType::Continuous:
-      return "continuous";
-    case JointType::Revolute:
-      return "revolute";
-    case JointType::Prismatic:
-      return "prismatic";
+    case RobotJoint::Type::Fixed:
+      return origin_;
+    case RobotJoint::Type::Continuous:
+    case RobotJoint::Type::Revolute:
+    {
+      auto transform = origin_;
+      return transform.rotate(Eigen::AngleAxisd(joint_value, axis_));
+    }
+    case RobotJoint::Type::Prismatic:
+    {
+      auto transform = origin_;
+      return transform.translate(joint_value * axis_);
+    }
+    default:
+      return origin_;
   }
 }
 
-void RobotJoint::setParentLink(const std::shared_ptr<RobotLink>& parent) noexcept
+RobotJoint::Type RobotJoint::getJointType(std::string type) noexcept
 {
-  parent_ = parent;
+  if (type == "fixed")
+    return RobotJoint::Type::Fixed;
+  if (type == "continuous")
+    return RobotJoint::Type::Continuous;
+  if (type == "revolute")
+    return RobotJoint::Type::Revolute;
+  if (type == "prismatic")
+    return RobotJoint::Type::Prismatic;
+  return RobotJoint::Type::Undefined;
 }
 
-void RobotJoint::setChildLink(const std::shared_ptr<RobotLink>& child) noexcept
+void RobotJoint::setName(const std::string& name) noexcept
 {
-  child_ = child;
+  name_ = name;
+}
+
+const std::string& RobotJoint::getName() const noexcept
+{
+  return name_;
 }
 
 void RobotJoint::setOrigin(const Eigen::Affine3d& origin) noexcept
@@ -65,52 +77,19 @@ const Eigen::Vector3d& RobotJoint::getAxis() const noexcept
   return axis_;
 }
 
-void RobotJoint::setName(const std::string& name) noexcept
+void RobotJoint::setLimits(double lower, double upper) noexcept
 {
-  name_ = name;
-}
-
-const std::string& RobotJoint::getName() const noexcept
-{
-  return name_;
-}
-
-void RobotJoint::setLimit(double lower, double upper) noexcept
-{
-  limit_.lower = lower;
-  limit_.upper = upper;
+  lower_ = lower;
+  upper_ = upper;
 }
 
 double RobotJoint::getLower() const noexcept
 {
-  return limit_.lower;
+  return lower_;
 }
 
 double RobotJoint::getUpper() const noexcept
 {
-  return limit_.upper;
-}
-
-Eigen::Affine3d RobotJoint::getTransform(double joint_value) const
-{
-  Eigen::Affine3d transform = origin_;
-  switch (type_)
-  {
-    case JointType::Fixed:
-      break;
-    case JointType::Continuous:
-    case JointType::Revolute:
-      transform.rotate(Eigen::AngleAxisd(joint_value, axis_));
-      break;
-    case JointType::Prismatic:
-      transform.translate(joint_value * axis_);
-      break;
-  }
-  return transform;
-}
-
-std::shared_ptr<RobotLink> RobotJoint::getChildLink() const noexcept
-{
-  return child_;
+  return upper_;
 }
 }

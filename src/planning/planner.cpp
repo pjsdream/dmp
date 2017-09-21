@@ -17,6 +17,8 @@
 #include <dmp/rendering/request/request_custom_texture.h>
 #include <dmp/rendering/request/request_custom_mesh.h>
 
+#include <iostream>
+
 namespace dmp
 {
 class Planner::Impl
@@ -38,7 +40,6 @@ private:
   void drawGround();
   void drawRobotModel();
   void drawEnvironment();
-  void renderingTraverse(const std::shared_ptr<RobotLink>& link);
 
   void setRenderer(const std::shared_ptr<Renderer>& renderer);
   void setRobotModel(const std::shared_ptr<RobotModel>& robot_model);
@@ -71,6 +72,8 @@ void Planner::Impl::setRenderer(const std::shared_ptr<Renderer>& renderer)
 void Planner::Impl::setRobotModel(const std::shared_ptr<RobotModel>& robot_model)
 {
   robot_model_ = robot_model;
+
+  // TODO: import bounding volumes
 }
 
 void Planner::Impl::setMotion(const std::shared_ptr<Motion>& motion)
@@ -115,16 +118,49 @@ void Planner::Impl::drawGround()
 
 void Planner::Impl::drawRobotModel()
 {
-  // draw robot model
-  const auto& link = robot_model_->getRoot();
+  auto num_links = robot_model_->numLinks();
 
-  auto frame = std::make_unique<RequestFrame>();
-  frame->action = RequestFrame::Action::Set;
-  frame->name = link->getName();
-  frame->transform = Eigen::Affine3d::Identity();
-  renderer_->sendRequest(std::move(frame));
+  for (int i=0; i<num_links; i++)
+  {
+    const auto& link = robot_model_->getLink(i);
 
-  renderingTraverse(link);
+    // frame
+    // TODO: send requests at once. Currently, it's sending one by one.
+    const std::string frame_name{std::string("model_") + link.getName()};
+    auto frame = std::make_unique<RequestFrame>();
+    frame->action = RequestFrame::Action::Set;
+    frame->name = frame_name;
+    if (i == 0)
+      frame->transform = Eigen::Affine3d::Identity();
+    else
+    {
+      const auto& parent = robot_model_->getParent(i);
+      const auto& parent_link = robot_model_->getLink(parent);
+      const auto& joint = robot_model_->getJoint(i);
+
+      frame->parent = std::string("model_") + parent_link.getName();
+      frame->transform = joint.getJointTransform((joint.getLower() + joint.getUpper()) / 2.);
+    }
+    renderer_->sendRequest(std::move(frame));
+
+    // mesh requests
+    // TODO: send requests at once. Currently, it's sending one by one.
+    for (const auto& visual : link.getVisuals())
+    {
+      auto frame = std::make_unique<RequestFrame>();
+      frame->action = RequestFrame::Action::Set;
+      frame->name = frame_name + "_" + visual.filename;
+      frame->parent = frame_name;
+      frame->transform = visual.transform;
+      renderer_->sendRequest(std::move(frame));
+
+      auto mesh = std::make_unique<RequestMesh>();
+      mesh->action = RequestMesh::Action::Attach;
+      mesh->filename = visual.filename;
+      mesh->frame = frame_name + "_" + visual.filename;
+      renderer_->sendRequest(std::move(mesh));
+    }
+  }
 }
 
 void Planner::Impl::drawEnvironment()
@@ -171,38 +207,6 @@ void Planner::Impl::drawEnvironment()
 
     renderer_->sendRequest(std::move(frame));
     renderer_->sendRequest(std::move(custom_mesh));
-  }
-}
-
-void Planner::Impl::renderingTraverse(const std::shared_ptr<RobotLink>& link)
-{
-  for (const auto& visual : link->getVisuals())
-  {
-    auto frame = std::make_unique<RequestFrame>();
-    frame->action = RequestFrame::Action::Set;
-    frame->name = link->getName() + ":" + visual.filename;
-    frame->parent = link->getName();
-    frame->transform = visual.transform;
-    renderer_->sendRequest(std::move(frame));
-
-    auto req = std::make_unique<RequestMesh>();
-    req->action = RequestMesh::Action::Attach;
-    req->filename = visual.filename;
-    req->frame = link->getName() + ":" + visual.filename;
-    renderer_->sendRequest(std::move(req));
-  }
-
-  for (const auto& joint : link->getChildJoints())
-  {
-    auto frame = std::make_unique<RequestFrame>();
-    frame->action = RequestFrame::Action::Set;
-    frame->name = joint->getChildLink()->getName();
-    frame->parent = link->getName();
-    frame->transform = joint->getTransform(0.);
-
-    renderer_->sendRequest(std::move(frame));
-
-    renderingTraverse(joint->getChildLink());
   }
 }
 
