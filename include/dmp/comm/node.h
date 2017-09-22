@@ -14,6 +14,12 @@ public:
   explicit Node(const std::string& name);
   virtual ~Node() = default;
 
+  Node(const Node& rhs) = delete;
+  Node& operator=(const Node& rhs) = delete;
+
+  Node(Node&& rhs) = delete;
+  Node& operator=(Node&& rhs) = delete;
+
   const std::string& getNodeName();
 
   void print(const char* format, ...);
