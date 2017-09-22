@@ -14,7 +14,8 @@ class Publisher
 public:
   void publish(const T& value)
   {
-    queue_->push(value);
+    if (queue_)
+      queue_->push(value);
   }
 
   // for internal use only

@@ -15,7 +15,9 @@ class Subscriber
 public:
   std::vector<std::unique_ptr<T>> popAll()
   {
-    return queue_->popAll();
+    if (queue_)
+      return queue_->popAll();
+    return std::vector<std::unique_ptr<T>>();
   }
 
   // for internal use only
