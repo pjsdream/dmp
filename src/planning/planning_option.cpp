@@ -35,14 +35,4 @@ std::shared_ptr<Motion> PlanningOption::getMotion() const
 {
   return motion_;
 }
-
-void PlanningOption::setRenderer(const std::shared_ptr<Renderer>& renderer)
-{
-  renderer_ = renderer;
-}
-
-std::shared_ptr<Renderer> PlanningOption::getRenderer() const
-{
-  return renderer_;
-}
 }

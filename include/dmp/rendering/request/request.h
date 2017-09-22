@@ -4,13 +4,15 @@
 #include <string>
 #include <memory>
 
+#include <dmp/comm/message.h>
+
 namespace dmp
 {
-class Request
+class Request : public Message
 {
 public:
   Request() = default;
-  virtual ~Request() = default;
+  virtual ~Request() override = default;
 
   Request(const Request& rhs) = delete;
   Request& operator=(const Request& rhs) = delete;

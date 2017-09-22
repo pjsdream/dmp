@@ -3,6 +3,8 @@
 
 #include <type_traits>
 #include <mutex>
+#include <memory>
+#include <vector>
 
 #include <dmp/comm/message.h>
 

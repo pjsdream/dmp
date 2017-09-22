@@ -6,6 +6,4 @@ RequestFrame::RequestFrame()
     : action(Action::Nothing), transform(Eigen::Affine3d::Identity())
 {
 }
-
-RequestFrame::~RequestFrame() = default;
 }

@@ -14,7 +14,7 @@ class RequestCustomMesh : public Request
 {
 public:
   RequestCustomMesh();
-  ~RequestCustomMesh() override;
+  ~RequestCustomMesh() override = default;
 
   bool hasGlobalColor();
   const Eigen::Vector3f& getGlobalColor();

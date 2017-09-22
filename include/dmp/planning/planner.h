@@ -3,6 +3,9 @@
 
 #include <memory>
 
+#include <dmp/comm/publisher.h>
+#include <dmp/rendering/request/request.h>
+
 namespace dmp
 {
 class PlanningOption;
@@ -20,6 +23,8 @@ public:
   Planner& operator = (Planner&& rhs) = default;
 
   void plan();
+
+  Publisher<Request>& getRendererPublisher();
 
 private:
   class Impl;

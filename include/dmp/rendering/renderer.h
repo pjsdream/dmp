@@ -2,6 +2,8 @@
 #define DMP_RENDERER_H
 
 #include <dmp/rendering/gl_base.h>
+#include <dmp/rendering/request/request.h>
+#include <dmp/comm/subscriber.h>
 
 #include <QOpenGLWidget>
 
@@ -17,8 +19,6 @@ class SceneManager;
 class SceneNode;
 class SceneObject;
 class ResourceManager;
-class RequestManager;
-class Request;
 class LightShader;
 
 class Renderer : public QOpenGLWidget
@@ -35,7 +35,7 @@ public:
   Renderer(Renderer&& rhs) = delete;
   Renderer& operator=(Renderer&& rhs) = delete;
 
-  void sendRequest(std::unique_ptr<Request> request);
+  Subscriber<Request>& getSubscriber();
 
 protected:
   void paintGL() override;

@@ -23,8 +23,6 @@ void RequestCustomMesh::setGlobalColor(const Eigen::Vector3f& global_color)
   global_color_ = global_color;
 }
 
-RequestCustomMesh::~RequestCustomMesh() = default;
-
 void RequestCustomMesh::createCube(Eigen::Vector3d size)
 {
   // make it to halfsize

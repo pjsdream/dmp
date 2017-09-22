@@ -1,6 +1,4 @@
 #include <dmp/rendering/renderer.h>
-#include <dmp/rendering/request/request_manager.h>
-#include <dmp/rendering/request/request.h>
 #include <dmp/rendering/request/request_frame.h>
 #include <dmp/rendering/request/request_mesh.h>
 #include <dmp/rendering/request/request_light.h>
@@ -16,6 +14,8 @@
 #include <dmp/rendering/light/light_manager.h>
 #include <dmp/rendering/light/light.h>
 #include <dmp/utils/texture_loader.h>
+
+#include <dmp/comm/subscriber.h>
 
 #include <QTimer>
 #include <QMouseEvent>
@@ -35,10 +35,10 @@ public:
   void resizeGL(int w, int h);
   void initializeGL(QOpenGLContext* context);
 
-  void sendRequest(std::unique_ptr<Request> request);
-
   void mousePressEvent(QMouseEvent* event);
   void mouseMoveEvent(QMouseEvent* event);
+
+  Subscriber<Request>& getSubscriber();
 
 private:
   void handleRequest(std::unique_ptr<Request> request);
@@ -52,8 +52,9 @@ private:
 
   std::unique_ptr<SceneManager> scene_manager_;
   std::unique_ptr<ResourceManager> resource_manager_;
-  std::unique_ptr<RequestManager> request_manager_;
   std::unique_ptr<LightManager> light_manager_;
+
+  Subscriber<Request> request_subscriber_;
 
   std::unique_ptr<LightShader> light_shader_;
 
@@ -65,6 +66,9 @@ private:
   int last_mouse_y_;
 };
 
+//
+// Renderer
+//
 Renderer::Renderer(QWidget* parent)
     : QOpenGLWidget(parent),
       impl_(std::make_unique<Impl>())
@@ -82,9 +86,9 @@ Renderer::Renderer(QWidget* parent)
 
 Renderer::~Renderer() = default;
 
-void Renderer::sendRequest(std::unique_ptr<Request> request)
+Subscriber<Request>& Renderer::getSubscriber()
 {
-  impl_->sendRequest(std::move(request));
+  return impl_->getSubscriber();
 }
 
 void Renderer::paintGL()
@@ -115,12 +119,19 @@ void Renderer::mouseMoveEvent(QMouseEvent* event)
   update();
 }
 
+//
+// Renderer::Impl
+//
 Renderer::Impl::Impl()
     : camera_(std::make_unique<Camera>()),
       scene_manager_(std::make_unique<SceneManager>()),
-      request_manager_(std::make_unique<RequestManager>()),
       light_manager_(std::make_unique<LightManager>())
 {
+}
+
+Subscriber<Request>& Renderer::Impl::getSubscriber()
+{
+  return request_subscriber_;
 }
 
 void Renderer::Impl::handleRequest(std::unique_ptr<Request> request)
@@ -200,17 +211,12 @@ void Renderer::Impl::handleRequestCustomMesh(std::unique_ptr<RequestCustomMesh> 
   scene_manager_->attachResource(request->frame, mesh);
 }
 
-void Renderer::Impl::sendRequest(std::unique_ptr<Request> request)
-{
-  request_manager_->addRequest(std::move(request));
-}
-
 void Renderer::Impl::paintGL()
 {
   gl_->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // update scene upon requests
-  std::vector<std::unique_ptr<Request>> requests{request_manager_->pullRequests()};
+  std::vector<std::unique_ptr<Request>> requests{request_subscriber_.popAll()};
 
   for (auto&& request : requests)
     handleRequest(std::move(request));

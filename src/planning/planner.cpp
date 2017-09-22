@@ -1,6 +1,5 @@
 #include <dmp/planning/planner.h>
 #include <dmp/planning/planning_option.h>
-#include <dmp/rendering/renderer.h>
 #include <dmp/robot/robot_model.h>
 #include <dmp/robot/robot_link.h>
 #include <dmp/robot/robot_joint.h>
@@ -39,17 +38,19 @@ public:
 
   void plan();
 
+  Publisher<Request>& getRendererPublisher();
+
 private:
   void drawGround();
   void drawRobotModel();
   void drawEnvironment();
 
-  void setRenderer(const std::shared_ptr<Renderer>& renderer);
   void setRobotModel(const std::shared_ptr<RobotModel>& robot_model);
   void setMotion(const std::shared_ptr<Motion>& motion);
   void setEnvironment(const std::shared_ptr<Environment>& environment);
 
-  std::shared_ptr<Renderer> renderer_;
+  Publisher<Request> renderer_publisher_;
+
   std::shared_ptr<RobotModel> robot_model_;
   std::shared_ptr<Environment> environment_;
   std::shared_ptr<Motion> motion_;
@@ -59,19 +60,14 @@ private:
 
 Planner::Impl::Impl(const PlanningOption& option)
 {
-  setRenderer(option.getRenderer());
   setRobotModel(option.getRobotModel());
   setEnvironment(option.getEnvironment());
   setMotion(option.getMotion());
-
-  drawGround();
-  drawRobotModel();
-  drawEnvironment();
 }
 
-void Planner::Impl::setRenderer(const std::shared_ptr<Renderer>& renderer)
+Publisher<Request>& Planner::Impl::getRendererPublisher()
 {
-  renderer_ = renderer;
+  return renderer_publisher_;
 }
 
 void Planner::Impl::setRobotModel(const std::shared_ptr<RobotModel>& robot_model)
@@ -123,6 +119,9 @@ void Planner::Impl::setEnvironment(const std::shared_ptr<Environment>& environme
 
 void Planner::Impl::plan()
 {
+  drawGround();
+  drawRobotModel();
+  drawEnvironment();
 }
 
 void Planner::Impl::drawGround()
@@ -131,14 +130,14 @@ void Planner::Impl::drawGround()
   auto frame = std::make_unique<RequestFrame>();
   frame->name = "ground";
   frame->transform = Eigen::Affine3d::Identity();
-  renderer_->sendRequest(std::move(frame));
+  renderer_publisher_.publish(std::move(frame));
 
   auto custom_texture = std::make_unique<RequestCustomTexture>();
   custom_texture->name = "checkerboard";
   custom_texture->w = 2;
   custom_texture->h = 2;
   custom_texture->image = {192, 192, 192, 255, 255, 255, 255, 255, 255, 255, 255, 255, 192, 192, 192, 255};
-  renderer_->sendRequest(std::move(custom_texture));
+  renderer_publisher_.publish(std::move(custom_texture));
 
   auto custom_mesh = std::make_unique<RequestCustomMesh>();
   custom_mesh->name = "ground";
@@ -148,7 +147,7 @@ void Planner::Impl::drawGround()
   custom_mesh->texture_buffer = {-5, -5, 5, -5, 5, 5, -5, 5};
   custom_mesh->face_buffer = {0, 1, 2, 0, 2, 3};
   custom_mesh->texture_name = "checkerboard";
-  renderer_->sendRequest(std::move(custom_mesh));
+  renderer_publisher_.publish(std::move(custom_mesh));
 }
 
 void Planner::Impl::drawRobotModel()
@@ -176,7 +175,7 @@ void Planner::Impl::drawRobotModel()
       frame->parent = std::string("model_") + parent_link.getName();
       frame->transform = joint.getJointTransform((joint.getLower() + joint.getUpper()) / 2.);
     }
-    renderer_->sendRequest(std::move(frame));
+    renderer_publisher_.publish(std::move(frame));
 
     // mesh requests
     // TODO: send requests at once. Currently, it's sending one by one.
@@ -187,13 +186,13 @@ void Planner::Impl::drawRobotModel()
       frame->name = frame_name + "_" + visual.filename;
       frame->parent = frame_name;
       frame->transform = visual.transform;
-      renderer_->sendRequest(std::move(frame));
+      renderer_publisher_.publish(std::move(frame));
 
       auto mesh = std::make_unique<RequestMesh>();
       mesh->action = RequestMesh::Action::Attach;
       mesh->filename = visual.filename;
       mesh->frame = frame_name + "_" + visual.filename;
-      renderer_->sendRequest(std::move(mesh));
+      renderer_publisher_.publish(std::move(mesh));
     }
 
     // collision mesh requests
@@ -205,13 +204,13 @@ void Planner::Impl::drawRobotModel()
       frame->name = frame_name + "_" + collision.filename;
       frame->parent = frame_name;
       frame->transform = collision.transform;
-      renderer_->sendRequest(std::move(frame));
+      renderer_publisher_.publish(std::move(frame));
 
       auto mesh = std::make_unique<RequestMesh>();
       mesh->action = RequestMesh::Action::Attach;
       mesh->filename = collision.filename;
       mesh->frame = frame_name + "_" + collision.filename;
-      renderer_->sendRequest(std::move(mesh));
+      renderer_publisher_.publish(std::move(mesh));
     }
 
     // TODO: refactoring the code
@@ -226,14 +225,14 @@ void Planner::Impl::drawRobotModel()
       frame->parent = frame_name;
       frame->transform = Eigen::Affine3d::Identity();
       frame->transform.translate((aabb.getMin() + aabb.getMax()) * .5);
-      renderer_->sendRequest(std::move(frame));
+      renderer_publisher_.publish(std::move(frame));
 
       auto custom_mesh = std::make_unique<RequestCustomMesh>();
       custom_mesh->name = "aabb_" + std::to_string(i) + "_" + std::to_string(j);
       custom_mesh->frame = frame_name + "_" + "aabb_" + std::to_string(i) + "_" + std::to_string(j);
       custom_mesh->createCube(aabb.getMax() - aabb.getMin());
       custom_mesh->setGlobalColor(Eigen::Vector3f(0.8f, 0.8f, 0.8f));
-      renderer_->sendRequest(std::move(custom_mesh));
+      renderer_publisher_.publish(std::move(custom_mesh));
     }
   }
 }
@@ -280,8 +279,8 @@ void Planner::Impl::drawEnvironment()
       frame->transform.translate(sphere->getPosition());
     }
 
-    renderer_->sendRequest(std::move(frame));
-    renderer_->sendRequest(std::move(custom_mesh));
+    renderer_publisher_.publish(std::move(frame));
+    renderer_publisher_.publish(std::move(custom_mesh));
   }
 }
 
@@ -298,5 +297,10 @@ Planner::~Planner() = default;
 void Planner::plan()
 {
   impl_->plan();
+}
+
+Publisher<Request>& Planner::getRendererPublisher()
+{
+  return impl_->getRendererPublisher();
 }
 }

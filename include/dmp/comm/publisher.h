@@ -18,6 +18,12 @@ public:
       queue_->push(value);
   }
 
+  void publish(std::unique_ptr<T> value)
+  {
+    if (queue_)
+      queue_->push(std::move(value));
+  }
+
   // for internal use only
   void conntectToQueue(const std::shared_ptr<MessageQueue<T>>& queue)
   {

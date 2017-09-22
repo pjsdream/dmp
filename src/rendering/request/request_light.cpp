@@ -7,8 +7,6 @@ RequestLight::RequestLight()
 {
 }
 
-RequestLight::~RequestLight() = default;
-
 void RequestLight::setLight(int index, Light&& light)
 {
   action_ = Action::Set;

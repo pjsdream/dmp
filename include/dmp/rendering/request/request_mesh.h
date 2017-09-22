@@ -9,7 +9,7 @@ class RequestMesh : public Request
 {
 public:
   RequestMesh();
-  ~RequestMesh() = default;
+  ~RequestMesh() override = default;
 
   enum class Action
   {

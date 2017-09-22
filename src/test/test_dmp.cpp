@@ -15,6 +15,7 @@
 #include <dmp/shape/cube.h>
 #include <dmp/shape/cylinder.h>
 #include <dmp/shape/sphere.h>
+#include <dmp/comm/core.h>
 
 #include <QApplication>
 
@@ -35,6 +36,8 @@ int main(int argc, char** argv)
   format.setProfile(QSurfaceFormat::CoreProfile);
   QSurfaceFormat::setDefaultFormat(format);
 
+  dmp::Core::init(argc, argv);
+
   auto robot_model_loader = dmp::RobotModelLoader{};
   robot_model_loader.setSubstitutePackageDirectory("/playpen/jaesungp/catkin_ws/src/fetch_ros");
   robot_model_loader.load("/playpen/jaesungp/catkin_ws/src/fetch_ros/fetch_description/robots/fetch.urdf");
@@ -49,15 +52,24 @@ int main(int argc, char** argv)
   auto renderer = std::make_shared<dmp::Renderer>();
 
   dmp::PlanningOption option;
-  option.setRenderer(renderer);
   option.setRobotModel(robot_model);
   option.setMotion(motion);
   option.setEnvironment(environment);
 
   auto planner = std::make_shared<dmp::Planner>(option);
+  dmp::Core::connect(planner->getRendererPublisher(), renderer->getSubscriber());
+
   planner->plan();
 
-  auto addLight = [&](int index, auto type, auto position, auto ambient, auto diffuse, auto specular, auto attenuation)
+  dmp::Publisher<dmp::Request> light_publisher;
+  dmp::Core::connect(light_publisher, renderer->getSubscriber());
+  auto addLight = [&light_publisher](int index,
+                                     auto type,
+                                     auto position,
+                                     auto ambient,
+                                     auto diffuse,
+                                     auto specular,
+                                     auto attenuation)
   {
     auto light = dmp::Light{};
     light.type = type;
@@ -70,7 +82,7 @@ int main(int argc, char** argv)
     auto light_req = std::make_unique<dmp::RequestLight>();
     light_req->setLight(index, std::move(light));
 
-    renderer->sendRequest(std::move(light_req));
+    light_publisher.publish(std::move(light_req));
   };
 
   addLight(0,

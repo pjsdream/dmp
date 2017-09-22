@@ -11,7 +11,7 @@ class RequestCustomTexture : public Request
 {
 public:
   RequestCustomTexture();
-  ~RequestCustomTexture() override;
+  ~RequestCustomTexture() override = default;
 
   std::string name;
   unsigned int w;

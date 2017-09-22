@@ -84,8 +84,6 @@ set(DMP_SOURCE_FILES
   include/dmp/rendering/shader/light_shader.h
   include/dmp/rendering/scene/scene_edge.h
   src/rendering/scene/scene_edge.cpp
-  src/rendering/request/request_manager.cpp
-  include/dmp/rendering/request/request_manager.h
   include/dmp/rendering/request/request.h
   src/rendering/request/request.cpp
   include/dmp/json/json.h src/json/json.cpp

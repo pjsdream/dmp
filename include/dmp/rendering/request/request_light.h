@@ -19,7 +19,7 @@ public:
   };
 
   RequestLight();
-  ~RequestLight();
+  ~RequestLight() override = default;
 
   void setLight(int index, Light&& light);
 

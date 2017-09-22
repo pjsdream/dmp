@@ -11,7 +11,7 @@ class RequestFrame : public Request
 {
 public:
   RequestFrame();
-  ~RequestFrame() override;
+  ~RequestFrame() override = default;
 
   enum class Action
   {

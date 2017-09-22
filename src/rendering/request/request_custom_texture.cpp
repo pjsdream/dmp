@@ -6,6 +6,4 @@ RequestCustomTexture::RequestCustomTexture()
     : Request()
 {
 }
-
-RequestCustomTexture::~RequestCustomTexture() = default;
 }

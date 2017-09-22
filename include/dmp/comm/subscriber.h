@@ -15,19 +15,24 @@ class Subscriber
 public:
   std::vector<std::unique_ptr<T>> popAll()
   {
-    if (queue_)
-      return queue_->popAll();
-    return std::vector<std::unique_ptr<T>>();
+    std::vector<std::unique_ptr<T>> result;
+    for (auto& queue : queues_)
+    {
+      auto part = std::move(queue->popAll());
+      for (auto& value : part)
+        result.push_back(std::move(value));
+    }
+    return result;
   }
 
   // for internal use only
   void conntectToQueue(const std::shared_ptr<MessageQueue<T>>& queue)
   {
-    queue_ = queue;
+    queues_.push_back(queue);
   }
 
 private:
-  std::shared_ptr<MessageQueue<T>> queue_;
+  std::vector<std::shared_ptr<MessageQueue<T>>> queues_;
 };
 }
 
