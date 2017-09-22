@@ -11,14 +11,28 @@ namespace dmp
 class AbstractMessageQueue
 {
 public:
+  AbstractMessageQueue() = default;
   virtual ~AbstractMessageQueue() = default;
+
+  AbstractMessageQueue(const AbstractMessageQueue& rhs) = delete;
+  AbstractMessageQueue& operator=(const AbstractMessageQueue& rhs) = delete;
+
+  AbstractMessageQueue(AbstractMessageQueue&& rhs) = delete;
+  AbstractMessageQueue& operator=(AbstractMessageQueue&& rhs) = delete;
 };
 
 template<typename T, typename = typename std::enable_if_t<std::is_base_of<Message, T>::value>>
 class MessageQueue : public AbstractMessageQueue
 {
 public:
-  ~MessageQueue() = default;
+  MessageQueue() = default;
+  ~MessageQueue() override = default;
+
+  MessageQueue(const MessageQueue& rhs) = delete;
+  MessageQueue& operator=(const MessageQueue& rhs) = delete;
+
+  MessageQueue(MessageQueue&& rhs) = delete;
+  MessageQueue& operator=(MessageQueue&& rhs) = delete;
 
   void push(const T& value)
   {

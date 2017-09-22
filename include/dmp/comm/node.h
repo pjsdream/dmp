@@ -12,6 +12,7 @@ class Node
 public:
   Node() = delete;
   explicit Node(const std::string& name);
+  virtual ~Node() = default;
 
   const std::string& getNodeName();
 
