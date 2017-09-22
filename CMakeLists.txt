@@ -165,7 +165,7 @@ set(DMP_SOURCE_FILES
   src/robot/robot_link.cpp
   include/dmp/shape/bounding_volume_factory.h
   src/shape/bounding_volume_factory.cpp
-  )
+  include/dmp/comm/node.h include/dmp/comm/core.h include/dmp/comm/message.h src/comm/core.cpp src/comm/node.cpp src/comm/message.cpp include/dmp/comm/publisher.h include/dmp/comm/subscriber.h include/dmp/comm/message_queue.h)
 
 add_library(dmp ${DMP_SOURCE_FILES})
 target_link_libraries(dmp
@@ -179,3 +179,6 @@ target_link_libraries(dmp
 
 add_executable(test_dmp src/test/test_dmp.cpp)
 target_link_libraries(test_dmp dmp)
+
+add_executable(test_comm src/test/test_comm.cpp)
+target_link_libraries(test_comm dmp)
