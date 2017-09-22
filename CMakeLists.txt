@@ -67,7 +67,6 @@ set(DMP_SOURCE_FILES
   include/dmp/rendering/renderer.h
   include/dmp/rendering/shader/shader.h
   include/dmp/rendering/gl_base.h
-  src/dmp.cpp
   src/rendering/renderer.cpp
   src/rendering/shader/shader.cpp
   src/rendering/gl_base.cpp
@@ -168,7 +167,7 @@ set(DMP_SOURCE_FILES
   src/shape/bounding_volume_factory.cpp
   )
 
-add_executable(dmp ${DMP_SOURCE_FILES})
+add_library(dmp ${DMP_SOURCE_FILES})
 target_link_libraries(dmp
   Threads::Threads
   ${catkin_LIBRARIES}
@@ -177,3 +176,6 @@ target_link_libraries(dmp
   ${Qt5Widgets_LIBRARIES}
   ${Qt5OpenGL_LIBRARIES}
   )
+
+add_executable(test_dmp src/test/test_dmp.cpp)
+target_link_libraries(test_dmp dmp)
