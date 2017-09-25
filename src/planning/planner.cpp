@@ -18,6 +18,7 @@
 #include <dmp/rendering/request/request_custom_mesh.h>
 
 #include <dmp/utils/mesh_loader.h>
+#include <dmp/utils/rate.h>
 
 #include <iostream>
 
@@ -36,9 +37,10 @@ public:
   Impl(Impl&& rhs) = delete;
   Impl& operator=(Impl&& rhs) = delete;
 
-  void plan();
+  void run();
 
   Publisher<Request>& getRendererPublisher();
+  Publisher<Trajectory>& getTrajectoryPublisher();
 
 private:
   void drawGround();
@@ -50,6 +52,7 @@ private:
   void setEnvironment(const std::shared_ptr<Environment>& environment);
 
   Publisher<Request> renderer_publisher_;
+  Publisher<Trajectory> trajectory_publisher_;
 
   std::shared_ptr<RobotModel> robot_model_;
   std::shared_ptr<Environment> environment_;
@@ -63,6 +66,10 @@ Planner::Impl::Impl(const PlanningOption& option)
   setRobotModel(option.getRobotModel());
   setEnvironment(option.getEnvironment());
   setMotion(option.getMotion());
+
+  // drawing environment
+  drawGround();
+  drawEnvironment();
 }
 
 Publisher<Request>& Planner::Impl::getRendererPublisher()
@@ -70,10 +77,52 @@ Publisher<Request>& Planner::Impl::getRendererPublisher()
   return renderer_publisher_;
 }
 
+Publisher<Trajectory>& Planner::Impl::getTrajectoryPublisher()
+{
+  return trajectory_publisher_;
+}
+
+void Planner::Impl::run()
+{
+  using namespace std::chrono_literals;
+
+  const auto& joint_names = motion_->getBodyJoints();
+
+  // 20Hz re-planning
+  Rate rate(20);
+
+  for (int i = 0; i < 20 * 100; i++)
+  {
+    // generate a random trajectory
+    Trajectory trajectory(joint_names);
+
+    for (int j = 0; j < 30; j++)
+    {
+      const double t = j * 0.1;
+
+      Eigen::VectorXd joint_positions(joint_names.size());
+      for (int k = 0; k < joint_names.size(); k++)
+      {
+        const auto& joint = robot_model_->getJoint(joint_names[k]);
+        joint_positions(k) = (std::rand() / 2147483647.) * (joint.getUpper() - joint.getLower()) + joint.getLower();
+      }
+
+      TrajectoryPoint point(t, joint_positions);
+      trajectory.addPoint(point);
+    }
+
+    trajectory_publisher_.publish(std::move(trajectory));
+
+    // running at 20Hz
+    rate.sleep();
+  }
+}
+
 void Planner::Impl::setRobotModel(const std::shared_ptr<RobotModel>& robot_model)
 {
   robot_model_ = robot_model;
 
+  // constructing bounding volumes
   const auto num_links = robot_model_->numLinks();
   for (int i = 0; i < num_links; i++)
   {
@@ -115,13 +164,6 @@ void Planner::Impl::setMotion(const std::shared_ptr<Motion>& motion)
 void Planner::Impl::setEnvironment(const std::shared_ptr<Environment>& environment)
 {
   environment_ = environment;
-}
-
-void Planner::Impl::plan()
-{
-  drawGround();
-  drawRobotModel();
-  drawEnvironment();
 }
 
 void Planner::Impl::drawGround()
@@ -288,19 +330,24 @@ void Planner::Impl::drawEnvironment()
 // Planner to pImpl
 //
 Planner::Planner(const PlanningOption& option)
-    : impl_(std::make_unique<Impl>(option))
+    : Node("planner"), impl_(std::make_unique<Impl>(option))
 {
 }
 
 Planner::~Planner() = default;
 
-void Planner::plan()
-{
-  impl_->plan();
-}
-
 Publisher<Request>& Planner::getRendererPublisher()
 {
   return impl_->getRendererPublisher();
+}
+
+Publisher<Trajectory>& Planner::getTrajectoryPublisher()
+{
+  return impl_->getTrajectoryPublisher();
+}
+
+void Planner::run()
+{
+  impl_->run();
 }
 }

@@ -1,4 +1,3 @@
-#include <dmp/comm/core.h>
 #include <dmp/comm/node.h>
 #include <dmp/comm/message.h>
 #include <dmp/comm/publisher.h>
@@ -85,16 +84,11 @@ int main(int argc, char** argv)
   setbuf(stdin, NULL);
   setbuf(stdout, NULL);
 
-  dmp::Core::init(argc, argv);
-
   auto node1 = std::make_shared<Node1>("node1");
   auto node2 = std::make_shared<Node2>("node2");
 
-  dmp::Core::addNode(node1);
-  dmp::Core::addNode(node2);
+  // TODO: connect publisher and subscriber
 
-  dmp::Core::connect(node1->getPublisher(), node2->getSubscriber());
-
-  dmp::Core::run();
+  // TODO: run threads
   return 0;
 }

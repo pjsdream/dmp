@@ -2,6 +2,7 @@
 #define DMP_ROBOT_MODEL_H
 
 #include <memory>
+#include <unordered_map>
 #include <Eigen/Dense>
 #include <dmp/utils/vector_eigen.h>
 #include <Eigen/StdVector>
@@ -27,10 +28,12 @@ public:
   RobotModel& operator=(RobotModel&& rhs) = default;
 
   int numLinks() const noexcept;
+  int numJoints() const noexcept;
   std::vector<std::string> getJointNames() const;
 
   const RobotLink& getLink(int index) const noexcept;
   const RobotJoint& getJoint(int index) const noexcept; // index corresponds to index of link
+  const RobotJoint& getJoint(const std::string& joint_name) const noexcept;
   int getParent(int index) const noexcept;
 
   VectorEigen<Eigen::Affine3d> forwardKinematics(const std::vector<double>& joint_values) const;
@@ -41,6 +44,8 @@ private:
   std::vector<int> parents_;
   std::vector<RobotLink> links_;
   std::vector<RobotJoint> joints_;
+
+  std::unordered_map<std::string, int> joint_name_to_index_;
 };
 }
 

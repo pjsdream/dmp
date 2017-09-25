@@ -144,10 +144,10 @@ set(DMP_SOURCE_FILES
   src/planning/motion/motion_loader.cpp
   src/planning/motion/motion.cpp
   include/dmp/planning/motion/motion.h
-  include/dmp/planning/trajectory/trajectory.h
-  include/dmp/planning/trajectory/trajectory_point.h
-  src/planning/trajectory/trajectory.cpp
-  src/planning/trajectory/trajectory_point.cpp
+  include/dmp/trajectory/trajectory.h
+  include/dmp/trajectory/trajectory_point.h
+  src/trajectory/trajectory.cpp
+  src/trajectory/trajectory_point.cpp
   include/dmp/planning/planning_option.h
   src/planning/planning_option.cpp
   include/dmp/shape/distance_query.h
@@ -163,7 +163,7 @@ set(DMP_SOURCE_FILES
   src/robot/robot_link.cpp
   include/dmp/shape/bounding_volume_factory.h
   src/shape/bounding_volume_factory.cpp
-  include/dmp/comm/node.h include/dmp/comm/core.h include/dmp/comm/message.h src/comm/core.cpp src/comm/node.cpp src/comm/message.cpp include/dmp/comm/publisher.h include/dmp/comm/subscriber.h include/dmp/comm/message_queue.h)
+  include/dmp/comm/node.h include/dmp/comm/message.h src/comm/node.cpp src/comm/message.cpp include/dmp/comm/publisher.h include/dmp/comm/subscriber.h include/dmp/comm/message_queue.h include/dmp/controlling/controller.h include/dmp/controlling/controller_option.h src/controlling/controller.cpp src/controlling/controller_option.cpp include/dmp/utils/rate.h src/utils/rate.cpp)
 
 add_library(dmp ${DMP_SOURCE_FILES})
 target_link_libraries(dmp

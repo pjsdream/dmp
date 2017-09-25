@@ -5,6 +5,7 @@
 #include <memory>
 
 #include <dmp/comm/message.h>
+#include <dmp/comm/publisher.h>
 #include <dmp/comm/message_queue.h>
 
 namespace dmp
@@ -25,10 +26,9 @@ public:
     return result;
   }
 
-  // for internal use only
-  void conntectToQueue(const std::shared_ptr<MessageQueue<T>>& queue)
+  void subscribeFrom(const Publisher<T>& publisher)
   {
-    queues_.push_back(queue);
+    queues_.push_back(publisher.getQueue());
   }
 
 private:

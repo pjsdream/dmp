@@ -1,12 +1,11 @@
 #include <dmp/comm/node.h>
-#include <dmp/comm/core.h>
-#include <stdarg.h>
+#include <cstdarg>
 
 namespace dmp
 {
 Node::Node(const std::string& name)
 {
-  name_ = dmp::Core::assignNodeName(name);
+  name_ = name;
 }
 
 const std::string& Node::getNodeName()

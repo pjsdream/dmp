@@ -3,28 +3,33 @@
 
 #include <memory>
 
+#include <dmp/comm/node.h>
 #include <dmp/comm/publisher.h>
 #include <dmp/rendering/request/request.h>
+#include <dmp/trajectory/trajectory.h>
 
 namespace dmp
 {
 class PlanningOption;
-class Planner
+
+class Planner : public Node
 {
 public:
   Planner() = delete;
   explicit Planner(const PlanningOption& option);
-  ~Planner();
+  ~Planner() override;
 
   Planner(const Planner& rhs) = delete;
   Planner& operator = (const Planner& rhs) = delete;
 
-  Planner(Planner&& rhs) = default;
-  Planner& operator = (Planner&& rhs) = default;
-
-  void plan();
+  Planner(Planner&& rhs) = delete;
+  Planner& operator = (Planner&& rhs) = delete;
 
   Publisher<Request>& getRendererPublisher();
+  Publisher<Trajectory>& getTrajectoryPublisher();
+
+protected:
+  void run() override;
 
 private:
   class Impl;

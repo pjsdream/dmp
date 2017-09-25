@@ -27,7 +27,7 @@ void RobotModel::buildFromRobotModel(const std::shared_ptr<TreeRobotLink>& model
 
   links_.push_back(std::move(link));
   parents_.push_back(parent_link_id);
-  auto link_id = links_.size() - 1;
+  auto link_id = static_cast<int>(links_.size() - 1);
 
   // for root node, add a dummy joint (undefined joint)
   if (link_id == 0)
@@ -44,6 +44,7 @@ void RobotModel::buildFromRobotModel(const std::shared_ptr<TreeRobotLink>& model
     joint.setLimits(model_child_joint->getLower(), model_child_joint->getUpper());
 
     joints_.push_back(std::move(joint));
+    joint_name_to_index_[model_child_joint->getName()] = static_cast<int>(joints_.size() - 1);
 
     buildFromRobotModel(model_child_joint->getChildLink(), link_id);
   }
@@ -51,7 +52,12 @@ void RobotModel::buildFromRobotModel(const std::shared_ptr<TreeRobotLink>& model
 
 int RobotModel::numLinks() const noexcept
 {
-  return links_.size();
+  return static_cast<int>(links_.size());
+}
+
+int RobotModel::numJoints() const noexcept
+{
+  return numLinks() - 1;
 }
 
 std::vector<std::string> RobotModel::getJointNames() const
@@ -93,6 +99,11 @@ const RobotLink& RobotModel::getLink(int index) const noexcept
 const RobotJoint& RobotModel::getJoint(int index) const noexcept
 {
   return joints_[index];
+}
+
+const RobotJoint& RobotModel::getJoint(const std::string& joint_name) const noexcept
+{
+  return joints_[joint_name_to_index_.find(joint_name)->second];
 }
 
 int RobotModel::getParent(int index) const noexcept

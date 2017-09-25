@@ -1,7 +1,6 @@
 #include <dmp/rendering/renderer.h>
 #include <dmp/rendering/scene/scene_node.h>
 #include <dmp/json/json.h>
-#include <dmp/rendering/request/request.h>
 #include <dmp/rendering/request/request_frame.h>
 #include <dmp/rendering/request/request_mesh.h>
 #include <dmp/rendering/request/request_light.h>
@@ -15,7 +14,8 @@
 #include <dmp/shape/cube.h>
 #include <dmp/shape/cylinder.h>
 #include <dmp/shape/sphere.h>
-#include <dmp/comm/core.h>
+#include <dmp/controlling/controller_option.h>
+#include <dmp/controlling/controller.h>
 
 #include <QApplication>
 
@@ -36,33 +36,39 @@ int main(int argc, char** argv)
   format.setProfile(QSurfaceFormat::CoreProfile);
   QSurfaceFormat::setDefaultFormat(format);
 
-  dmp::Core::init(argc, argv);
-
+  // robot model
   auto robot_model_loader = dmp::RobotModelLoader{};
   robot_model_loader.setSubstitutePackageDirectory("/playpen/jaesungp/catkin_ws/src/fetch_ros");
   robot_model_loader.load("/playpen/jaesungp/catkin_ws/src/fetch_ros/fetch_description/robots/fetch.urdf");
   auto robot_model = robot_model_loader.getRobotModel();
 
+  // environment
   dmp::EnvironmentLoader environment_loader;
   auto environment = environment_loader.loadEnvironment("/playpen/jaesungp/cpp_workspace/dmp/config/environment.json");
 
+  // motion
   dmp::MotionLoader motion_loader;
   auto motion = motion_loader.load("/playpen/jaesungp/cpp_workspace/dmp/config/motion.json");
 
+  // planner
+  dmp::PlanningOption planning_option;
+  planning_option.setRobotModel(robot_model);
+  planning_option.setMotion(motion);
+  planning_option.setEnvironment(environment);
+
+  auto planner = std::make_shared<dmp::Planner>(planning_option);
+
+  // controller
+  dmp::ControllerOption controller_option;
+  controller_option.setRobotModel(robot_model);
+  controller_option.setMotion(motion);
+
+  auto controller = std::make_shared<dmp::Controller>(controller_option);
+
+  // renderer
   auto renderer = std::make_shared<dmp::Renderer>();
 
-  dmp::PlanningOption option;
-  option.setRobotModel(robot_model);
-  option.setMotion(motion);
-  option.setEnvironment(environment);
-
-  auto planner = std::make_shared<dmp::Planner>(option);
-  dmp::Core::connect(planner->getRendererPublisher(), renderer->getSubscriber());
-
-  planner->plan();
-
   dmp::Publisher<dmp::Request> light_publisher;
-  dmp::Core::connect(light_publisher, renderer->getSubscriber());
   auto addLight = [&light_publisher](int index,
                                      auto type,
                                      auto position,
@@ -124,6 +130,17 @@ int main(int argc, char** argv)
            Eigen::Vector3f(0.25f, 0.25f, 0.25f),
            Eigen::Vector3f(0.15f, 0.15f, 0.15f),
            Eigen::Vector3f(1.f, 0.07f, 0.017f));
+
+  // setup communication
+  renderer->getSubscriber().subscribeFrom(planner->getRendererPublisher());
+  renderer->getSubscriber().subscribeFrom(light_publisher);
+  renderer->getSubscriber().subscribeFrom(controller->getRendererPublisher());
+
+  controller->getTrajectorySubscriber().subscribeFrom(planner->getTrajectoryPublisher());
+
+  // run threads
+  planner->runThread();
+  controller->runThread();
 
   app.exec();
   return 0;

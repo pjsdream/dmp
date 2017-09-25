@@ -7,6 +7,11 @@ void Motion::setNavigationJoints(const std::vector<std::string>& navigation_join
   navigation_joints_ = navigation_joints;
 }
 
+const std::vector<std::string>& Motion::getBodyJoints()
+{
+  return body_joints_;
+}
+
 void Motion::setBodyJoints(const std::vector<std::string>& body_joints)
 {
   body_joints_ = body_joints;

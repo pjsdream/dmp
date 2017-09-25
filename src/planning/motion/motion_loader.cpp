@@ -16,12 +16,12 @@ std::shared_ptr<Motion> MotionLoader::load(const std::string& filename)
     navigation_joints_.push_back(joint.toString());
 
   auto body = json["body"];
-  auto& body_joints = navigation["joints"].toArray();
+  auto& body_joints = body["joints"].toArray();
   for (auto joint : body_joints)
     body_joints_.push_back(joint.toString());
 
   auto gripper = json["gripper"];
-  auto& gripper_joints = navigation["joints"].toArray();
+  auto& gripper_joints = gripper["joints"].toArray();
   for (auto joint : gripper_joints)
     gripper_joints_.push_back(joint.toString());
 

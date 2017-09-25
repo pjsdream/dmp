@@ -12,26 +12,32 @@ template<typename T, typename = typename std::enable_if_t<std::is_base_of<Messag
 class Publisher
 {
 public:
+  Publisher()
+  {
+    queue_ = std::make_shared<MessageQueue<T>>();
+  }
+
+  const std::shared_ptr<MessageQueue<T>>& getQueue() const
+  {
+    return queue_;
+  }
+
   void publish(const T& value)
   {
-    if (queue_)
-      queue_->push(value);
+    queue_->push(value);
+  }
+
+  void publish(T&& value)
+  {
+    queue_->push(std::move(value));
   }
 
   void publish(std::unique_ptr<T> value)
   {
-    if (queue_)
-      queue_->push(std::move(value));
-  }
-
-  // for internal use only
-  void conntectToQueue(const std::shared_ptr<MessageQueue<T>>& queue)
-  {
-    queue_ = queue;
+    queue_->push(std::move(value));
   }
 
 private:
-  // Core class should manage the queue so that the reference won't dangle
   std::shared_ptr<MessageQueue<T>> queue_;
 };
 }

@@ -237,11 +237,11 @@ void Renderer::Impl::paintGL()
 
   // rendering
   const Eigen::Vector3f default_color(0.8f, 0.8f, 0.8f);
-  for (auto node : nodes)
+  for (const auto& node : nodes)
   {
     light_shader_->loadModel(node->getTransform());
-    auto resources = node->getAttachedResources();
-    for (auto resource : resources)
+    const auto& resources = node->getAttachedResources();
+    for (const auto& resource : resources)
     {
       auto mesh = std::dynamic_pointer_cast<ResourceMesh>(resource);
 
