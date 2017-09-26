@@ -14,6 +14,13 @@ void Rate::reset() noexcept
   count_ = 0;
 }
 
+double Rate::remainingTime()
+{
+  double wait_until = (count_ + 1) * duration_;
+  std::chrono::duration<double> diff = std::chrono::high_resolution_clock::now() - start_time_;
+  return wait_until - diff.count();
+}
+
 void Rate::sleep()
 {
   count_++;

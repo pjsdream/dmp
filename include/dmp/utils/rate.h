@@ -13,6 +13,8 @@ public:
 
   void reset() noexcept;
 
+  double remainingTime();
+
   void sleep();
 
 private:
