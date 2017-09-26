@@ -138,6 +138,8 @@ int main(int argc, char** argv)
 
   controller->getTrajectorySubscriber().subscribeFrom(planner->getTrajectoryPublisher());
 
+  planner->getRobotStateSubscriber().subscribeFrom(controller->getRobotStatePublisher());
+
   // run threads
   planner->runThread();
   controller->runThread();

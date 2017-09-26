@@ -25,6 +25,11 @@ Publisher<Request>& Controller::getRendererPublisher()
   return renderer_publisher_;
 }
 
+Publisher<RobotState>& Controller::getRobotStatePublisher()
+{
+  return robot_state_publisher_;
+}
+
 void Controller::drawRobot(const Eigen::VectorXd& joint_values)
 {
   auto num_links = robot_model_->numLinks();

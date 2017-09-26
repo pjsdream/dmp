@@ -6,6 +6,7 @@
 #include <dmp/comm/subscriber.h>
 #include <dmp/rendering/request/request.h>
 #include <dmp/trajectory/trajectory.h>
+#include <dmp/robot/robot_state.h>
 
 namespace dmp
 {
@@ -20,6 +21,7 @@ public:
 
   Subscriber<Trajectory>& getTrajectorySubscriber();
   Publisher<Request>& getRendererPublisher();
+  Publisher<RobotState>& getRobotStatePublisher();
 
 protected:
   void run() override;
@@ -29,6 +31,7 @@ private:
 
   Subscriber<Trajectory> trajectory_subscriber_;
   Publisher<Request> renderer_publisher_;
+  Publisher<RobotState> robot_state_publisher_;
 
   std::shared_ptr<RobotModel> robot_model_;
 };

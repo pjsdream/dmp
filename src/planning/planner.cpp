@@ -24,44 +24,8 @@
 
 namespace dmp
 {
-class Planner::Impl
-{
-public:
-  Impl() = delete;
-  explicit Impl(const PlanningOption& option);
-  ~Impl() = default;
-
-  Impl(const Impl& rhs) = delete;
-  Impl& operator=(const Impl& rhs) = delete;
-
-  Impl(Impl&& rhs) = delete;
-  Impl& operator=(Impl&& rhs) = delete;
-
-  void run();
-
-  Publisher<Request>& getRendererPublisher();
-  Publisher<Trajectory>& getTrajectoryPublisher();
-
-private:
-  void drawGround();
-  void drawRobotModel();
-  void drawEnvironment();
-
-  void setRobotModel(const std::shared_ptr<RobotModel>& robot_model);
-  void setMotion(const std::shared_ptr<Motion>& motion);
-  void setEnvironment(const std::shared_ptr<Environment>& environment);
-
-  Publisher<Request> renderer_publisher_;
-  Publisher<Trajectory> trajectory_publisher_;
-
-  std::shared_ptr<RobotModel> robot_model_;
-  std::shared_ptr<Environment> environment_;
-  std::shared_ptr<Motion> motion_;
-
-  std::vector<std::vector<std::shared_ptr<Shape>>> bounding_volumes_;
-};
-
-Planner::Impl::Impl(const PlanningOption& option)
+Planner::Planner(const PlanningOption& option)
+    : Node("planner")
 {
   setRobotModel(option.getRobotModel());
   setEnvironment(option.getEnvironment());
@@ -72,17 +36,24 @@ Planner::Impl::Impl(const PlanningOption& option)
   drawEnvironment();
 }
 
-Publisher<Request>& Planner::Impl::getRendererPublisher()
+Planner::~Planner() = default;
+
+Subscriber<RobotState>& Planner::getRobotStateSubscriber()
+{
+  return robot_state_subscriber_;
+}
+
+Publisher<Request>& Planner::getRendererPublisher()
 {
   return renderer_publisher_;
 }
 
-Publisher<Trajectory>& Planner::Impl::getTrajectoryPublisher()
+Publisher<Trajectory>& Planner::getTrajectoryPublisher()
 {
   return trajectory_publisher_;
 }
 
-void Planner::Impl::run()
+void Planner::run()
 {
   using namespace std::chrono_literals;
 
@@ -91,9 +62,13 @@ void Planner::Impl::run()
   // 20Hz re-planning
   Rate rate(20);
 
-  for (int i = 0; i < 20 * 100; i++)
+  while (!stopRequested())
   {
-    // generate a random trajectory
+    // Assume that the previous planning step has been done in time.
+
+    // TODO
+    // Send the first part of the trajectory to the controller.
+    // Temporarily, generate a random trajectory and send to the controller.
     Trajectory trajectory(joint_names);
 
     for (int j = 0; j < 30; j++)
@@ -113,12 +88,24 @@ void Planner::Impl::run()
 
     trajectory_publisher_.publish(std::move(trajectory));
 
+    // TODO
+    // Step forward the trajectory by timestep, finding the best fitting of spline trajectory.
+
+    // TODO
+    // Receive the current robot state.
+    // If it is given, then change the initial position and velocity of the new trajectory to the current robot state.
+    // Otherwise, the initial position and velocity of the new trajectory should match with ones of the original
+    // trajectory.
+
+    // TODO
+    // Draw the current motion plan in the renderer.
+
     // running at 20Hz
     rate.sleep();
   }
 }
 
-void Planner::Impl::setRobotModel(const std::shared_ptr<RobotModel>& robot_model)
+void Planner::setRobotModel(const std::shared_ptr<RobotModel>& robot_model)
 {
   robot_model_ = robot_model;
 
@@ -156,17 +143,17 @@ void Planner::Impl::setRobotModel(const std::shared_ptr<RobotModel>& robot_model
   }
 }
 
-void Planner::Impl::setMotion(const std::shared_ptr<Motion>& motion)
+void Planner::setMotion(const std::shared_ptr<Motion>& motion)
 {
   motion_ = motion;
 }
 
-void Planner::Impl::setEnvironment(const std::shared_ptr<Environment>& environment)
+void Planner::setEnvironment(const std::shared_ptr<Environment>& environment)
 {
   environment_ = environment;
 }
 
-void Planner::Impl::drawGround()
+void Planner::drawGround()
 {
   // draw ground
   auto frame = std::make_unique<RequestFrame>();
@@ -192,7 +179,7 @@ void Planner::Impl::drawGround()
   renderer_publisher_.publish(std::move(custom_mesh));
 }
 
-void Planner::Impl::drawRobotModel()
+void Planner::drawRobotModel()
 {
   auto num_links = robot_model_->numLinks();
 
@@ -279,7 +266,7 @@ void Planner::Impl::drawRobotModel()
   }
 }
 
-void Planner::Impl::drawEnvironment()
+void Planner::drawEnvironment()
 {
   // drawing environment
   const auto& objects = environment_->getObjects();
@@ -324,30 +311,5 @@ void Planner::Impl::drawEnvironment()
     renderer_publisher_.publish(std::move(frame));
     renderer_publisher_.publish(std::move(custom_mesh));
   }
-}
-
-//
-// Planner to pImpl
-//
-Planner::Planner(const PlanningOption& option)
-    : Node("planner"), impl_(std::make_unique<Impl>(option))
-{
-}
-
-Planner::~Planner() = default;
-
-Publisher<Request>& Planner::getRendererPublisher()
-{
-  return impl_->getRendererPublisher();
-}
-
-Publisher<Trajectory>& Planner::getTrajectoryPublisher()
-{
-  return impl_->getTrajectoryPublisher();
-}
-
-void Planner::run()
-{
-  impl_->run();
 }
 }

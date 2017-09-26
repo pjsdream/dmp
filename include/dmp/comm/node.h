@@ -2,6 +2,7 @@
 #define DMP_NODE_H
 
 #include <thread>
+#include <atomic>
 
 #include <dmp/comm/message.h>
 
@@ -31,10 +32,13 @@ public:
 protected:
   virtual void run();
 
+  bool stopRequested();
+
 private:
   std::string name_;
 
   std::thread thread_;
+  std::atomic_bool stop_requested_;
 };
 }
 

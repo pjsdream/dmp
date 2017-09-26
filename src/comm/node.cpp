@@ -4,6 +4,7 @@
 namespace dmp
 {
 Node::Node(const std::string& name)
+    : stop_requested_(false)
 {
   name_ = name;
 }
@@ -39,5 +40,10 @@ void Node::joinThread()
 void Node::run()
 {
   printf("Node::run() should not be running\n");
+}
+
+bool Node::stopRequested()
+{
+  return stop_requested_;
 }
 }
