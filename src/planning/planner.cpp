@@ -77,7 +77,7 @@ void Planner::run()
     // Assume that the previous planning step has been done in time.
 
     // Send the whole trajectory to the controller. The controller will overwrite the previously passed trajectory with
-    // the new one.
+    // the new one. Takes less than 0.1 ms.
     constexpr auto trajectory_discretization = 30;
     Trajectory trajectory(body_joint_names);
 
@@ -103,17 +103,20 @@ void Planner::run()
     trajectory_publisher_.publish(std::move(trajectory));
 
     // Receive the current robot state. Step forward the trajectory by timestep, finding the best fitting of spline
-    // trajectory.
+    // trajectory. Take about 2 ms.
+    /*
     auto robot_state_requests = robot_state_subscriber_.popAll();
     std::unique_ptr<RobotState> robot_state_request;
     if (!robot_state_requests.empty())
       robot_state_request = std::move(*robot_state_requests.rbegin());
 
     stepForwardTrajectory(rate.duration(), std::move(robot_state_request));
+     */
 
     // TODO
     // Optimize the trajectory within the time limit
     // For testing the controller, increasing the joint splines
+    print("remaining planning time: %lf ms\n", rate.remainingTime() * 1000.);
     for (int i = 0; i < body_joint_names.size(); i++)
     {
       auto& spline = trajectory_->getSpline(body_joint_names[i]);
