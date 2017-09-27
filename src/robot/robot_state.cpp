@@ -2,9 +2,12 @@
 
 namespace dmp
 {
-RobotState::RobotState(const std::vector<std::string>& joint_names) noexcept
+RobotState::RobotState(const std::vector<std::string>& joint_names)
     : joint_names_(joint_names)
 {
+  positions_.resize(joint_names.size(), 0.);
+  velocities_.resize(joint_names.size(), 0.);
+
   for (int i=0; i<joint_names.size(); i++)
     joint_name_to_index_[joint_names[i]] = i;
 }

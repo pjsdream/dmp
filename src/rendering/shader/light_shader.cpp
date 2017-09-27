@@ -3,6 +3,7 @@
 #include <dmp/rendering/light/light.h>
 #include <dmp/rendering/material/material.h>
 #include <dmp/rendering/resource/resource_texture.h>
+#include <dmp/common.h>
 
 namespace dmp
 {
@@ -10,7 +11,6 @@ LightShader::LightShader(const std::shared_ptr<GlFunctions>& gl)
     : Shader(gl)
 {
   // TODO: define PROJECT_SOURCE_DIR in a common header file
-  const static std::string PROJECT_SOURCE_DIR = "/playpen/jaesungp/cpp_workspace/dmp";
   loadShader(PROJECT_SOURCE_DIR + "/shader/light.vert", ShaderType::Vertex);
   loadShader(PROJECT_SOURCE_DIR + "/shader/light.frag", ShaderType::Fragment);
 

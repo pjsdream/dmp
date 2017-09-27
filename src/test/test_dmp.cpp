@@ -16,6 +16,7 @@
 #include <dmp/shape/sphere.h>
 #include <dmp/controlling/controller_option.h>
 #include <dmp/controlling/controller.h>
+#include <dmp/common.h>
 
 #include <QApplication>
 
@@ -38,17 +39,17 @@ int main(int argc, char** argv)
 
   // robot model
   auto robot_model_loader = dmp::RobotModelLoader{};
-  robot_model_loader.setSubstitutePackageDirectory("/playpen/jaesungp/catkin_ws/src/fetch_ros");
-  robot_model_loader.load("/playpen/jaesungp/catkin_ws/src/fetch_ros/fetch_description/robots/fetch.urdf");
+  robot_model_loader.setSubstitutePackageDirectory(dmp::PROJECT_SOURCE_DIR + "/../../catkin_ws/src/fetch_ros");
+  robot_model_loader.load(dmp::PROJECT_SOURCE_DIR + "/../../catkin_ws/src/fetch_ros/fetch_description/robots/fetch.urdf");
   auto robot_model = robot_model_loader.getRobotModel();
 
   // environment
   dmp::EnvironmentLoader environment_loader;
-  auto environment = environment_loader.loadEnvironment("/playpen/jaesungp/cpp_workspace/dmp/config/environment.json");
+  auto environment = environment_loader.loadEnvironment(dmp::PROJECT_SOURCE_DIR + "/config/environment.json");
 
   // motion
   dmp::MotionLoader motion_loader;
-  auto motion = motion_loader.load("/playpen/jaesungp/cpp_workspace/dmp/config/motion.json");
+  auto motion = motion_loader.load(dmp::PROJECT_SOURCE_DIR + "/config/motion.json");
 
   // planner
   dmp::PlanningOption planning_option;
