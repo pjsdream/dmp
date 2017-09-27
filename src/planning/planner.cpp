@@ -11,6 +11,8 @@
 #include <dmp/shape/cylinder.h>
 #include <dmp/shape/sphere.h>
 #include <dmp/shape/bounding_volume_factory.h>
+#include <dmp/trajectory/cubic_spline_trajectory.h>
+#include <dmp/trajectory/cubic_spline.h>
 
 #include <dmp/rendering/request/request_frame.h>
 #include <dmp/rendering/request/request_mesh.h>
@@ -30,6 +32,15 @@ Planner::Planner(const PlanningOption& option)
   setRobotModel(option.getRobotModel());
   setEnvironment(option.getEnvironment());
   setMotion(option.getMotion());
+
+  trajectory_duration_ = option.getTrajectoryDuration();
+  trajectory_num_curves_ = option.numTrajectoryCurves();
+  timestep_ = option.getTimestep();
+
+  // initialize trajectory
+  // TODO: change the joint names. For now, use the body joints only
+  trajectory_ =
+      std::make_unique<CubicSplineTrajectory>(motion_->getBodyJoints(), trajectory_duration_, trajectory_num_curves_);
 
   // drawing environment
   drawGround();
@@ -57,29 +68,32 @@ void Planner::run()
 {
   using namespace std::chrono_literals;
 
-  const auto& joint_names = motion_->getBodyJoints();
+  const auto& body_joint_names = motion_->getBodyJoints();
 
-  // 20Hz re-planning
-  Rate rate(20);
+  auto rate = Rate::withDuration(timestep_);
 
   while (!stopRequested())
   {
     // Assume that the previous planning step has been done in time.
 
-    // TODO
-    // Send the first part of the trajectory to the controller.
-    // Temporarily, generate a random trajectory and send to the controller.
-    Trajectory trajectory(joint_names);
+    // Send the whole trajectory to the controller. The controller will overwrite the previously passed trajectory with
+    // the new one.
+    constexpr auto trajectory_discretization = 30;
+    Trajectory trajectory(body_joint_names);
 
-    for (int j = 0; j < 30; j++)
+    for (int i = 0; i < trajectory_discretization; i++)
     {
-      const double t = j * 0.1;
+      const auto t = i * trajectory_duration_ / trajectory_discretization;
 
-      Eigen::VectorXd joint_positions(joint_names.size());
-      for (int k = 0; k < joint_names.size(); k++)
+      Eigen::VectorXd joint_positions(body_joint_names.size());
+      for (int j = 0; j < body_joint_names.size(); j++)
       {
-        const auto& joint = robot_model_->getJoint(joint_names[k]);
-        joint_positions(k) = (std::rand() / 2147483647.) * (joint.getUpper() - joint.getLower()) + joint.getLower();
+        /*
+        const auto& joint = robot_model_->getJoint(body_joint_names[j]);
+        joint_positions(j) = (std::rand() / 2147483647.) * (joint.getUpper() - joint.getLower()) + joint.getLower();
+         */
+        const auto& spline = trajectory_->getSpline(body_joint_names[j]);
+        joint_positions(j) = spline.position(t);
       }
 
       TrajectoryPoint point(t, joint_positions);
@@ -88,20 +102,86 @@ void Planner::run()
 
     trajectory_publisher_.publish(std::move(trajectory));
 
-    // TODO
-    // Step forward the trajectory by timestep, finding the best fitting of spline trajectory.
+    // Receive the current robot state. Step forward the trajectory by timestep, finding the best fitting of spline
+    // trajectory.
+    auto robot_state_requests = robot_state_subscriber_.popAll();
+    std::unique_ptr<RobotState> robot_state_request;
+    if (!robot_state_requests.empty())
+      robot_state_request = std::move(*robot_state_requests.rbegin());
+
+    stepForwardTrajectory(rate.duration(), std::move(robot_state_request));
 
     // TODO
-    // Receive the current robot state.
-    // If it is given, then change the initial position and velocity of the new trajectory to the current robot state.
-    // Otherwise, the initial position and velocity of the new trajectory should match with ones of the original
-    // trajectory.
+    // Optimize the trajectory within the time limit
+    // For testing the controller, increasing the joint splines
+    for (int i = 0; i < body_joint_names.size(); i++)
+    {
+      auto& spline = trajectory_->getSpline(body_joint_names[i]);
+      for (int j = 0; j <= trajectory_num_curves_; j++)
+      {
+        spline.controlPosition(j) += 0.01 * j;
+      }
+    }
 
     // TODO
     // Draw the current motion plan in the renderer.
 
-    // running at 20Hz
+    // Re-planning
     rate.sleep();
+  }
+}
+
+void Planner::stepForwardTrajectory(double time, std::unique_ptr<RobotState> robot_state)
+{
+  // If it is given, then change the initial position and velocity of the new trajectory to the current robot state.
+  // Otherwise, the initial position and velocity of the new trajectory should match with ones of the original
+  // trajectory.
+
+  for (const auto& joint_name : trajectory_->getJointNames())
+  {
+    auto& spline = trajectory_->getSpline(joint_name);
+
+    double p0;
+    double v0;
+
+    if (robot_state)
+    {
+      p0 = robot_state->position(joint_name);
+      v0 = robot_state->velocity(joint_name);
+    }
+    else
+    {
+      p0 = spline.position(time);
+      v0 = spline.velocity(time);
+    }
+
+    // TODO: sampling
+    constexpr auto num_samples_per_curve = 10;
+    const auto total_samples = trajectory_num_curves_ * num_samples_per_curve;
+    std::vector<std::tuple<double, double>> samples;
+
+    for (int i = 0; i < total_samples; i++)
+    {
+      const auto t = trajectory_duration_ * i / (total_samples - 1);
+      double p;
+
+      if (t + time <= trajectory_duration_)
+      {
+        p = spline.position(t + time);
+      }
+      else
+      {
+        // Linear extrapolate
+        const auto extra_time = t + time - trajectory_duration_;
+        const auto v = spline.velocity(trajectory_duration_);
+        p = spline.position(trajectory_duration_) + extra_time * v;
+      }
+
+      samples.push_back(std::make_tuple(t, p));
+    }
+
+    // Spline fitting
+    spline.fitting(samples, p0, v0);
   }
 }
 

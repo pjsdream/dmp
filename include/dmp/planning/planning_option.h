@@ -30,10 +30,20 @@ public:
   void setMotion(const std::shared_ptr<Motion>& motion);
   std::shared_ptr<Motion> getMotion() const;
 
+  void setTrajectoryOptions(double duration, int num_curves) noexcept;
+  double getTrajectoryDuration() const noexcept;
+  int numTrajectoryCurves() const noexcept;
+
+  void setTimestep(double timestep) noexcept;
+  double getTimestep() const noexcept;
+
 private:
   std::shared_ptr<RobotModel> robot_model_;
   std::shared_ptr<Environment> environment_;
   std::shared_ptr<Motion> motion_;
+  double trajectory_duration_;
+  int trajectory_num_curves_;
+  double timestep_;
 };
 }
 

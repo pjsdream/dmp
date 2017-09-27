@@ -9,11 +9,14 @@ class Rate
 {
 public:
   Rate() = delete;
-  explicit Rate(int rate);
+  explicit Rate(double rate);
+
+  static Rate withDuration(double duration);
 
   void reset() noexcept;
 
-  double remainingTime();
+  double remainingTime() const;
+  double duration() const;
 
   void sleep();
 

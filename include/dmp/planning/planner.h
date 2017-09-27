@@ -17,6 +17,7 @@ class RobotModel;
 class Motion;
 class Environment;
 class Shape;
+class CubicSplineTrajectory;
 
 class Planner : public Node
 {
@@ -54,8 +55,16 @@ private:
   std::shared_ptr<RobotModel> robot_model_;
   std::shared_ptr<Environment> environment_;
   std::shared_ptr<Motion> motion_;
+  double trajectory_duration_;
+  int trajectory_num_curves_;
+  double timestep_;
 
   std::vector<std::vector<std::shared_ptr<Shape>>> bounding_volumes_;
+
+  std::unique_ptr<CubicSplineTrajectory> trajectory_;
+
+  // robot_state is nullable
+  void stepForwardTrajectory(double time, std::unique_ptr<RobotState> robot_state);
 };
 }
 

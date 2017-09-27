@@ -5,7 +5,7 @@
 
 namespace dmp
 {
-const static std::string PROJECT_SOURCE_DIR = "/home/jaesungp/cpp_workspace/dmp";
+const static std::string PROJECT_SOURCE_DIR = "/playpen/jaesungp/cpp_workspace/dmp";
 }
 
 #endif //DMP_COMMON_H

@@ -9,10 +9,17 @@ class CubicSpline
 {
 public:
   CubicSpline() = delete;
-  explicit CubicSpline(double t, int num_curves);
+  CubicSpline(double t, int num_curves);
+
+  double getT() const;
 
   double position(double t) const;
   double velocity(double t) const;
+
+  double& controlPosition(int i);
+  double& controlVelocity(int i);
+
+  void fitting(const std::vector<std::tuple<double, double>>& samples, double p0, double v0);
 
 private:
   double position(int i, double u) const;

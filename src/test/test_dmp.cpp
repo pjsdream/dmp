@@ -56,6 +56,8 @@ int main(int argc, char** argv)
   planning_option.setRobotModel(robot_model);
   planning_option.setMotion(motion);
   planning_option.setEnvironment(environment);
+  planning_option.setTrajectoryOptions(3.0, 10);
+  planning_option.setTimestep(0.1);
 
   auto planner = std::make_shared<dmp::Planner>(planning_option);
 

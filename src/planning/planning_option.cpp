@@ -35,4 +35,30 @@ std::shared_ptr<Motion> PlanningOption::getMotion() const
 {
   return motion_;
 }
+
+void PlanningOption::setTrajectoryOptions(double duration, int num_curves) noexcept
+{
+  trajectory_duration_ = duration;
+  trajectory_num_curves_ = num_curves;
+}
+
+double PlanningOption::getTrajectoryDuration() const noexcept
+{
+  return trajectory_duration_;
+}
+
+int PlanningOption::numTrajectoryCurves() const noexcept
+{
+  return trajectory_num_curves_;
+}
+
+void PlanningOption::setTimestep(double timestep) noexcept
+{
+  timestep_ = timestep;
+}
+
+double PlanningOption::getTimestep() const noexcept
+{
+  return timestep_;
+}
 }
