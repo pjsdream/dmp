@@ -164,8 +164,21 @@ void Planner::optimize(double remaining_time)
     // Alternating optimization
 
     // TODO: optimize the trajectory
+    // Need to compute joint limit cost / smoothness cost / collision cost and objective completion cost.
+    // Forward (velocity) kinematics at the fixed objective completion times.
+
+    // Compute the cost and gradient, doing forward kinematics at uniformly discretized times.
+
+    // Move the trajectory along the gradient.
 
     // TODO: optimize over the objective completion time
+    // Need to compute objective completion cost.
+    // Forward (velocity) kinematics at the varying objective completion times.
+
+    // Compute the gradient. Each component has +w because it is added to the overall cost minimizing the sum of task
+    // completion time.
+
+    // Move the objective completion time along the gradient.
 
     printf("Objective completion times:");
     for (int i=0; i<objective_completion_times_.size(); i++)
