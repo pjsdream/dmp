@@ -68,6 +68,7 @@ std::shared_ptr<Environment> EnvironmentLoader::loadEnvironment(const std::strin
 
     if (shape != nullptr)
     {
+      object->setName(name);
       object->setColor(rgba);
       object->setShape(shape);
       environment->addObject(object);

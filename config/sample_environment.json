@@ -11,35 +11,36 @@
     }
   },
   {
-    "name": "red block",
+    "name": "sphere",
     "type": "interactable object",
     "geometry": {
-      "shape": "cube",
+      "shape": "sphere",
       "rgba": [1, 0, 0, 1],
-      "size": [0.0889, 0.0889, 0.0889],
-      "xyz": [2, 0.2, 0.73],
+      "radius": 0.03,
+      "xyz": [2, -0.5, 0.73],
       "rpy": [0, 0, 0]
     }
   },
   {
-    "name": "green block",
+    "name": "cube",
     "type": "interactable object",
     "geometry": {
       "shape": "cube",
       "rgba": [0, 1, 0, 1],
-      "size": [0.0889, 0.0889, 0.0889],
-      "xyz": [2, 0.4, 0.73],
+      "size": [0.06, 0.06, 0.06],
+      "xyz": [2, 0, 0.73],
       "rpy": [0, 0, 0]
     }
   },
   {
-    "name": "blue block",
+    "name": "cylinder",
     "type": "interactable object",
     "geometry": {
-      "shape": "cube",
+      "shape": "cylinder",
       "rgba": [0, 0, 1, 1],
-      "size": [0.0889, 0.0889, 0.0889],
-      "xyz": [2, 0.6, 0.73],
+      "radius": 0.03,
+      "height": 0.1,
+      "xyz": [2, 0.5, 0.76],
       "rpy": [0, 0, 0]
     }
   }

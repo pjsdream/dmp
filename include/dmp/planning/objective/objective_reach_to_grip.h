@@ -2,10 +2,13 @@
 #define DMP_OBJECTIVE_REACH_GRIP_H
 
 #include "objective.h"
-#include <dmp/planning/environment/interactable_object.h>
+
+#include <memory>
 
 namespace dmp
 {
+class InteractableObject;
+
 class ObjectiveReachToGrip : public Objective
 {
 public:

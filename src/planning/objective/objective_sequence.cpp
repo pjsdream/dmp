@@ -2,6 +2,11 @@
 
 namespace dmp
 {
+ObjectiveSequence::ObjectiveSequence(std::initializer_list<std::shared_ptr<Objective>> list)
+    : sequence_(list)
+{
+}
+
 void ObjectiveSequence::addObjective(const std::shared_ptr<Objective>& objective)
 {
   sequence_.push_back(objective);

@@ -1,4 +1,5 @@
 #include <dmp/planning/objective/objective_reach_to_grip.h>
+#include <dmp/planning/environment/interactable_object.h>
 
 namespace dmp
 {

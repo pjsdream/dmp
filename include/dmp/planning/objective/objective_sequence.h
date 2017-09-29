@@ -11,6 +11,9 @@ class Objective;
 class ObjectiveSequence
 {
 public:
+  ObjectiveSequence() = default;
+  ObjectiveSequence(std::initializer_list<std::shared_ptr<Objective>> list);
+
   void addObjective(const std::shared_ptr<Objective>& objective);
 
   const std::vector<std::shared_ptr<Objective>>& getSequence() const noexcept;

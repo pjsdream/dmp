@@ -9,6 +9,8 @@
 #include <dmp/robot/robot_model_loader.h>
 #include <dmp/robot/robot_model.h>
 #include <dmp/planning/environment/environment_loader.h>
+#include <dmp/planning/environment/environment.h>
+#include <dmp/planning/environment/interactable_object.h>
 #include <dmp/planning/motion/motion_loader.h>
 #include <dmp/shape/distance_query.h>
 #include <dmp/shape/cube.h>
@@ -17,10 +19,10 @@
 #include <dmp/controlling/controller_option.h>
 #include <dmp/controlling/controller.h>
 #include <dmp/common.h>
+#include <dmp/planning/objective/objective_reach_to_grip.h>
+#include <dmp/planning/objective/objective_grip.h>
 
 #include <QApplication>
-
-#include <thread>
 
 int main(int argc, char** argv)
 {
@@ -40,7 +42,8 @@ int main(int argc, char** argv)
   // robot model
   auto robot_model_loader = dmp::RobotModelLoader{};
   robot_model_loader.setSubstitutePackageDirectory(dmp::PROJECT_SOURCE_DIR + "/../../catkin_ws/src/fetch_ros");
-  robot_model_loader.load(dmp::PROJECT_SOURCE_DIR + "/../../catkin_ws/src/fetch_ros/fetch_description/robots/fetch.urdf");
+  robot_model_loader.load(
+      dmp::PROJECT_SOURCE_DIR + "/../../catkin_ws/src/fetch_ros/fetch_description/robots/fetch.urdf");
   auto robot_model = robot_model_loader.getRobotModel();
 
   // environment
@@ -60,6 +63,18 @@ int main(int argc, char** argv)
   planning_option.setTimestep(0.1);
 
   auto planner = std::make_shared<dmp::Planner>(planning_option);
+
+  // task
+  auto reach_to_grip =
+      std::make_unique<dmp::ObjectiveReachToGrip>(std::dynamic_pointer_cast<dmp::InteractableObject>(environment->getObject(
+          "red block")));
+  auto grip =
+      std::make_unique<dmp::ObjectiveGrip>(std::dynamic_pointer_cast<dmp::InteractableObject>(environment->getObject(
+          "red block")));
+
+  dmp::Publisher<dmp::Objective> objective_publisher;
+  objective_publisher.publish(std::move(reach_to_grip));
+  objective_publisher.publish(std::move(grip));
 
   // controller
   dmp::ControllerOption controller_option;
@@ -142,6 +157,8 @@ int main(int argc, char** argv)
   controller->getTrajectorySubscriber().subscribeFrom(planner->getTrajectoryPublisher());
 
   planner->getRobotStateSubscriber().subscribeFrom(controller->getRobotStatePublisher());
+
+  planner->getObjectiveSubscriber().subscribeFrom(objective_publisher);
 
   // run threads
   planner->runThread();

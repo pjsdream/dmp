@@ -13,14 +13,15 @@
 #include <dmp/shape/bounding_volume_factory.h>
 #include <dmp/trajectory/cubic_spline_trajectory.h>
 #include <dmp/trajectory/cubic_spline.h>
-
 #include <dmp/rendering/request/request_frame.h>
 #include <dmp/rendering/request/request_mesh.h>
 #include <dmp/rendering/request/request_custom_texture.h>
 #include <dmp/rendering/request/request_custom_mesh.h>
-
 #include <dmp/utils/mesh_loader.h>
 #include <dmp/utils/rate.h>
+#include <dmp/utils/timer.h>
+#include <dmp/planning/objective/objective_grip.h>
+#include <dmp/planning/objective/objective_reach_to_grip.h>
 
 #include <iostream>
 
@@ -54,6 +55,11 @@ Subscriber<RobotState>& Planner::getRobotStateSubscriber()
   return robot_state_subscriber_;
 }
 
+Subscriber<Objective>& Planner::getObjectiveSubscriber()
+{
+  return objective_subscriber_;
+}
+
 Publisher<Request>& Planner::getRendererPublisher()
 {
   return renderer_publisher_;
@@ -76,6 +82,7 @@ void Planner::run()
   {
     // Assume that the previous planning step has been done in time.
 
+
     // Send the whole trajectory to the controller. The controller will overwrite the previously passed trajectory with
     // the new one. Takes less than 0.1 ms.
     constexpr auto trajectory_discretization = 30;
@@ -88,10 +95,6 @@ void Planner::run()
       Eigen::VectorXd joint_positions(body_joint_names.size());
       for (int j = 0; j < body_joint_names.size(); j++)
       {
-        /*
-        const auto& joint = robot_model_->getJoint(body_joint_names[j]);
-        joint_positions(j) = (std::rand() / 2147483647.) * (joint.getUpper() - joint.getLower()) + joint.getLower();
-         */
         const auto& spline = trajectory_->getSpline(body_joint_names[j]);
         joint_positions(j) = spline.position(t);
       }
@@ -102,21 +105,36 @@ void Planner::run()
 
     trajectory_publisher_.publish(std::move(trajectory));
 
+
     // Receive the current robot state. Step forward the trajectory by timestep, finding the best fitting of spline
     // trajectory. Take about 2 ms.
-    /*
     auto robot_state_requests = robot_state_subscriber_.popAll();
     std::unique_ptr<RobotState> robot_state_request;
     if (!robot_state_requests.empty())
       robot_state_request = std::move(*robot_state_requests.rbegin());
 
     stepForwardTrajectory(rate.duration(), std::move(robot_state_request));
-     */
 
-    // TODO
+
+    // Receive objectives
+    auto objective_requests = objective_subscriber_.popAll();
+    for (auto& objective : objective_requests)
+    {
+      objectives_.push_back(std::shared_ptr<Objective>(std::move(objective)));
+      objective_completion_times_.push_back(trajectory_duration_);
+    }
+
+
     // Optimize the trajectory within the time limit
     // For testing the controller, increasing the joint splines
     print("remaining planning time: %lf ms\n", rate.remainingTime() * 1000.);
+
+    // Spend 0.9 x remaining time for optimization.
+    optimize(rate.remainingTime() * 0.9);
+    print("remaining time after planning: %lf ms\n", rate.remainingTime() * 1000.);
+
+    // Test code for spline control.
+    /*
     for (int i = 0; i < body_joint_names.size(); i++)
     {
       auto& spline = trajectory_->getSpline(body_joint_names[i]);
@@ -125,12 +143,34 @@ void Planner::run()
         spline.controlPosition(j) += 0.01 * j;
       }
     }
+     */
+
 
     // TODO
     // Draw the current motion plan in the renderer.
 
-    // Re-planning
+
+    // Wait for the next timestep
     rate.sleep();
+  }
+}
+
+void Planner::optimize(double remaining_time)
+{
+  Timer timer(remaining_time);
+
+  while (!timer.isOver())
+  {
+    // Alternating optimization
+
+    // TODO: optimize the trajectory
+
+    // TODO: optimize over the objective completion time
+
+    printf("Objective completion times:");
+    for (int i=0; i<objective_completion_times_.size(); i++)
+      printf(" %lf", objective_completion_times_[i]);
+    printf("\n");
   }
 }
 
@@ -193,6 +233,7 @@ void Planner::setRobotModel(const std::shared_ptr<RobotModel>& robot_model)
   robot_model_ = robot_model;
 
   // constructing bounding volumes
+  int cnt = 0;
   const auto num_links = robot_model_->numLinks();
   for (int i = 0; i < num_links; i++)
   {
@@ -222,8 +263,11 @@ void Planner::setRobotModel(const std::shared_ptr<RobotModel>& robot_model)
 
       // TODO: save computed bounding volume to a storage
       bounding_volumes_[i].push_back(bounding_volume);
+      cnt++;
     }
   }
+
+  printf("%d bounding volumes\n", cnt);
 }
 
 void Planner::setMotion(const std::shared_ptr<Motion>& motion)

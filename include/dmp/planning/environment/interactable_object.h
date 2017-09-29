@@ -8,6 +8,8 @@ namespace dmp
 class InteractableObject : public Object
 {
 public:
+  ~InteractableObject() override = default;
+
 private:
 };
 }

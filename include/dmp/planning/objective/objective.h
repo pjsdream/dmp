@@ -1,11 +1,13 @@
 #ifndef DMP_OBJECTIVE_H
 #define DMP_OBJECTIVE_H
 
+#include <dmp/comm/message.h>
+
 #include <type_traits>
 
 namespace dmp
 {
-class Objective
+class Objective : public Message
 {
 public:
   virtual ~Objective() = default;

@@ -22,4 +22,14 @@ const Eigen::Vector4f& Object::getColor() const
 {
   return color_;
 }
+
+void Object::setName(const std::string& name) noexcept
+{
+  name_ = name;
+}
+
+const std::string& Object::getName() const noexcept
+{
+  return name_;
+}
 }
