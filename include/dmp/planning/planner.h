@@ -28,10 +28,10 @@ public:
   ~Planner() override;
 
   Planner(const Planner& rhs) = delete;
-  Planner& operator = (const Planner& rhs) = delete;
+  Planner& operator=(const Planner& rhs) = delete;
 
   Planner(Planner&& rhs) = delete;
-  Planner& operator = (Planner&& rhs) = delete;
+  Planner& operator=(Planner&& rhs) = delete;
 
   Subscriber<RobotState>& getRobotStateSubscriber();
   Subscriber<Objective>& getObjectiveSubscriber();
@@ -66,7 +66,8 @@ private:
   double timestep_;
 
   // Cost computation
-  std::pair<double, Eigen::VectorXd> computeCost(const Eigen::VectorXd& robot_state);
+  std::pair<double, Eigen::VectorXd> computeCost(const Eigen::VectorXd& robot_positions,
+                                                 const Eigen::VectorXd& robot_velocities);
 
   // Robot bounding volumes
   // TODO: need better data container for bounding volumes more efficient for forward kinematics and collision check

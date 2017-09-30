@@ -174,20 +174,28 @@ void Planner::optimize(double remaining_time)
     // Alternating optimization
 
     // TODO: optimize the trajectory
-    // Need to compute joint limit cost / smoothness cost / collision cost and objective completion cost.
+    // Compute joint limit cost / smoothness cost / collision cost.
     std::vector<std::future<std::pair<double, Eigen::VectorXd>>> costs(discretizations_);
     for (int i = 0; i < discretizations_; i++)
     {
       const auto t = static_cast<double>(i) / (discretizations_ - 1) * trajectory_duration_;
 
-      Eigen::VectorXd robot_state(joint_names.size());
+      Eigen::VectorXd robot_positions(joint_names.size());
+      Eigen::VectorXd robot_velocities(joint_names.size());
       for (int j = 0; j < joint_names.size(); j++)
-        robot_state(j) = trajectory_->getSpline(joint_names[j]).position(t);
+      {
+        robot_positions(j) = trajectory_->getSpline(joint_names[j]).position(t);
+        robot_velocities(j) = trajectory_->getSpline(joint_names[j]).velocity(t);
+      }
 
       // Compute the cost and gradient conditionally asynchronously
-      costs[i] = std::async([optimizer = this, robot_state = robot_state]()
-                            { return optimizer->computeCost(robot_state); });
+      costs[i] = std::async([optimizer = this, robot_positions = robot_positions, robot_velocities = robot_velocities]()
+                            { return optimizer->computeCost(robot_positions, robot_velocities); });
     }
+
+    // TODO: compute objective completion cost
+
+    printf("[%lf ms] Created all tasks\n", stopwatch.time() * 1000.);
 
     for (int i = 0; i < costs.size(); i++)
     {
@@ -196,6 +204,8 @@ void Planner::optimize(double remaining_time)
       // Update gradient
       auto cost = costs[i].get();
     }
+
+    printf("[%lf ms] Joined all tasks\n", stopwatch.time() * 1000.);
 
     // Move the trajectory along the gradient.
 
@@ -217,15 +227,36 @@ void Planner::optimize(double remaining_time)
   }
 }
 
-std::pair<double, Eigen::VectorXd> Planner::computeCost(const Eigen::VectorXd& robot_state)
+std::pair<double, Eigen::VectorXd> Planner::computeCost(const Eigen::VectorXd& robot_positions,
+                                                        const Eigen::VectorXd& robot_velocities)
 {
-  // TODO
   // Forward (velocity) kinematics at the fixed objective completion times.
+  const auto num_links = robot_model_->numLinks();
+  VectorEigen<Eigen::Affine3d> transforms(num_links);
+  for (int i = 0; i < num_links; i++)
+  {
+    const auto& link = robot_model_->getLink(i);
 
-  // TODO
+    Eigen::Affine3d transform;
+    if (i == 0)
+      transforms[i] = Eigen::Affine3d::Identity();
+    else
+    {
+      const auto& joint = robot_model_->getJoint(i);
+      transforms[i] = joint.getJointTransform((joint.getLower() + joint.getUpper()) / 2.);
+    }
+  }
+
   // Compute cost
+  double cost = 0.;
 
-  // TODO
+  // 1. Smoothness
+  constexpr auto smoothness_weight = 1.;
+  auto smoothness_cost = 0.;
+  for (int i = 0; i < robot_velocities.size(); i++)
+    smoothness_cost += robot_velocities(i) * robot_velocities(i);
+  smoothness_cost *= smoothness_weight;
+
   // Compute gradient
 
   return std::make_pair(0., Eigen::VectorXd(10));
@@ -365,7 +396,7 @@ void Planner::drawGround()
 
 void Planner::drawRobotModel()
 {
-  auto num_links = robot_model_->numLinks();
+  const auto num_links = robot_model_->numLinks();
 
   for (int i = 0; i < num_links; i++)
   {
