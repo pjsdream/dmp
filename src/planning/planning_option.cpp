@@ -61,4 +61,14 @@ double PlanningOption::getTimestep() const noexcept
 {
   return timestep_;
 }
+
+void PlanningOption::setDiscretizations(int discretizations) noexcept
+{
+  discretizations_ = discretizations;
+}
+
+int PlanningOption::getDiscretizations() const noexcept
+{
+  return discretizations_;
+}
 }

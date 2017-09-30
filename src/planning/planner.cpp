@@ -20,6 +20,7 @@
 #include <dmp/utils/mesh_loader.h>
 #include <dmp/utils/rate.h>
 #include <dmp/utils/timer.h>
+#include <dmp/utils/stopwatch.h>
 #include <dmp/planning/objective/objective_grip.h>
 #include <dmp/planning/objective/objective_reach_to_grip.h>
 
@@ -37,6 +38,7 @@ Planner::Planner(const PlanningOption& option)
   trajectory_duration_ = option.getTrajectoryDuration();
   trajectory_num_curves_ = option.numTrajectoryCurves();
   timestep_ = option.getTimestep();
+  discretizations_ = option.getDiscretizations();
 
   // initialize trajectory
   // TODO: change the joint names. For now, use the body joints only
@@ -159,17 +161,44 @@ void Planner::optimize(double remaining_time)
 {
   Timer timer(remaining_time);
 
+  const auto& joint_names = trajectory_->getJointNames();
+
+  // Because the initial control doesn't change while optimizing the trajectory, the number of optimizing control points
+  // is the same as the number of curves.
+  const auto num_control_points = trajectory_->numCurves();
+
   while (!timer.isOver())
   {
+    Stopwatch stopwatch;
+
     // Alternating optimization
 
     // TODO: optimize the trajectory
     // Need to compute joint limit cost / smoothness cost / collision cost and objective completion cost.
-    // Forward (velocity) kinematics at the fixed objective completion times.
+    std::vector<std::future<std::pair<double, Eigen::VectorXd>>> costs(discretizations_);
+    for (int i = 0; i < discretizations_; i++)
+    {
+      const auto t = static_cast<double>(i) / (discretizations_ - 1) * trajectory_duration_;
 
-    // Compute the cost and gradient, doing forward kinematics at uniformly discretized times.
+      Eigen::VectorXd robot_state(joint_names.size());
+      for (int j = 0; j < joint_names.size(); j++)
+        robot_state(j) = trajectory_->getSpline(joint_names[j]).position(t);
+
+      // Compute the cost and gradient conditionally asynchronously
+      costs[i] = std::async([optimizer = this, robot_state = robot_state]()
+                            { return optimizer->computeCost(robot_state); });
+    }
+
+    for (int i = 0; i < costs.size(); i++)
+    {
+      const auto t = static_cast<double>(i) / (discretizations_ - 1) * trajectory_duration_;
+
+      // Update gradient
+      auto cost = costs[i].get();
+    }
 
     // Move the trajectory along the gradient.
+
 
     // TODO: optimize over the objective completion time
     // Need to compute objective completion cost.
@@ -180,12 +209,27 @@ void Planner::optimize(double remaining_time)
 
     // Move the objective completion time along the gradient.
 
+
     printf("Objective completion times:");
-    for (int i=0; i<objective_completion_times_.size(); i++)
+    for (int i = 0; i < objective_completion_times_.size(); i++)
       printf(" %lf", objective_completion_times_[i]);
     printf("\n");
   }
 }
+
+std::pair<double, Eigen::VectorXd> Planner::computeCost(const Eigen::VectorXd& robot_state)
+{
+  // TODO
+  // Forward (velocity) kinematics at the fixed objective completion times.
+
+  // TODO
+  // Compute cost
+
+  // TODO
+  // Compute gradient
+
+  return std::make_pair(0., Eigen::VectorXd(10));
+};
 
 void Planner::stepForwardTrajectory(double time, std::unique_ptr<RobotState> robot_state)
 {

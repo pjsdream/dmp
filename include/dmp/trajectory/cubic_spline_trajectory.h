@@ -17,10 +17,14 @@ public:
 
   const std::vector<std::string>& getJointNames() const noexcept;
 
+  int numCurves() const noexcept;
+
+  CubicSpline& getSpline(int i);
   CubicSpline& getSpline(const std::string& joint_name);
 
 private:
   double duration_;
+  int num_curves_;
   std::vector<std::string> joint_names_;
 
   std::vector<CubicSpline> splines_;

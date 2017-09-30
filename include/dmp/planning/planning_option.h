@@ -37,12 +37,16 @@ public:
   void setTimestep(double timestep) noexcept;
   double getTimestep() const noexcept;
 
+  void setDiscretizations(int discretizations) noexcept;
+  int getDiscretizations() const noexcept;
+
 private:
   std::shared_ptr<RobotModel> robot_model_;
   std::shared_ptr<Environment> environment_;
   std::shared_ptr<Motion> motion_;
   double trajectory_duration_;
   int trajectory_num_curves_;
+  int discretizations_;
   double timestep_;
 };
 }

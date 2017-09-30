@@ -62,7 +62,11 @@ private:
   std::shared_ptr<Motion> motion_;
   double trajectory_duration_;
   int trajectory_num_curves_;
+  int discretizations_;
   double timestep_;
+
+  // Cost computation
+  std::pair<double, Eigen::VectorXd> computeCost(const Eigen::VectorXd& robot_state);
 
   // Robot bounding volumes
   // TODO: need better data container for bounding volumes more efficient for forward kinematics and collision check

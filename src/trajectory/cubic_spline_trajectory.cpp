@@ -6,7 +6,7 @@ namespace dmp
 CubicSplineTrajectory::CubicSplineTrajectory(const std::vector<std::string>& joint_names,
                                              double duration,
                                              int num_curves)
-    : joint_names_(joint_names)
+    : joint_names_(joint_names), num_curves_(num_curves)
 {
   splines_.resize(joint_names.size(), CubicSpline(duration, num_curves));
 
@@ -17,6 +17,16 @@ CubicSplineTrajectory::CubicSplineTrajectory(const std::vector<std::string>& joi
 const std::vector<std::string>& CubicSplineTrajectory::getJointNames() const noexcept
 {
   return joint_names_;
+}
+
+int CubicSplineTrajectory::numCurves() const noexcept
+{
+  return num_curves_;
+}
+
+CubicSpline& CubicSplineTrajectory::getSpline(int i)
+{
+  return splines_[i];
 }
 
 CubicSpline& CubicSplineTrajectory::getSpline(const std::string& joint_name)
