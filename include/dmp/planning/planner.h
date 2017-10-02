@@ -10,6 +10,7 @@
 #include <dmp/trajectory/trajectory.h>
 #include <dmp/robot/robot_state.h>
 #include <dmp/planning/objective/objective.h>
+#include <dmp/planning/cost/cost.h>
 
 namespace dmp
 {
@@ -19,6 +20,7 @@ class Motion;
 class Environment;
 class Shape;
 class CubicSplineTrajectory;
+class RobotConfigurations;
 
 class Planner : public Node
 {
@@ -35,6 +37,7 @@ public:
 
   Subscriber<RobotState>& getRobotStateSubscriber();
   Subscriber<Objective>& getObjectiveSubscriber();
+  Subscriber<Cost>& getCostSubscriber();
   Publisher<Request>& getRendererPublisher();
   Publisher<Trajectory>& getTrajectoryPublisher();
 
@@ -47,6 +50,7 @@ private:
   void drawGround();
   void drawRobotModel();
   void drawEnvironment();
+  void drawTrajectory();
 
   void setRobotModel(const std::shared_ptr<RobotModel>& robot_model);
   void setMotion(const std::shared_ptr<Motion>& motion);
@@ -54,6 +58,7 @@ private:
 
   Subscriber<RobotState> robot_state_subscriber_;
   Subscriber<Objective> objective_subscriber_;
+  Subscriber<Cost> cost_subscriber_;
   Publisher<Request> renderer_publisher_;
   Publisher<Trajectory> trajectory_publisher_;
 
@@ -66,15 +71,21 @@ private:
   double timestep_;
 
   // Cost computation
-  std::pair<double, Eigen::VectorXd> computeCost(const Eigen::VectorXd& robot_positions,
-                                                 const Eigen::VectorXd& robot_velocities);
+  std::tuple<double, Eigen::VectorXd, Eigen::VectorXd> computeCost(const RobotConfiguration& configuration);
+  std::tuple<double, Eigen::VectorXd, Eigen::VectorXd> computeObjectiveCost(const RobotConfiguration& configuration);
 
   // Robot bounding volumes
   // TODO: need better data container for bounding volumes more efficient for forward kinematics and collision check
   std::vector<std::vector<std::shared_ptr<Shape>>> bounding_volumes_;
 
-  // Objectives, updated every timestep
+  // Robot configurations, storing precomputed resources (e.g., forward kinematics)
+  std::vector<RobotConfiguration> configurations_;
+
+  // Objectives, updated every timestep upon request
   std::vector<std::shared_ptr<Objective>> objectives_;
+
+  // Costs, updated every timestep upon request
+  std::vector<std::shared_ptr<Cost>> costs_;
 
   // Optimization variables
   std::vector<double> objective_completion_times_;

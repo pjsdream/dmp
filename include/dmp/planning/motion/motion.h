@@ -19,6 +19,8 @@ public:
                   const std::string& link,
                   const Eigen::Vector3d& xyz,
                   double width);
+  const std::string& getGripperLink() const noexcept;
+  const Eigen::Vector3d getGripperXyz() const noexcept;
 
 private:
   std::vector<std::string> navigation_joints_;

@@ -3,6 +3,11 @@
 
 namespace dmp
 {
+Object::Object()
+    : color_(0.f, 0.f, 0.f, 1.f), transform_(Eigen::Affine3d::Identity())
+{
+}
+
 void Object::setShape(const std::shared_ptr<Shape>& shape)
 {
   shape_ = shape;
@@ -31,5 +36,15 @@ void Object::setName(const std::string& name) noexcept
 const std::string& Object::getName() const noexcept
 {
   return name_;
+}
+
+void Object::setTransform(const Eigen::Affine3d& transform) noexcept
+{
+  transform_ = transform;
+}
+
+const Eigen::Affine3d& Object::getTransform() const noexcept
+{
+  return transform_;
 }
 }

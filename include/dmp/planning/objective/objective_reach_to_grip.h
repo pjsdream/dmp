@@ -16,6 +16,8 @@ public:
   explicit ObjectiveReachToGrip(const std::shared_ptr<InteractableObject>& object);
   ~ObjectiveReachToGrip() override = default;
 
+  std::tuple<double, Eigen::VectorXd, Eigen::VectorXd> computeCost(const RobotConfiguration& configuration) override;
+
 private:
   std::shared_ptr<InteractableObject> object_;
 };

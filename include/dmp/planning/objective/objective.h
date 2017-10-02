@@ -3,10 +3,14 @@
 
 #include <dmp/comm/message.h>
 
+#include <Eigen/Dense>
+
 #include <type_traits>
 
 namespace dmp
 {
+class RobotConfiguration;
+
 class Objective : public Message
 {
 public:
@@ -17,6 +21,8 @@ public:
   {
     return static_cast<T>(*this);
   };
+
+  virtual std::tuple<double, Eigen::VectorXd, Eigen::VectorXd> computeCost(const RobotConfiguration& configuration);
 
 private:
 };

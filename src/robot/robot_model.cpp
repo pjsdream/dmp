@@ -26,6 +26,7 @@ void RobotModel::buildFromRobotModel(const std::shared_ptr<TreeRobotLink>& model
     link.addCollision(model_collision.filename, model_collision.transform);
 
   links_.push_back(std::move(link));
+  link_name_to_index_[model_link->getName()] = static_cast<int>(links_.size() - 1);
   parents_.push_back(parent_link_id);
   auto link_id = static_cast<int>(links_.size() - 1);
 
@@ -109,5 +110,10 @@ const RobotJoint& RobotModel::getJoint(const std::string& joint_name) const noex
 int RobotModel::getParent(int index) const noexcept
 {
   return parents_[index];
+}
+
+int RobotModel::getLinkIndex(const std::string& link_name) const
+{
+  return link_name_to_index_.find(link_name)->second;
 }
 }

@@ -10,7 +10,7 @@
 
 namespace dmp
 {
-std::shared_ptr<Environment> EnvironmentLoader::loadEnvironment(const std::string &filename)
+std::shared_ptr<Environment> EnvironmentLoader::loadEnvironment(const std::string& filename)
 {
   JsonLoader json_loader;
   Json json{json_loader.loadJson(filename)};
@@ -27,7 +27,24 @@ std::shared_ptr<Environment> EnvironmentLoader::loadEnvironment(const std::strin
     if (type == "static obstacle")
       object = std::make_shared<Obstacle>();
     else if (type == "interactable object")
-      object = std::make_shared<InteractableObject>();
+    {
+      auto interactable_object = std::make_shared<InteractableObject>();
+
+      Eigen::Vector3d grip_xyz
+          {geometry["grip_xyz"][0].toDouble(), geometry["grip_xyz"][1].toDouble(), geometry["grip_xyz"][2].toDouble()};
+      Eigen::Vector3d grip_rpy
+          {geometry["grip_rpy"][0].toDouble(), geometry["grip_rpy"][1].toDouble(), geometry["grip_rpy"][2].toDouble()};
+
+      Eigen::Affine3d transform = Eigen::Affine3d::Identity();
+      transform.translate(grip_xyz);
+      transform.rotate(Eigen::AngleAxisd(grip_rpy(0), Eigen::Vector3d(0, 0, 1)));
+      transform.rotate(Eigen::AngleAxisd(grip_rpy(1), Eigen::Vector3d(0, 1, 0)));
+      transform.rotate(Eigen::AngleAxisd(grip_rpy(2), Eigen::Vector3d(1, 0, 0)));
+
+      interactable_object->setGripTransform(transform);
+
+      object = interactable_object;
+    }
 
     std::shared_ptr<Shape> shape;
     auto shape_type = geometry["shape"].toString();
@@ -48,21 +65,18 @@ std::shared_ptr<Environment> EnvironmentLoader::loadEnvironment(const std::strin
       Eigen::Vector3d
           size{geometry["size"][0].toDouble(), geometry["size"][1].toDouble(), geometry["size"][2].toDouble()};
       cube->setSize(size);
-      cube->setTransform(transform);
       shape = cube;
     }
     else if (shape_type == "sphere")
     {
       auto sphere = std::make_shared<Sphere>();
       sphere->setRadius(geometry["radius"].toDouble());
-      sphere->setPosition(transform.translation());
       shape = sphere;
     }
     else if (shape_type == "cylinder")
     {
       auto cylinder = std::make_shared<Cylinder>();
       cylinder->setDimension(geometry["radius"].toDouble(), geometry["height"].toDouble());
-      cylinder->setTransform(transform);
       shape = cylinder;
     }
 
@@ -71,6 +85,7 @@ std::shared_ptr<Environment> EnvironmentLoader::loadEnvironment(const std::strin
       object->setName(name);
       object->setColor(rgba);
       object->setShape(shape);
+      object->setTransform(transform);
       environment->addObject(object);
     }
   }

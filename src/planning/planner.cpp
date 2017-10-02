@@ -23,6 +23,8 @@
 #include <dmp/utils/stopwatch.h>
 #include <dmp/planning/objective/objective_grip.h>
 #include <dmp/planning/objective/objective_reach_to_grip.h>
+#include <dmp/planning/cost/cost.h>
+#include <dmp/planning/robot_configuration.h>
 
 #include <iostream>
 
@@ -40,12 +42,18 @@ Planner::Planner(const PlanningOption& option)
   timestep_ = option.getTimestep();
   discretizations_ = option.getDiscretizations();
 
-  // initialize trajectory
+  // Initialize trajectory
   // TODO: change the joint names. For now, use the body joints only
   trajectory_ =
       std::make_unique<CubicSplineTrajectory>(motion_->getBodyJoints(), trajectory_duration_, trajectory_num_curves_);
 
-  // drawing environment
+  // Allocate robot configurations
+  const int num_max_objectives = 10;
+  configurations_ =
+      std::vector<RobotConfiguration>(discretizations_ + num_max_objectives,
+                                      RobotConfiguration(robot_model_, motion_));
+
+  // Drawing environment
   drawGround();
   drawEnvironment();
 }
@@ -60,6 +68,11 @@ Subscriber<RobotState>& Planner::getRobotStateSubscriber()
 Subscriber<Objective>& Planner::getObjectiveSubscriber()
 {
   return objective_subscriber_;
+}
+
+Subscriber<Cost>& Planner::getCostSubscriber()
+{
+  return cost_subscriber_;
 }
 
 Publisher<Request>& Planner::getRendererPublisher()
@@ -127,6 +140,12 @@ void Planner::run()
     }
 
 
+    // Receive costs
+    auto cost_requests = cost_subscriber_.popAll();
+    for (auto& cost : cost_requests)
+      costs_.push_back(std::shared_ptr<Cost>(std::move(cost)));
+
+
     // Optimize the trajectory within the time limit
     // For testing the controller, increasing the joint splines
     print("remaining planning time: %lf ms\n", rate.remainingTime() * 1000.);
@@ -148,8 +167,8 @@ void Planner::run()
      */
 
 
-    // TODO
     // Draw the current motion plan in the renderer.
+    drawTrajectory();
 
 
     // Wait for the next timestep
@@ -175,10 +194,13 @@ void Planner::optimize(double remaining_time)
 
     // TODO: optimize the trajectory
     // Compute joint limit cost / smoothness cost / collision cost.
-    std::vector<std::future<std::pair<double, Eigen::VectorXd>>> costs(discretizations_);
+    std::vector<std::future<std::tuple<double, Eigen::VectorXd, Eigen::VectorXd>>> costs;
+    std::vector<double> cost_times;
     for (int i = 0; i < discretizations_; i++)
     {
+      auto& configuration = configurations_[i];
       const auto t = static_cast<double>(i) / (discretizations_ - 1) * trajectory_duration_;
+      cost_times.push_back(t);
 
       Eigen::VectorXd robot_positions(joint_names.size());
       Eigen::VectorXd robot_velocities(joint_names.size());
@@ -188,21 +210,54 @@ void Planner::optimize(double remaining_time)
         robot_velocities(j) = trajectory_->getSpline(joint_names[j]).velocity(t);
       }
 
+      configuration.setPositions(robot_positions);
+      configuration.setVelocities(robot_velocities);
+
+      configuration.forwardKinematics();
+
       // Compute the cost and gradient conditionally asynchronously
-      costs[i] = std::async([optimizer = this, robot_positions = robot_positions, robot_velocities = robot_velocities]()
-                            { return optimizer->computeCost(robot_positions, robot_velocities); });
+      costs.push_back(std::async([optimizer = this, &configuration]()
+                                 { return optimizer->computeCost(configuration); }));
     }
 
-    // TODO: compute objective completion cost
+    // Compute objective completion cost
+    for (int i = 0; i < objectives_.size(); i++)
+    {
+      auto& configuration = configurations_[discretizations_ + i];
+      const auto t = objective_completion_times_[i];
+      cost_times.push_back(t);
+
+      Eigen::VectorXd robot_positions(joint_names.size());
+      Eigen::VectorXd robot_velocities(joint_names.size());
+      for (int j = 0; j < joint_names.size(); j++)
+      {
+        robot_positions(j) = trajectory_->getSpline(joint_names[j]).position(t);
+        robot_velocities(j) = trajectory_->getSpline(joint_names[j]).velocity(t);
+      }
+
+      configuration.setPositions(robot_positions);
+      configuration.setVelocities(robot_velocities);
+
+      configuration.forwardKinematics();
+
+      // Compute the cost and gradient conditionally asynchronously
+      costs.push_back(std::async([optimizer = this, &configuration]()
+                                 { return optimizer->computeObjectiveCost(configuration); }));
+    }
 
     printf("[%lf ms] Created all tasks\n", stopwatch.time() * 1000.);
 
     for (int i = 0; i < costs.size(); i++)
     {
-      const auto t = static_cast<double>(i) / (discretizations_ - 1) * trajectory_duration_;
+      const auto t = cost_times[i];
 
       // Update gradient
-      auto cost = costs[i].get();
+      auto cost_tuple = costs[i].get();
+      const auto& cost = std::get<0>(cost_tuple);
+      const auto& position_gradient = std::get<1>(cost_tuple);
+      const auto& velocity_gradient = std::get<2>(cost_tuple);
+
+      // TODO
     }
 
     printf("[%lf ms] Joined all tasks\n", stopwatch.time() * 1000.);
@@ -227,39 +282,46 @@ void Planner::optimize(double remaining_time)
   }
 }
 
-std::pair<double, Eigen::VectorXd> Planner::computeCost(const Eigen::VectorXd& robot_positions,
-                                                        const Eigen::VectorXd& robot_velocities)
+std::tuple<double, Eigen::VectorXd, Eigen::VectorXd> Planner::computeCost(const RobotConfiguration& configuration)
 {
-  // Forward (velocity) kinematics at the fixed objective completion times.
-  const auto num_links = robot_model_->numLinks();
-  VectorEigen<Eigen::Affine3d> transforms(num_links);
-  for (int i = 0; i < num_links; i++)
-  {
-    const auto& link = robot_model_->getLink(i);
+  double cost = 0.;
+  Eigen::VectorXd position_gradient(configuration.getPositions().rows());
+  Eigen::VectorXd velocity_gradient(configuration.getVelocities().rows());
+  position_gradient.setZero();
+  velocity_gradient.setZero();
 
-    Eigen::Affine3d transform;
-    if (i == 0)
-      transforms[i] = Eigen::Affine3d::Identity();
-    else
-    {
-      const auto& joint = robot_model_->getJoint(i);
-      transforms[i] = joint.getJointTransform((joint.getLower() + joint.getUpper()) / 2.);
-    }
+  for (int i = 0; i < costs_.size(); i++)
+  {
+    auto result = costs_[i]->computeCost(configuration);
+
+    cost += std::get<0>(result);
+    position_gradient += std::get<1>(result);
+    velocity_gradient += std::get<2>(result);
   }
 
-  // Compute cost
+  return std::make_tuple(cost, position_gradient, velocity_gradient);
+};
+
+std::tuple<double,
+           Eigen::VectorXd,
+           Eigen::VectorXd> Planner::computeObjectiveCost(const RobotConfiguration& configuration)
+{
   double cost = 0.;
+  Eigen::VectorXd position_gradient(configuration.getPositions().rows());
+  Eigen::VectorXd velocity_gradient(configuration.getVelocities().rows());
+  position_gradient.setZero();
+  velocity_gradient.setZero();
 
-  // 1. Smoothness
-  constexpr auto smoothness_weight = 1.;
-  auto smoothness_cost = 0.;
-  for (int i = 0; i < robot_velocities.size(); i++)
-    smoothness_cost += robot_velocities(i) * robot_velocities(i);
-  smoothness_cost *= smoothness_weight;
+  for (int i = 0; i < objectives_.size(); i++)
+  {
+    auto result = objectives_[i]->computeCost(configuration);
 
-  // Compute gradient
+    cost += std::get<0>(result);
+    position_gradient += std::get<1>(result);
+    velocity_gradient += std::get<2>(result);
+  }
 
-  return std::make_pair(0., Eigen::VectorXd(10));
+  return std::make_tuple(cost, position_gradient, velocity_gradient);
 };
 
 void Planner::stepForwardTrajectory(double time, std::unique_ptr<RobotState> robot_state)
@@ -320,7 +382,7 @@ void Planner::setRobotModel(const std::shared_ptr<RobotModel>& robot_model)
 {
   robot_model_ = robot_model;
 
-  // constructing bounding volumes
+  // Constructing bounding volumes
   int cnt = 0;
   const auto num_links = robot_model_->numLinks();
   for (int i = 0; i < num_links; i++)
@@ -337,7 +399,7 @@ void Planner::setRobotModel(const std::shared_ptr<RobotModel>& robot_model)
 
       const auto num_vertices = raw_mesh.vertex_buffer.size() / 3;
 
-      // allocate vertex vector
+      // Cllocate vertex vector
       VectorEigen<Eigen::Vector3d> points(num_vertices);
       for (int j = 0; j < num_vertices; j++)
       {
@@ -346,7 +408,7 @@ void Planner::setRobotModel(const std::shared_ptr<RobotModel>& robot_model)
                                                           raw_mesh.vertex_buffer[3 * j + 2]);
       }
 
-      // create bounding volume through factory function
+      // Create bounding volume through factory function
       auto bounding_volume = BoundingVolumeFactory::newBoundingVolumeFromPoints(points);
 
       // TODO: save computed bounding volume to a storage
@@ -506,25 +568,30 @@ void Planner::drawEnvironment()
       custom_mesh->createCube(cube->getSize());
       custom_mesh->setGlobalColor(Eigen::Vector3f(color(0), color(1), color(2)));
 
-      frame->transform = cube->getTransform();
+      frame->transform = object->getTransform();
     }
     else if (auto cylinder = dynamic_cast<Cylinder*>(shape.get()))
     {
       custom_mesh->createCylinder(cylinder->getRadius(), cylinder->getHeight());
       custom_mesh->setGlobalColor(Eigen::Vector3f(color(0), color(1), color(2)));
 
-      frame->transform = cylinder->getTransform();
+      frame->transform = object->getTransform();
     }
     else if (auto sphere = dynamic_cast<Sphere*>(shape.get()))
     {
       custom_mesh->createSphere(sphere->getRadius());
       custom_mesh->setGlobalColor(Eigen::Vector3f(color(0), color(1), color(2)));
 
-      frame->transform.translate(sphere->getPosition());
+      frame->transform.translate(object->getTransform().translation());
     }
 
     renderer_publisher_.publish(std::move(frame));
     renderer_publisher_.publish(std::move(custom_mesh));
   }
+}
+
+void Planner::drawTrajectory()
+{
+  // TODO
 }
 }

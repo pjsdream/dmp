@@ -27,4 +27,14 @@ void Motion::setGripper(const std::vector<std::string>& gripper_joints,
   gripper_link_xyz_ = xyz;
   gripper_width_ = width;
 }
+
+const std::string& Motion::getGripperLink() const noexcept
+{
+  return gripper_link_;
+}
+
+const Eigen::Vector3d Motion::getGripperXyz() const noexcept
+{
+  return gripper_link_xyz_;
+}
 }

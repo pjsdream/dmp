@@ -21,6 +21,8 @@
 #include <dmp/common.h>
 #include <dmp/planning/objective/objective_reach_to_grip.h>
 #include <dmp/planning/objective/objective_grip.h>
+#include <dmp/planning/cost/cost_smoothness.h>
+#include <dmp/planning/cost/cost_collision.h>
 
 #include <QApplication>
 
@@ -59,9 +61,9 @@ int main(int argc, char** argv)
   planning_option.setRobotModel(robot_model);
   planning_option.setMotion(motion);
   planning_option.setEnvironment(environment);
-  planning_option.setTrajectoryOptions(3.0, 10);
+  planning_option.setTrajectoryOptions(3.0, 5);
   planning_option.setTimestep(0.1);
-  planning_option.setDiscretizations(100);
+  planning_option.setDiscretizations(30);
 
   auto planner = std::make_shared<dmp::Planner>(planning_option);
 
@@ -76,6 +78,14 @@ int main(int argc, char** argv)
   dmp::Publisher<dmp::Objective> objective_publisher;
   objective_publisher.publish(std::move(reach_to_grip));
   objective_publisher.publish(std::move(grip));
+
+  // cost
+  auto smoothness_cost = std::make_unique<dmp::CostSmoothness>(1.);
+  auto collision_cost = std::make_unique<dmp::CostCollision>(1.);
+
+  dmp::Publisher<dmp::Cost> cost_publisher;
+  cost_publisher.publish(std::move(smoothness_cost));
+  cost_publisher.publish(std::move(collision_cost));
 
   // controller
   dmp::ControllerOption controller_option;
@@ -160,6 +170,8 @@ int main(int argc, char** argv)
   planner->getRobotStateSubscriber().subscribeFrom(controller->getRobotStatePublisher());
 
   planner->getObjectiveSubscriber().subscribeFrom(objective_publisher);
+
+  planner->getCostSubscriber().subscribeFrom(cost_publisher);
 
   // run threads
   planner->runThread();

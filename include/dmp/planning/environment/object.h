@@ -11,6 +11,7 @@ class Shape;
 class Object
 {
 public:
+  Object();
   virtual ~Object() = default;
 
   void setShape(const std::shared_ptr<Shape>& shape);
@@ -22,10 +23,14 @@ public:
   void setName(const std::string& name) noexcept;
   const std::string& getName() const noexcept;
 
+  void setTransform(const Eigen::Affine3d& transform) noexcept;
+  const Eigen::Affine3d& getTransform() const noexcept;
+
 private:
   std::string name_;
   std::shared_ptr<Shape> shape_;
   Eigen::Vector4f color_;
+  Eigen::Affine3d transform_;
 };
 }
 

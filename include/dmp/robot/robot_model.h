@@ -36,6 +36,8 @@ public:
   const RobotJoint& getJoint(const std::string& joint_name) const noexcept;
   int getParent(int index) const noexcept;
 
+  int getLinkIndex(const std::string& link_name) const;
+
   VectorEigen<Eigen::Affine3d> forwardKinematics(const std::vector<double>& joint_values) const;
 
 private:
@@ -46,6 +48,7 @@ private:
   std::vector<RobotJoint> joints_;
 
   std::unordered_map<std::string, int> joint_name_to_index_;
+  std::unordered_map<std::string, int> link_name_to_index_;
 };
 }
 
