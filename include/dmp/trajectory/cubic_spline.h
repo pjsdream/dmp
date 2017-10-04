@@ -9,9 +9,7 @@ class CubicSpline
 {
 public:
   CubicSpline() = delete;
-  CubicSpline(double t, int num_curves);
-
-  double getT() const;
+  explicit CubicSpline(int num_curves);
 
   double position(double t) const;
   double velocity(double t) const;
@@ -25,8 +23,6 @@ private:
   double position(int i, double u) const;
   double velocity(int i, double u) const;
 
-  double t_;
-  double dt_;
   std::vector<double> p_;
   std::vector<double> v_;
 };

@@ -24,7 +24,7 @@
 #include <dmp/planning/objective/objective_grip.h>
 #include <dmp/planning/objective/objective_reach_to_grip.h>
 #include <dmp/planning/cost/cost.h>
-#include <dmp/planning/robot_configuration.h>
+#include <include/dmp/robot/robot_configuration.h>
 
 #include <iostream>
 
@@ -44,8 +44,7 @@ Planner::Planner(const PlanningOption& option)
 
   // Initialize trajectory
   // TODO: change the joint names. For now, use the body joints only
-  trajectory_ =
-      std::make_unique<CubicSplineTrajectory>(motion_->getBodyJoints(), trajectory_duration_, trajectory_num_curves_);
+  trajectory_ = std::make_unique<CubicSplineTrajectory>(motion_->getBodyJoints(), trajectory_num_curves_);
 
   // Allocate robot configurations
   const int num_max_objectives = 10;
@@ -91,6 +90,11 @@ void Planner::run()
 
   const auto& body_joint_names = motion_->getBodyJoints();
 
+  // Open finger
+  auto joint_names = body_joint_names;
+  joint_names.push_back("r_gripper_finger_joint");
+  joint_names.push_back("l_gripper_finger_joint");
+
   auto rate = Rate::withDuration(timestep_);
 
   while (!stopRequested())
@@ -101,18 +105,22 @@ void Planner::run()
     // Send the whole trajectory to the controller. The controller will overwrite the previously passed trajectory with
     // the new one. Takes less than 0.1 ms.
     constexpr auto trajectory_discretization = 30;
-    Trajectory trajectory(body_joint_names);
+    Trajectory trajectory(joint_names);
 
     for (int i = 0; i < trajectory_discretization; i++)
     {
-      const auto t = i * trajectory_duration_ / trajectory_discretization;
+      //const auto t = i * trajectory_duration_ / trajectory_discretization;
+      const auto t = static_cast<double>(i) / trajectory_discretization * trajectory_num_curves_;
 
-      Eigen::VectorXd joint_positions(body_joint_names.size());
+      Eigen::VectorXd joint_positions(body_joint_names.size() + 2);
       for (int j = 0; j < body_joint_names.size(); j++)
       {
         const auto& spline = trajectory_->getSpline(body_joint_names[j]);
         joint_positions(j) = spline.position(t);
       }
+
+      joint_positions(body_joint_names.size()) = 0.05;
+      joint_positions(body_joint_names.size() + 1) = 0.05;
 
       TrajectoryPoint point(t, joint_positions);
       trajectory.addPoint(point);
@@ -128,7 +136,7 @@ void Planner::run()
     if (!robot_state_requests.empty())
       robot_state_request = std::move(*robot_state_requests.rbegin());
 
-    stepForwardTrajectory(rate.duration(), std::move(robot_state_request));
+    //stepForwardTrajectory(rate.duration(), std::move(robot_state_request));
 
 
     // Receive objectives
@@ -155,17 +163,39 @@ void Planner::run()
     print("remaining time after planning: %lf ms\n", rate.remainingTime() * 1000.);
 
     // Test code for spline control.
-    /*
-    for (int i = 0; i < body_joint_names.size(); i++)
+    for (int j = 0; j <= trajectory_num_curves_; j++)
     {
-      auto& spline = trajectory_->getSpline(body_joint_names[i]);
-      for (int j = 0; j <= trajectory_num_curves_; j++)
-      {
-        spline.controlPosition(j) += 0.01 * j;
-      }
-    }
-     */
+      /*
+      trajectory_->getSpline("torso_lift_joint").controlPosition(j) = 0.3;
+      trajectory_->getSpline("shoulder_pan_joint").controlPosition(j) = -0.3;
+      trajectory_->getSpline("shoulder_lift_joint").controlPosition(j) = -0.8;
+      trajectory_->getSpline("upperarm_roll_joint").controlPosition(j) = 0.0;
+      trajectory_->getSpline("elbow_flex_joint").controlPosition(j) = 1.0;
+      trajectory_->getSpline("forearm_roll_joint").controlPosition(j) = 0.0;
+      trajectory_->getSpline("wrist_flex_joint").controlPosition(j) = 1.37;
+      trajectory_->getSpline("wrist_roll_joint").controlPosition(j) = -0.3;
+       */
+      /*
+      trajectory_->getSpline("torso_lift_joint").controlPosition(j) = 0.3;
+      trajectory_->getSpline("shoulder_pan_joint").controlPosition(j) = 0.3;
+      trajectory_->getSpline("shoulder_lift_joint").controlPosition(j) = -0.6;
+      trajectory_->getSpline("upperarm_roll_joint").controlPosition(j) = 0.0;
+      trajectory_->getSpline("elbow_flex_joint").controlPosition(j) = 1.1;
+      trajectory_->getSpline("forearm_roll_joint").controlPosition(j) = 0.0;
+      trajectory_->getSpline("wrist_flex_joint").controlPosition(j) = 1.07;
+      trajectory_->getSpline("wrist_roll_joint").controlPosition(j) = 0.3;
+       */
 
+      const double t = static_cast<double>(j) / trajectory_num_curves_;
+      trajectory_->getSpline("torso_lift_joint").controlPosition(j) = 0.3 * (1-t) + 0.3 * t;
+      trajectory_->getSpline("shoulder_pan_joint").controlPosition(j) = 0.3 * (1-t) + -0.3 * t;
+      trajectory_->getSpline("shoulder_lift_joint").controlPosition(j) = -0.6 * (1-t) + -0.8 * t;
+      trajectory_->getSpline("upperarm_roll_joint").controlPosition(j) = 0.0;
+      trajectory_->getSpline("elbow_flex_joint").controlPosition(j) = 1.1 * (1-t) + 1.0 * t;
+      trajectory_->getSpline("forearm_roll_joint").controlPosition(j) = 0.0;
+      trajectory_->getSpline("wrist_flex_joint").controlPosition(j) = 1.07 * (1-t) + 1.37 * t;
+      trajectory_->getSpline("wrist_roll_joint").controlPosition(j) = 0.3 * (1-t) + -0.3 * t;
+    }
 
     // Draw the current motion plan in the renderer.
     drawTrajectory();

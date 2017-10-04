@@ -27,7 +27,7 @@ protected:
   void run() override;
 
 private:
-  void drawRobot(const Eigen::VectorXd& joint_values);
+  void drawRobot(const Eigen::VectorXd& joint_values, std::string tag = "");
 
   Subscriber<Trajectory> trajectory_subscriber_;
   Publisher<Request> renderer_publisher_;

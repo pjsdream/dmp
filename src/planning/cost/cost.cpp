@@ -1,5 +1,5 @@
 #include <dmp/planning/cost/cost.h>
-#include <dmp/planning/robot_configuration.h>
+#include <include/dmp/robot/robot_configuration.h>
 
 namespace dmp
 {

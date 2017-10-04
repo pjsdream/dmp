@@ -3,37 +3,30 @@
 
 namespace dmp
 {
-CubicSpline::CubicSpline(double t, int num_curves)
-    : t_(t), dt_(t / num_curves)
+CubicSpline::CubicSpline(int num_curves)
 {
   p_.resize(num_curves + 1);
   v_.resize(num_curves + 1);
 }
 
-double CubicSpline::getT() const
-{
-  return t_;
-}
-
 double CubicSpline::position(double t) const
 {
-  auto i = static_cast<int>(t / dt_);
-  if (t == t_)
+  auto i = static_cast<int>(t);
+  if (i == p_.size() - 1)
     i = static_cast<int>(p_.size() - 2);
-  auto u = (t - dt_ * i) / dt_;
+  auto u = t - i;
 
   return position(i, u);
 }
 
 double CubicSpline::velocity(double t) const
 {
-  auto i = static_cast<int>(t / dt_);
-  if (t == t_)
+  auto i = static_cast<int>(t);
+  if (i == p_.size() - 1)
     i = static_cast<int>(p_.size() - 2);
-  const auto u = (t - dt_ * i) / dt_;
+  const auto u = t - i;
 
-  // Time domain is [0, dt]. Multiply by dt to convert domain from [0, 1].
-  return velocity(i, u) * dt_;
+  return velocity(i, u);
 }
 
 double& CubicSpline::controlPosition(int i)
@@ -76,9 +69,9 @@ void CubicSpline::fitting(const std::vector<std::tuple<double, double>>& samples
     const auto time = std::get<0>(tuple);
     const auto position = std::get<1>(tuple);
 
-    auto col = static_cast<int>(time / dt_);
-    auto u = time / dt_ - col;
-    if (std::abs(time - t_) < 1e-5)
+    auto col = static_cast<int>(time);
+    auto u = time - col;
+    if (std::abs(time - (p_.size() - 1)) < 1e-5)
     {
       col--;
       u = 1.;

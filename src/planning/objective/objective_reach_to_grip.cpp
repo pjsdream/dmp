@@ -1,6 +1,6 @@
 #include <dmp/planning/objective/objective_reach_to_grip.h>
 #include <dmp/planning/environment/interactable_object.h>
-#include <dmp/planning/robot_configuration.h>
+#include <include/dmp/robot/robot_configuration.h>
 #include <dmp/planning/motion/motion.h>
 
 #include <iostream>

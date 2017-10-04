@@ -50,7 +50,7 @@ int main(int argc, char** argv)
 
   // environment
   dmp::EnvironmentLoader environment_loader;
-  auto environment = environment_loader.loadEnvironment(dmp::PROJECT_SOURCE_DIR + "/config/environment.json");
+  auto environment = environment_loader.loadEnvironment(dmp::PROJECT_SOURCE_DIR + "/config/stacked_blocks.json");
 
   // motion
   dmp::MotionLoader motion_loader;

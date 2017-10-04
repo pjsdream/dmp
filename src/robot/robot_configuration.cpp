@@ -1,4 +1,4 @@
-#include <dmp/planning/robot_configuration.h>
+#include <include/dmp/robot/robot_configuration.h>
 #include <dmp/robot/robot_model.h>
 #include <dmp/robot/robot_joint.h>
 #include <dmp/robot/robot_link.h>

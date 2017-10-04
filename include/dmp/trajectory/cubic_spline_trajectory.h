@@ -13,7 +13,7 @@ class CubicSplineTrajectory
 {
 public:
   CubicSplineTrajectory() = delete;
-  CubicSplineTrajectory(const std::vector<std::string>& joint_names, double duration, int num_curves);
+  CubicSplineTrajectory(const std::vector<std::string>& joint_names, int num_curves);
 
   const std::vector<std::string>& getJointNames() const noexcept;
 
@@ -23,7 +23,6 @@ public:
   CubicSpline& getSpline(const std::string& joint_name);
 
 private:
-  double duration_;
   int num_curves_;
   std::vector<std::string> joint_names_;
 

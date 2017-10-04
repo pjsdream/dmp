@@ -3,14 +3,12 @@
 
 namespace dmp
 {
-CubicSplineTrajectory::CubicSplineTrajectory(const std::vector<std::string>& joint_names,
-                                             double duration,
-                                             int num_curves)
+CubicSplineTrajectory::CubicSplineTrajectory(const std::vector<std::string>& joint_names, int num_curves)
     : joint_names_(joint_names), num_curves_(num_curves)
 {
-  splines_.resize(joint_names.size(), CubicSpline(duration, num_curves));
+  splines_.resize(joint_names.size(), CubicSpline(num_curves));
 
-  for (int i=0; i<joint_names_.size(); i++)
+  for (int i = 0; i < joint_names_.size(); i++)
     joint_name_to_index_[joint_names_[i]] = i;
 }
 
