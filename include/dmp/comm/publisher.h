@@ -3,38 +3,38 @@
 
 #include <type_traits>
 
-#include <dmp/comm/message.h>
-#include <dmp/comm/message_queue.h>
-
 namespace dmp
 {
-template<typename T, typename = typename std::enable_if_t<std::is_base_of<Message, T>::value>>
+template<typename T>
+class MessageQueue;
+
+template<typename T>
 class Publisher
 {
 public:
-  Publisher()
-  {
-    queue_ = std::make_shared<MessageQueue<T>>();
-  }
+  Publisher() = default;
 
-  const std::shared_ptr<MessageQueue<T>>& getQueue() const
+  Publisher(const std::shared_ptr<MessageQueue<T>>& queue)
+      : queue_(queue)
   {
-    return queue_;
   }
 
   void publish(const T& value)
   {
-    queue_->push(value);
+    if (queue_)
+      queue_->push(value);
   }
 
   void publish(T&& value)
   {
-    queue_->push(std::move(value));
+    if (queue_)
+      queue_->push(std::move(value));
   }
 
   void publish(std::unique_ptr<T> value)
   {
-    queue_->push(std::move(value));
+    if (queue_)
+      queue_->push(std::move(value));
   }
 
 private:

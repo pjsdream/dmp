@@ -161,17 +161,15 @@ int main(int argc, char** argv)
            Eigen::Vector3f(1.f, 0.07f, 0.017f));
 
   // setup communication
+  /*
   renderer->getSubscriber().subscribeFrom(planner->getRendererPublisher());
   renderer->getSubscriber().subscribeFrom(light_publisher);
   renderer->getSubscriber().subscribeFrom(controller->getRendererPublisher());
-
   controller->getTrajectorySubscriber().subscribeFrom(planner->getTrajectoryPublisher());
-
   planner->getRobotStateSubscriber().subscribeFrom(controller->getRobotStatePublisher());
-
   planner->getObjectiveSubscriber().subscribeFrom(objective_publisher);
-
   planner->getCostSubscriber().subscribeFrom(cost_publisher);
+   */
 
   // run threads
   planner->runThread();

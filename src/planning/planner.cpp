@@ -59,31 +59,6 @@ Planner::Planner(const PlanningOption& option)
 
 Planner::~Planner() = default;
 
-Subscriber<RobotState>& Planner::getRobotStateSubscriber()
-{
-  return robot_state_subscriber_;
-}
-
-Subscriber<Objective>& Planner::getObjectiveSubscriber()
-{
-  return objective_subscriber_;
-}
-
-Subscriber<Cost>& Planner::getCostSubscriber()
-{
-  return cost_subscriber_;
-}
-
-Publisher<Request>& Planner::getRendererPublisher()
-{
-  return renderer_publisher_;
-}
-
-Publisher<Trajectory>& Planner::getTrajectoryPublisher()
-{
-  return trajectory_publisher_;
-}
-
 void Planner::run()
 {
   using namespace std::chrono_literals;
@@ -131,7 +106,9 @@ void Planner::run()
 
     // Receive the current robot state. Step forward the trajectory by timestep, finding the best fitting of spline
     // trajectory. Take about 2 ms.
-    auto robot_state_requests = robot_state_subscriber_.popAll();
+    // TODO: refactoring comm
+    //auto robot_state_requests = robot_state_subscriber_.popAll();
+    std::vector<std::unique_ptr<RobotState>> robot_state_requests;
     std::unique_ptr<RobotState> robot_state_request;
     if (!robot_state_requests.empty())
       robot_state_request = std::move(*robot_state_requests.rbegin());
@@ -140,7 +117,9 @@ void Planner::run()
 
 
     // Receive objectives
-    auto objective_requests = objective_subscriber_.popAll();
+    // TODO: refactoring comm
+    //auto objective_requests = objective_subscriber_.popAll();
+    std::vector<std::unique_ptr<Objective>> objective_requests;
     for (auto& objective : objective_requests)
     {
       objectives_.push_back(std::shared_ptr<Objective>(std::move(objective)));
@@ -149,7 +128,9 @@ void Planner::run()
 
 
     // Receive costs
-    auto cost_requests = cost_subscriber_.popAll();
+    // TODO: refactoring comm
+    //auto cost_requests = cost_subscriber_.popAll();
+    std::vector<std::unique_ptr<Cost>> cost_requests;
     for (auto& cost : cost_requests)
       costs_.push_back(std::shared_ptr<Cost>(std::move(cost)));
 

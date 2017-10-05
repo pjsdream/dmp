@@ -15,21 +15,6 @@ Controller::Controller(const ControllerOption& option)
   robot_model_ = option.getRobotModel();
 }
 
-Subscriber<Trajectory>& Controller::getTrajectorySubscriber()
-{
-  return trajectory_subscriber_;
-}
-
-Publisher<Request>& Controller::getRendererPublisher()
-{
-  return renderer_publisher_;
-}
-
-Publisher<RobotState>& Controller::getRobotStatePublisher()
-{
-  return robot_state_publisher_;
-}
-
 void Controller::drawRobot(const Eigen::VectorXd& joint_values, std::string tag)
 {
   auto num_links = robot_model_->numLinks();
@@ -98,7 +83,9 @@ void Controller::run()
 
   for (int i = 0; i < 100 * 100; i++)
   {
-    auto requests = trajectory_subscriber_.popAll();
+    // TODO: refactoring comm
+    //auto requests = trajectory_subscriber_.popAll();
+    std::vector<std::unique_ptr<Trajectory>> requests;
 
     // rendering the current robot state
     // TODO: render the robot state of the recentest trajectory

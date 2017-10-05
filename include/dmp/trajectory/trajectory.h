@@ -4,17 +4,16 @@
 #include <vector>
 #include <string>
 
-#include <dmp/comm/message.h>
 #include <dmp/trajectory/trajectory_point.h>
 
 namespace dmp
 {
-class Trajectory : public Message
+class Trajectory
 {
 public:
   Trajectory() = delete;
   explicit Trajectory(const std::vector<std::string>& joint_names);
-  ~Trajectory() override = default;
+  ~Trajectory() = default;
 
   Trajectory(const Trajectory& rhs) = default;
   Trajectory& operator=(const Trajectory& rhs) = default;

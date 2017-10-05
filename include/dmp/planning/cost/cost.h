@@ -1,15 +1,13 @@
 #ifndef DMP_COST_H
 #define DMP_COST_H
 
-#include <dmp/comm/message.h>
-
 #include <Eigen/Dense>
 
 namespace dmp
 {
 class RobotConfiguration;
 
-class Cost : public Message
+class Cost
 {
 public:
   Cost() = delete;

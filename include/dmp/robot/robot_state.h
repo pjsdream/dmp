@@ -5,16 +5,14 @@
 #include <string>
 #include <unordered_map>
 
-#include <dmp/comm/message.h>
-
 namespace dmp
 {
-class RobotState : public Message
+class RobotState
 {
 public:
   RobotState() = delete;
   explicit RobotState(const std::vector<std::string>& joint_names);
-  ~RobotState() override = default;
+  ~RobotState() = default;
 
   double& position(int i);
   double& position(const std::string& joint_name);

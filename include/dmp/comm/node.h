@@ -4,8 +4,6 @@
 #include <thread>
 #include <atomic>
 
-#include <dmp/comm/message.h>
-
 namespace dmp
 {
 class Node

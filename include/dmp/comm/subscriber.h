@@ -4,16 +4,16 @@
 #include <type_traits>
 #include <memory>
 
-#include <dmp/comm/message.h>
 #include <dmp/comm/publisher.h>
 #include <dmp/comm/message_queue.h>
 
 namespace dmp
 {
-template<typename T, typename = typename std::enable_if_t<std::is_base_of<Message, T>::value>>
+template<typename T>
 class Subscriber
 {
 public:
+  /*
   std::vector<std::unique_ptr<T>> popAll()
   {
     std::vector<std::unique_ptr<T>> result;
@@ -30,6 +30,7 @@ public:
   {
     queues_.push_back(publisher.getQueue());
   }
+   */
 
 private:
   std::vector<std::shared_ptr<MessageQueue<T>>> queues_;

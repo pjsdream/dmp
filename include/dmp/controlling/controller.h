@@ -19,10 +19,6 @@ public:
   Controller() = delete;
   explicit Controller(const ControllerOption& option);
 
-  Subscriber<Trajectory>& getTrajectorySubscriber();
-  Publisher<Request>& getRendererPublisher();
-  Publisher<RobotState>& getRobotStatePublisher();
-
 protected:
   void run() override;
 

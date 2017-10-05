@@ -1,8 +1,6 @@
 #ifndef DMP_OBJECTIVE_H
 #define DMP_OBJECTIVE_H
 
-#include <dmp/comm/message.h>
-
 #include <Eigen/Dense>
 
 #include <type_traits>
@@ -11,7 +9,7 @@ namespace dmp
 {
 class RobotConfiguration;
 
-class Objective : public Message
+class Objective
 {
 public:
   virtual ~Objective() = default;

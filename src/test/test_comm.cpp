@@ -1,9 +1,8 @@
 #include <dmp/comm/node.h>
-#include <dmp/comm/message.h>
 #include <dmp/comm/publisher.h>
 #include <dmp/comm/subscriber.h>
 
-class IntMsg : public dmp::Message
+class IntMsg
 {
 public:
   explicit IntMsg(int x) : data{x}
@@ -59,7 +58,9 @@ protected:
     while (true)
     {
       print("subscribing\n");
-      auto values = subscriber_.popAll();
+      // TODO: refactoring comm
+      //auto values = subscriber_.popAll();
+      std::vector<std::unique_ptr<IntMsg>> values;
       print("received %d messages\n", values.size());
       for (const auto& value : values)
       {

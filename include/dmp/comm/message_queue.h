@@ -6,10 +6,13 @@
 #include <memory>
 #include <vector>
 
-#include <dmp/comm/message.h>
+#include <queue>
 
 namespace dmp
 {
+template<typename T>
+class SubscriberMessageQueue;
+
 class AbstractMessageQueue
 {
 public:
@@ -23,7 +26,7 @@ public:
   AbstractMessageQueue& operator=(AbstractMessageQueue&& rhs) = delete;
 };
 
-template<typename T, typename = typename std::enable_if_t<std::is_base_of<Message, T>::value>>
+template<typename T>
 class MessageQueue : public AbstractMessageQueue
 {
 public:
@@ -39,37 +42,101 @@ public:
   void push(const T& value)
   {
     std::lock_guard<std::mutex> lock{mutex_};
-    queue_.push_back(std::make_unique<T>(value));
+    queue_.push(std::make_shared<T>(value));
   }
 
   void push(T&& value)
   {
     std::lock_guard<std::mutex> lock{mutex_};
-    queue_.push_back(std::make_unique<T>(std::move(value)));
+    queue_.push(std::make_shared<T>(std::move(value)));
   }
 
   void push(std::unique_ptr<T> value)
   {
     std::lock_guard<std::mutex> lock{mutex_};
-    queue_.push_back(std::move(value));
+    queue_.push(std::shared_ptr<T>(std::move(value)));
   }
 
-  std::vector<std::unique_ptr<T>> popAll()
+  virtual std::shared_ptr<T> pop()
   {
-    std::vector<std::unique_ptr<T>> result;
+    auto front = queue_.front();
+    queue_.pop();
+    return front;
+  }
 
+protected:
+  std::mutex mutex_;
+  std::queue<std::shared_ptr<T>> queue_{};
+};
+
+template<typename T>
+class PublisherMessageQueue : public MessageQueue<T>
+{
+public:
+  PublisherMessageQueue() = default;
+  ~PublisherMessageQueue() override = default;
+
+  PublisherMessageQueue(const PublisherMessageQueue& rhs) = delete;
+  PublisherMessageQueue& operator=(const PublisherMessageQueue& rhs) = delete;
+
+  PublisherMessageQueue(PublisherMessageQueue&& rhs) = delete;
+  PublisherMessageQueue& operator=(PublisherMessageQueue&& rhs) = delete;
+
+  void broadcast();
+
+private:
+  std::vector<std::shared_ptr<SubscriberMessageQueue<T>>> subscribers_{};
+};
+
+template<typename T>
+class SubscriberMessageQueue : public MessageQueue<T>
+{
+public:
+  SubscriberMessageQueue() = default;
+  ~SubscriberMessageQueue() override = default;
+
+  SubscriberMessageQueue(const SubscriberMessageQueue& rhs) = delete;
+  SubscriberMessageQueue& operator=(const SubscriberMessageQueue& rhs) = delete;
+
+  SubscriberMessageQueue(SubscriberMessageQueue&& rhs) = delete;
+  SubscriberMessageQueue& operator=(SubscriberMessageQueue&& rhs) = delete;
+
+  std::shared_ptr<T> pop() override
+  {
+    // Obtaining shared ptr to publisher
+    if (auto publisher = publisher_.lock())
     {
-      std::lock_guard<std::mutex> lock{mutex_};
-      queue_.swap(result);
+      // Request broadcast to the publisher queue
+      publisher->broadcast();
+      return MessageQueue<T>::pop();
     }
 
-    return result;
+    return nullptr;
   }
 
 private:
   std::mutex mutex_;
-  std::vector<std::unique_ptr<T>> queue_;
+  std::queue<std::shared_ptr<T>> queue_;
+  std::weak_ptr<PublisherMessageQueue<T>> publisher_;
 };
+
+//
+// Implementations
+//
+template<typename T>
+void PublisherMessageQueue<T>::broadcast()
+{
+  // Broadcast pending messages to all connected subscribers
+  std::lock_guard<std::mutex> lock{MessageQueue<T>::mutex_};
+  while (!MessageQueue<T>::queue_.empty())
+  {
+    auto message = MessageQueue<T>::queue_.front();
+    MessageQueue<T>::queue_.pop();
+
+    for (const auto& subscriber : subscribers_)
+      subscriber->push(message);
+  }
+}
 }
 
 #endif //DMP_MESSAGE_QUEUE_H

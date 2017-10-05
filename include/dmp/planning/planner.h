@@ -35,12 +35,6 @@ public:
   Planner(Planner&& rhs) = delete;
   Planner& operator=(Planner&& rhs) = delete;
 
-  Subscriber<RobotState>& getRobotStateSubscriber();
-  Subscriber<Objective>& getObjectiveSubscriber();
-  Subscriber<Cost>& getCostSubscriber();
-  Publisher<Request>& getRendererPublisher();
-  Publisher<Trajectory>& getTrajectoryPublisher();
-
 protected:
   void run() override;
 

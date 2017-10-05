@@ -25,53 +25,13 @@
 
 namespace dmp
 {
-class Renderer::Impl
-{
-public:
-  Impl();
-  ~Impl() = default;
-
-  void paintGL();
-  void resizeGL(int w, int h);
-  void initializeGL(QOpenGLContext* context);
-
-  void mousePressEvent(QMouseEvent* event);
-  void mouseMoveEvent(QMouseEvent* event);
-
-  Subscriber<Request>& getSubscriber();
-
-private:
-  void handleRequest(std::unique_ptr<Request> request);
-  void handleRequestFrame(std::unique_ptr<RequestFrame> request);
-  void handleRequestMesh(std::unique_ptr<RequestMesh> request);
-  void handleRequestLight(std::unique_ptr<RequestLight> request);
-  void handleRequestCustomTexture(std::unique_ptr<RequestCustomTexture> request);
-  void handleRequestCustomMesh(std::unique_ptr<RequestCustomMesh> request);
-
-  std::shared_ptr<GlFunctions> gl_;
-
-  std::unique_ptr<SceneManager> scene_manager_;
-  std::unique_ptr<ResourceManager> resource_manager_;
-  std::unique_ptr<LightManager> light_manager_;
-
-  Subscriber<Request> request_subscriber_;
-
-  std::unique_ptr<LightShader> light_shader_;
-
-  std::shared_ptr<Camera> camera_;
-
-  std::unordered_map<const std::type_info*, std::function<void(std::unique_ptr<Request>)>> request_handlers_;
-
-  int last_mouse_x_;
-  int last_mouse_y_;
-};
-
 //
-// Renderer
+// Renderer::Impl
 //
 Renderer::Renderer(QWidget* parent)
-    : QOpenGLWidget(parent),
-      impl_(std::make_unique<Impl>())
+    : QOpenGLWidget(parent), camera_(std::make_unique<Camera>()),
+      scene_manager_(std::make_unique<SceneManager>()),
+      light_manager_(std::make_unique<LightManager>())
 {
   // window management
   resize(800, 600);
@@ -86,55 +46,7 @@ Renderer::Renderer(QWidget* parent)
 
 Renderer::~Renderer() = default;
 
-Subscriber<Request>& Renderer::getSubscriber()
-{
-  return impl_->getSubscriber();
-}
-
-void Renderer::paintGL()
-{
-  impl_->paintGL();
-}
-
-void Renderer::resizeGL(int w, int h)
-{
-  impl_->resizeGL(w, h);
-  update();
-}
-
-void Renderer::initializeGL()
-{
-  impl_->initializeGL(context());
-}
-
-void Renderer::mousePressEvent(QMouseEvent* event)
-{
-  impl_->mousePressEvent(event);
-  update();
-}
-
-void Renderer::mouseMoveEvent(QMouseEvent* event)
-{
-  impl_->mouseMoveEvent(event);
-  update();
-}
-
-//
-// Renderer::Impl
-//
-Renderer::Impl::Impl()
-    : camera_(std::make_unique<Camera>()),
-      scene_manager_(std::make_unique<SceneManager>()),
-      light_manager_(std::make_unique<LightManager>())
-{
-}
-
-Subscriber<Request>& Renderer::Impl::getSubscriber()
-{
-  return request_subscriber_;
-}
-
-void Renderer::Impl::handleRequest(std::unique_ptr<Request> request)
+void Renderer::handleRequest(std::unique_ptr<Request> request)
 {
   Request* bare_pointer = request.release();
   if (RequestFrame* request_frame = dynamic_cast<RequestFrame*>(bare_pointer))
@@ -149,17 +61,17 @@ void Renderer::Impl::handleRequest(std::unique_ptr<Request> request)
     handleRequestCustomMesh(std::unique_ptr<RequestCustomMesh>(request_custom_mesh));
 }
 
-void Renderer::Impl::handleRequestFrame(std::unique_ptr<RequestFrame> request)
+void Renderer::handleRequestFrame(std::unique_ptr<RequestFrame> request)
 {
   scene_manager_->setFrame(request->parent, request->name, request->transform);
 }
 
-void Renderer::Impl::handleRequestMesh(std::unique_ptr<RequestMesh> request)
+void Renderer::handleRequestMesh(std::unique_ptr<RequestMesh> request)
 {
   scene_manager_->attachResource(request->frame, resource_manager_->getMesh(request->filename));
 }
 
-void Renderer::Impl::handleRequestLight(std::unique_ptr<RequestLight> request)
+void Renderer::handleRequestLight(std::unique_ptr<RequestLight> request)
 {
   switch (request->getAction())
   {
@@ -170,17 +82,17 @@ void Renderer::Impl::handleRequestLight(std::unique_ptr<RequestLight> request)
 
       light_manager_->setLight(index, light);
     }
-    break;
+      break;
     case RequestLight::Action::Delete:
     {
       auto index = request->getIndex();
       light_manager_->deleteLight(index);
     }
-    break;
+      break;
   }
 }
 
-void Renderer::Impl::handleRequestCustomTexture(std::unique_ptr<RequestCustomTexture> request)
+void Renderer::handleRequestCustomTexture(std::unique_ptr<RequestCustomTexture> request)
 {
   TextureLoaderRawTexture texture;
   texture.width = request->w;
@@ -190,7 +102,7 @@ void Renderer::Impl::handleRequestCustomTexture(std::unique_ptr<RequestCustomTex
   resource_manager_->createTexture(request->name, std::move(texture));
 }
 
-void Renderer::Impl::handleRequestCustomMesh(std::unique_ptr<RequestCustomMesh> request)
+void Renderer::handleRequestCustomMesh(std::unique_ptr<RequestCustomMesh> request)
 {
   MeshLoaderRawMesh raw_mesh;
   raw_mesh.vertex_buffer = std::move(request->vertex_buffer);
@@ -203,7 +115,8 @@ void Renderer::Impl::handleRequestCustomMesh(std::unique_ptr<RequestCustomMesh> 
 
   auto mesh = resource_manager_->createMesh(request->name, std::move(raw_mesh));
 
-  if (!request->texture_name.empty()) {
+  if (!request->texture_name.empty())
+  {
     auto texture = resource_manager_->getTexture(request->texture_name);
     mesh->setTexture(texture);
   }
@@ -211,12 +124,14 @@ void Renderer::Impl::handleRequestCustomMesh(std::unique_ptr<RequestCustomMesh> 
   scene_manager_->attachResource(request->frame, mesh);
 }
 
-void Renderer::Impl::paintGL()
+void Renderer::paintGL()
 {
   gl_->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // update scene upon requests
-  std::vector<std::unique_ptr<Request>> requests{request_subscriber_.popAll()};
+  // TODO: refactoring comm
+  //std::vector<std::unique_ptr<Request>> requests{request_subscriber_.popAll()};
+  std::vector<std::unique_ptr<Request>> requests;
 
   for (auto&& request : requests)
     handleRequest(std::move(request));
@@ -259,18 +174,23 @@ void Renderer::Impl::paintGL()
     }
   }
   light_shader_->end();
+
+  update();
 }
 
-void Renderer::Impl::resizeGL(int w, int h)
+void Renderer::resizeGL(int w, int h)
 {
   gl_->glViewport(0, 0, w, h);
-  camera_->setAspect((double)w / h);
+  camera_->setAspect((double) w / h);
+
+  update();
 }
 
-void Renderer::Impl::initializeGL(QOpenGLContext* context)
+void Renderer::initializeGL()
 {
-  auto deleter = [](GlFunctions*){};
-  gl_.reset(context->versionFunctions<GlFunctions>(), deleter);
+  auto deleter = [](GlFunctions*)
+  {};
+  gl_.reset(context()->versionFunctions<GlFunctions>(), deleter);
 
   gl_->glClearColor(0.8f, 0.8f, 0.8f, 0.f);
   gl_->glEnable(GL_DEPTH_TEST);
@@ -282,13 +202,13 @@ void Renderer::Impl::initializeGL(QOpenGLContext* context)
   light_shader_ = std::make_unique<LightShader>(gl_);
 }
 
-void Renderer::Impl::mousePressEvent(QMouseEvent* event)
+void Renderer::mousePressEvent(QMouseEvent* event)
 {
   last_mouse_x_ = event->x();
   last_mouse_y_ = event->y();
 }
 
-void Renderer::Impl::mouseMoveEvent(QMouseEvent* event)
+void Renderer::mouseMoveEvent(QMouseEvent* event)
 {
   const int x = event->x();
   const int y = event->y();
@@ -300,14 +220,19 @@ void Renderer::Impl::mouseMoveEvent(QMouseEvent* event)
 
   switch (event->buttons())
   {
-    case Qt::LeftButton:camera_->rotatePixel(dx, dy);
+    case Qt::LeftButton:
+      camera_->rotatePixel(dx, dy);
       break;
 
-    case Qt::RightButton:camera_->translatePixel(dx, dy);
+    case Qt::RightButton:
+      camera_->translatePixel(dx, dy);
       break;
 
-    case Qt::LeftButton | Qt::RightButton:camera_->zoomPixel(dx, dy);
+    case Qt::LeftButton | Qt::RightButton:
+      camera_->zoomPixel(dx, dy);
       break;
   }
+
+  update();
 }
 }

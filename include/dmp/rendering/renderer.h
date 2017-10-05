@@ -8,6 +8,7 @@
 #include <QOpenGLWidget>
 
 #include <memory>
+#include <unordered_map>
 
 #include <Eigen/Dense>
 
@@ -20,6 +21,13 @@ class SceneNode;
 class SceneObject;
 class ResourceManager;
 class LightShader;
+class RequestFrame;
+class RequestMesh;
+class RequestLight;
+class RequestCustomTexture;
+class RequestCustomMesh;
+class LightManager;
+class Camera;
 
 class Renderer : public QOpenGLWidget
 {
@@ -35,8 +43,6 @@ public:
   Renderer(Renderer&& rhs) = delete;
   Renderer& operator=(Renderer&& rhs) = delete;
 
-  Subscriber<Request>& getSubscriber();
-
 protected:
   void paintGL() override;
   void resizeGL(int w, int h) override;
@@ -46,8 +52,27 @@ protected:
   void mouseMoveEvent(QMouseEvent* event) override;
 
 private:
-  class Impl;
-  std::unique_ptr<Impl> impl_;
+  void handleRequest(std::unique_ptr<Request> request);
+  void handleRequestFrame(std::unique_ptr<RequestFrame> request);
+  void handleRequestMesh(std::unique_ptr<RequestMesh> request);
+  void handleRequestLight(std::unique_ptr<RequestLight> request);
+  void handleRequestCustomTexture(std::unique_ptr<RequestCustomTexture> request);
+  void handleRequestCustomMesh(std::unique_ptr<RequestCustomMesh> request);
+
+  std::shared_ptr<GlFunctions> gl_;
+
+  std::unique_ptr<SceneManager> scene_manager_;
+  std::unique_ptr<ResourceManager> resource_manager_;
+  std::unique_ptr<LightManager> light_manager_;
+
+  Subscriber<Request> request_subscriber_;
+
+  std::unique_ptr<LightShader> light_shader_;
+
+  std::shared_ptr<Camera> camera_;
+
+  int last_mouse_x_;
+  int last_mouse_y_;
 };
 }
 
