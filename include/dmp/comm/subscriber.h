@@ -4,7 +4,6 @@
 #include <type_traits>
 #include <memory>
 
-#include <dmp/comm/publisher.h>
 #include <dmp/comm/message_queue.h>
 
 namespace dmp
@@ -13,27 +12,22 @@ template<typename T>
 class Subscriber
 {
 public:
-  /*
-  std::vector<std::unique_ptr<T>> popAll()
+  Subscriber() = default;
+
+  explicit Subscriber(const std::shared_ptr<SubscriberMessageQueue<T>>& queue)
+      : queue_(queue)
   {
-    std::vector<std::unique_ptr<T>> result;
-    for (auto& queue : queues_)
-    {
-      auto part = std::move(queue->popAll());
-      for (auto& value : part)
-        result.push_back(std::move(value));
-    }
-    return result;
   }
 
-  void subscribeFrom(const Publisher<T>& publisher)
+  std::shared_ptr<T> pop()
   {
-    queues_.push_back(publisher.getQueue());
+    if (queue_)
+      return queue_->pop();
+    return nullptr;
   }
-   */
 
 private:
-  std::vector<std::shared_ptr<MessageQueue<T>>> queues_;
+  std::shared_ptr<SubscriberMessageQueue<T>> queue_;
 };
 }
 

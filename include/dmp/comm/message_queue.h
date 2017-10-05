@@ -59,6 +59,8 @@ public:
 
   virtual std::shared_ptr<T> pop()
   {
+    std::lock_guard<std::mutex> lock{mutex_};
+
     auto front = queue_.front();
     queue_.pop();
     return front;
@@ -82,6 +84,11 @@ public:
   PublisherMessageQueue(PublisherMessageQueue&& rhs) = delete;
   PublisherMessageQueue& operator=(PublisherMessageQueue&& rhs) = delete;
 
+  void addSubscriber(const std::shared_ptr<SubscriberMessageQueue<T>>& subscriber)
+  {
+    subscribers_.push_back(subscriber);
+  }
+
   void broadcast();
 
 private:
@@ -101,22 +108,31 @@ public:
   SubscriberMessageQueue(SubscriberMessageQueue&& rhs) = delete;
   SubscriberMessageQueue& operator=(SubscriberMessageQueue&& rhs) = delete;
 
+  void setPublisher(const std::shared_ptr<SubscriberMessageQueue<T>>& publisher)
+  {
+    publisher_ = publisher;
+  }
+
   std::shared_ptr<T> pop() override
   {
+    std::lock_guard<std::mutex> lock{this->mutex_};
+
     // Obtaining shared ptr to publisher
     if (auto publisher = publisher_.lock())
     {
       // Request broadcast to the publisher queue
       publisher->broadcast();
-      return MessageQueue<T>::pop();
+
+      // Behaves like pop() of the basis function, but the mutex is already locked.
+      auto front = this->queue_.front();
+      this->queue_.pop();
+      return front;
     }
 
     return nullptr;
   }
 
 private:
-  std::mutex mutex_;
-  std::queue<std::shared_ptr<T>> queue_;
   std::weak_ptr<PublisherMessageQueue<T>> publisher_;
 };
 
@@ -126,12 +142,13 @@ private:
 template<typename T>
 void PublisherMessageQueue<T>::broadcast()
 {
+  std::lock_guard<std::mutex> lock{this->mutex_};
+
   // Broadcast pending messages to all connected subscribers
-  std::lock_guard<std::mutex> lock{MessageQueue<T>::mutex_};
-  while (!MessageQueue<T>::queue_.empty())
+  while (!this->queue_.empty())
   {
-    auto message = MessageQueue<T>::queue_.front();
-    MessageQueue<T>::queue_.pop();
+    auto message = this->queue_.front();
+    this->queue_.pop();
 
     for (const auto& subscriber : subscribers_)
       subscriber->push(message);

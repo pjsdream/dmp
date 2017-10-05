@@ -1,20 +1,19 @@
 #ifndef DMP_PUBLISHER_H
 #define DMP_PUBLISHER_H
 
-#include <type_traits>
+#include "message_queue.h"
+
+#include <memory>
 
 namespace dmp
 {
-template<typename T>
-class MessageQueue;
-
 template<typename T>
 class Publisher
 {
 public:
   Publisher() = default;
 
-  Publisher(const std::shared_ptr<MessageQueue<T>>& queue)
+  explicit Publisher(const std::shared_ptr<PublisherMessageQueue<T>>& queue)
       : queue_(queue)
   {
   }

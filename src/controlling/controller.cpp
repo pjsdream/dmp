@@ -79,7 +79,7 @@ void Controller::run()
 {
   using namespace std::chrono_literals;
 
-  Rate rate(1);
+  Rate rate(100);
 
   for (int i = 0; i < 100 * 100; i++)
   {
