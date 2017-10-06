@@ -165,29 +165,23 @@ int main(int argc, char** argv)
            Eigen::Vector3f(0.15f, 0.15f, 0.15f),
            Eigen::Vector3f(1.f, 0.07f, 0.017f));
 
-  // setup communication
-  /*
-  renderer->getSubscriber().subscribeFrom(planner->getRendererPublisher());
-  renderer->getSubscriber().subscribeFrom(light_publisher);
-  renderer->getSubscriber().subscribeFrom(controller->getRendererPublisher());
-  controller->getTrajectorySubscriber().subscribeFrom(planner->getTrajectoryPublisher());
-  planner->getRobotStateSubscriber().subscribeFrom(controller->getRobotStatePublisher());
-  planner->getObjectiveSubscriber().subscribeFrom(objective_publisher);
-  planner->getCostSubscriber().subscribeFrom(cost_publisher);
-   */
-
   // showing renderer
-  printf("showing window\n");
-  renderer->show();
-  printf("showing done\n");
-  renderer->windowHandle()->setScreen(qApp->screens().last());
   renderer->move(100, 100);
   renderer->resize(800, 600);
+  renderer->show();
 
   // run threads
   planner->runThread();
   controller->runThread();
 
   app.exec();
+
+  printf("exiting the program\n");
+  planner->requestStop();
+  controller->requestStop();
+  planner->joinThread();
+  controller->joinThread();
+
+  renderer.reset();
   return 0;
 }

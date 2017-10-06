@@ -21,6 +21,7 @@ public:
 
   Shader() = delete;
   explicit Shader(const std::shared_ptr<GlFunctions>& gl);
+  ~Shader();
 
   void loadShader(const std::string& filename, ShaderType type);
   void linkShader();

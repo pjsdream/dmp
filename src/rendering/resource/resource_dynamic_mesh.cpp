@@ -9,7 +9,10 @@ ResourceDynamicMesh::ResourceDynamicMesh(const std::shared_ptr<GlFunctions>& gl)
 
 ResourceDynamicMesh::~ResourceDynamicMesh()
 {
-  // TODO: clear gl objects
+  if (vao_ != 0)
+    gl_->glDeleteVertexArrays(1, &vao_);
+
+  gl_->glDeleteBuffers(5, &vbos_[0]);
 }
 
 void ResourceDynamicMesh::updateVertexBuffer(std::vector<float>&& b)

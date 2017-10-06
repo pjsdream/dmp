@@ -10,7 +10,8 @@ ResourceTexture::ResourceTexture(const std::shared_ptr<GlFunctions>& gl)
 
 ResourceTexture::~ResourceTexture()
 {
-  // TODO: delete gl resources
+  printf("deleting texture\n");
+  gl_->glDeleteTextures(1, &texture_id_);
 }
 
 void ResourceTexture::loadTexture(TextureLoaderRawTexture&& texture)

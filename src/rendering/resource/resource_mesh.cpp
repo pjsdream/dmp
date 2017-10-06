@@ -10,7 +10,7 @@ ResourceMesh::ResourceMesh(const std::shared_ptr<GlFunctions>& gl)
       ready_rendering_(true),
       ready_texture_(true),
       color_option_(ColorOption::GlobalColor),
-      global_color_(Eigen::Vector3f(0.8f, 0.8f, 0.8f))
+      global_color_(Eigen::Vector3f(0.8f, 0.8f, 0.8f)), vao_(0)
 {
 }
 
@@ -26,7 +26,10 @@ ResourceMesh::ResourceMesh(const std::shared_ptr<GlFunctions>& gl, const std::st
 
 ResourceMesh::~ResourceMesh()
 {
-  // TODO: clear gl objects
+  if (vao_ != 0)
+    gl_->glDeleteVertexArrays(1, &vao_);
+
+  gl_->glDeleteBuffers(5, &vbos_[0]);
 }
 
 void ResourceMesh::draw()

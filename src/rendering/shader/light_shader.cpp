@@ -10,11 +10,8 @@ namespace dmp
 LightShader::LightShader(const std::shared_ptr<GlFunctions>& gl)
     : Shader(gl)
 {
-  // TODO: define PROJECT_SOURCE_DIR in a common header file
-  loadShader(PROJECT_SOURCE_DIR + "/shader/light.vert", ShaderType::Vertex);
-  loadShader(PROJECT_SOURCE_DIR + "/shader/light.frag", ShaderType::Fragment);
-
-  bindAttribLocations();
+  //loadShader(PROJECT_SOURCE_DIR + "/shader/light.vert", ShaderType::Vertex);
+  //loadShader(PROJECT_SOURCE_DIR + "/shader/light.frag", ShaderType::Fragment);
 
   linkShader();
 
@@ -23,6 +20,8 @@ LightShader::LightShader(const std::shared_ptr<GlFunctions>& gl)
 
 void LightShader::setUniformLocations()
 {
+  // TODO: use locations explicitly assigned in shader files
+
   loc_model_ = getUniformLocation("model");
   loc_view_ = getUniformLocation("view");
   loc_projection_ = getUniformLocation("projection");
@@ -53,14 +52,6 @@ void LightShader::setUniformLocations()
   loc_material_.shininess = getUniformLocation("material.shininess");
 
   loc_material_texture_ = getUniformLocation("material_texture");
-}
-
-void LightShader::bindAttribLocations()
-{
-  bindAttribLocation(0, "position");
-  bindAttribLocation(1, "normal");
-  bindAttribLocation(2, "tex_coord");
-  bindAttribLocation(3, "color");
 }
 
 void LightShader::hasTexture(const std::shared_ptr<ResourceTexture>& texture)

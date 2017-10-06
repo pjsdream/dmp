@@ -8,6 +8,11 @@ Node::Node(const std::shared_ptr<Manager>& manager, const std::string& name)
 {
 }
 
+void Node::requestStop()
+{
+  stop_requested_ = true;
+}
+
 const std::string& Node::getNodeName()
 {
   return name_;

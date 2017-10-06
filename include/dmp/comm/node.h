@@ -27,6 +27,8 @@ public:
 
   const std::string& getNodeName();
 
+  void requestStop();
+
   void print(const char* format, ...);
 
   template<typename T>

@@ -5,7 +5,12 @@ namespace dmp
 Shader::Shader(const std::shared_ptr<GlFunctions>& gl)
     : gl_(gl)
 {
-  program_ = gl_->glCreateProgram();
+}
+
+Shader::~Shader()
+{
+  printf("deleting shader\n");
+  gl_->glDeleteProgram(program_);
 }
 
 void Shader::loadShader(const std::string& filename, ShaderType type)
@@ -47,6 +52,9 @@ void Shader::loadShader(const std::string& filename, ShaderType type)
     gl_->glGetShaderInfoLog(shader, len, &len, log);
     fprintf(stderr, "Shader compilation failed:\n%s\n", log);
     delete[] log;
+
+    // Don't need the shader anymore
+    gl_->glDeleteShader(shader);
   }
 
   shaders_.push_back(shader);
@@ -54,6 +62,8 @@ void Shader::loadShader(const std::string& filename, ShaderType type)
 
 void Shader::linkShader()
 {
+  program_ = gl_->glCreateProgram();
+
   for (GLuint shader : shaders_)
     gl_->glAttachShader(program_, shader);
 
@@ -64,9 +74,6 @@ void Shader::linkShader()
 
   if (!linked)
   {
-    for (GLuint shader : shaders_)
-      gl_->glDetachShader(program_, shader);
-
     GLsizei len;
     gl_->glGetProgramiv(program_, GL_INFO_LOG_LENGTH, &len);
 
@@ -75,8 +82,18 @@ void Shader::linkShader()
     fprintf(stderr, "Shader linking failed:\n%s\n", log);
     delete[] log;
 
+    // Don't need shaders and program anymore
+    gl_->glDeleteProgram(program_);
+    for (GLuint shader : shaders_)
+      gl_->glDeleteShader(shader);
+    shaders_.clear();
+
     return;
   }
+
+  // Detach shaders after a successful link
+  for (GLuint shader : shaders_)
+    gl_->glDetachShader(program_, shader);
 }
 
 GLuint Shader::shaderTypeToGlType(ShaderType type)

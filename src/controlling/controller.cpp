@@ -81,7 +81,7 @@ void Controller::run()
 
   Rate rate(100);
 
-  for (int i = 0; i < 100 * 100; i++)
+  for (int i = 0; i < 100 * 100 && !stopRequested(); i++)
   {
     // TODO: refactoring comm
     //auto requests = trajectory_subscriber_.popAll();

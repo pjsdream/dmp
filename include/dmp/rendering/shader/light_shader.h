@@ -39,7 +39,6 @@ private:
   };
 
   void setUniformLocations();
-  void bindAttribLocations();
 
   ColorOption color_option_;
 

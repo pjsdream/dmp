@@ -48,6 +48,8 @@ Renderer::~Renderer() = default;
 
 void Renderer::handleRequest(std::shared_ptr<Request> request)
 {
+  return;
+
   handleRequestFrame(std::dynamic_pointer_cast<RequestFrame>(request));
   handleRequestMesh(std::dynamic_pointer_cast<RequestMesh>(request));
   handleRequestLight(std::dynamic_pointer_cast<RequestLight>(request));
@@ -205,26 +207,18 @@ void Renderer::resizeGL(int w, int h)
 
 void Renderer::initializeGL()
 {
-  printf("initializing gl\n");
   auto deleter = [](GlFunctions*)
   {};
   gl_.reset(context()->versionFunctions<GlFunctions>(), deleter);
-
-  printf("got gl functions\n");
 
   gl_->glClearColor(0.8f, 0.8f, 0.8f, 0.f);
   gl_->glEnable(GL_DEPTH_TEST);
   gl_->glEnable(GL_MULTISAMPLE);
 
-  printf("creating resource manager\n");
-
   resource_manager_ = std::make_unique<ResourceManager>(gl_);
 
-  printf("creating light shader\n");
   // shaders
   light_shader_ = std::make_unique<LightShader>(gl_);
-
-  printf("initialize done\n");
 }
 
 void Renderer::mousePressEvent(QMouseEvent* event)
