@@ -143,7 +143,6 @@ void Renderer::paintGL()
   while (true)
   {
     auto request = request_subscriber_.pop();
-    printf("%p\n", request);
 
     if (request != nullptr)
       requests.push_back(request);

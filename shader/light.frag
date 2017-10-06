@@ -1,4 +1,5 @@
-#version 410 core
+#version 430 core
+#extension GL_ARB_explicit_uniform_location : enable
 
 struct Light
 {
@@ -23,14 +24,14 @@ struct Material
   float shininess;
 };
 
-uniform vec3 eye_position;
-uniform Light lights[8];
+layout(location = 6) uniform vec3 eye_position;
+layout(location = 14) uniform Light lights[8]; // Each component takes 7. Whole array takes 56
 
-uniform bool has_material;
-uniform Material material;
+layout(location = 7) uniform bool has_material;
+layout(location = 10) uniform Material material; // Takes 4
 
-uniform bool has_texture;
-uniform sampler2D material_texture;
+layout(location = 8) uniform bool has_texture;
+layout(location = 9) uniform sampler2D material_texture;
 
 in vec2 texture_coord;
 in vec3 surface_position;

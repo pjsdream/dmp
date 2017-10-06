@@ -1,17 +1,18 @@
 #version 430 core
+#extension GL_ARB_explicit_uniform_location : enable
 
-in vec3 position;
-in vec3 normal;
-in vec2 tex_coord;
-in vec3 color;
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec3 normal;
+layout(location = 2) in vec2 tex_coord;
+layout(location = 3) in vec3 color;
 
-uniform bool has_color;
-uniform bool has_global_color;
-uniform vec3 global_color;
+layout(location = 0) uniform bool has_color;
+layout(location = 1) uniform bool has_global_color;
+layout(location = 2) uniform vec3 global_color;
 
-uniform mat4 model;
-uniform mat4 projection;
-uniform mat4 view;
+layout(location = 3) uniform mat4 model;
+layout(location = 4) uniform mat4 projection;
+layout(location = 5) uniform mat4 view;
 
 out vec2 texture_coord;
 out vec3 surface_position;
