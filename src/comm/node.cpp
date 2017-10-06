@@ -3,10 +3,9 @@
 
 namespace dmp
 {
-Node::Node(const std::string& name)
-    : stop_requested_(false)
+Node::Node(const std::shared_ptr<Manager>& manager, const std::string& name)
+    : manager_(manager), name_(name), stop_requested_(false)
 {
-  name_ = name;
 }
 
 const std::string& Node::getNodeName()

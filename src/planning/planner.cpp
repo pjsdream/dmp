@@ -30,9 +30,15 @@
 
 namespace dmp
 {
-Planner::Planner(const PlanningOption& option)
-    : Node("planner")
+Planner::Planner(const std::shared_ptr<Manager>& manager, const PlanningOption& option)
+    : Node(manager, "planner")
 {
+  robot_state_subscriber_ = createSubscriber<RobotState>("robot_state");
+  objective_subscriber_ = createSubscriber<Objective>("objective");
+  cost_subscriber_ = createSubscriber<Cost>("cost");
+  renderer_publisher_ = createPublisher<Request>("rendering");
+  trajectory_publisher_ = createPublisher<Trajectory>("trajectory");
+
   setRobotModel(option.getRobotModel());
   setEnvironment(option.getEnvironment());
   setMotion(option.getMotion());

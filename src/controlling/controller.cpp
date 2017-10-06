@@ -9,8 +9,8 @@
 
 namespace dmp
 {
-Controller::Controller(const ControllerOption& option)
-    : Node("controller")
+Controller::Controller(const std::shared_ptr<Manager>& manager, const ControllerOption& option)
+    : Node(manager, "controller")
 {
   robot_model_ = option.getRobotModel();
 }

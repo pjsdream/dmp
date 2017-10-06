@@ -14,7 +14,7 @@
 #include <dmp/rendering/light/light_manager.h>
 #include <dmp/rendering/light/light.h>
 #include <dmp/utils/texture_loader.h>
-
+#include <dmp/comm/manager.h>
 #include <dmp/comm/subscriber.h>
 
 #include <QTimer>
@@ -28,15 +28,15 @@ namespace dmp
 //
 // Renderer::Impl
 //
-Renderer::Renderer(QWidget* parent)
-    : QOpenGLWidget(parent), camera_(std::make_unique<Camera>()),
+Renderer::Renderer(const std::shared_ptr<Manager>& manager, QWidget* parent)
+    : QOpenGLWidget(parent),
+      Node(manager, "renderer"),
+      camera_(std::make_unique<Camera>()),
       scene_manager_(std::make_unique<SceneManager>()),
       light_manager_(std::make_unique<LightManager>())
 {
-  // window management
-  resize(800, 600);
-  move(100, 100);
-  show();
+  // Subscriber
+  request_subscriber_ = createSubscriber<Request>("rendering");
 
   QTimer* timer = new QTimer(this);
   timer->setInterval(16);
@@ -46,33 +46,36 @@ Renderer::Renderer(QWidget* parent)
 
 Renderer::~Renderer() = default;
 
-void Renderer::handleRequest(std::unique_ptr<Request> request)
+void Renderer::handleRequest(std::shared_ptr<Request> request)
 {
-  Request* bare_pointer = request.release();
-  if (RequestFrame* request_frame = dynamic_cast<RequestFrame*>(bare_pointer))
-    handleRequestFrame(std::unique_ptr<RequestFrame>(request_frame));
-  else if (RequestMesh* request_mesh = dynamic_cast<RequestMesh*>(bare_pointer))
-    handleRequestMesh(std::unique_ptr<RequestMesh>(request_mesh));
-  else if (RequestLight* request_light = dynamic_cast<RequestLight*>(bare_pointer))
-    handleRequestLight(std::unique_ptr<RequestLight>(request_light));
-  else if (RequestCustomTexture* request_custom_texture = dynamic_cast<RequestCustomTexture*>(bare_pointer))
-    handleRequestCustomTexture(std::unique_ptr<RequestCustomTexture>(request_custom_texture));
-  else if (RequestCustomMesh* request_custom_mesh = dynamic_cast<RequestCustomMesh*>(bare_pointer))
-    handleRequestCustomMesh(std::unique_ptr<RequestCustomMesh>(request_custom_mesh));
+  handleRequestFrame(std::dynamic_pointer_cast<RequestFrame>(request));
+  handleRequestMesh(std::dynamic_pointer_cast<RequestMesh>(request));
+  handleRequestLight(std::dynamic_pointer_cast<RequestLight>(request));
+  handleRequestCustomTexture(std::dynamic_pointer_cast<RequestCustomTexture>(request));
+  handleRequestCustomMesh(std::dynamic_pointer_cast<RequestCustomMesh>(request));
 }
 
-void Renderer::handleRequestFrame(std::unique_ptr<RequestFrame> request)
+void Renderer::handleRequestFrame(std::shared_ptr<RequestFrame> request)
 {
+  if (request == nullptr)
+    return;
+
   scene_manager_->setFrame(request->parent, request->name, request->transform);
 }
 
-void Renderer::handleRequestMesh(std::unique_ptr<RequestMesh> request)
+void Renderer::handleRequestMesh(std::shared_ptr<RequestMesh> request)
 {
+  if (request == nullptr)
+    return;
+
   scene_manager_->attachResource(request->frame, resource_manager_->getMesh(request->filename));
 }
 
-void Renderer::handleRequestLight(std::unique_ptr<RequestLight> request)
+void Renderer::handleRequestLight(std::shared_ptr<RequestLight> request)
 {
+  if (request == nullptr)
+    return;
+
   switch (request->getAction())
   {
     case RequestLight::Action::Set:
@@ -92,8 +95,11 @@ void Renderer::handleRequestLight(std::unique_ptr<RequestLight> request)
   }
 }
 
-void Renderer::handleRequestCustomTexture(std::unique_ptr<RequestCustomTexture> request)
+void Renderer::handleRequestCustomTexture(std::shared_ptr<RequestCustomTexture> request)
 {
+  if (request == nullptr)
+    return;
+
   TextureLoaderRawTexture texture;
   texture.width = request->w;
   texture.height = request->h;
@@ -102,8 +108,11 @@ void Renderer::handleRequestCustomTexture(std::unique_ptr<RequestCustomTexture> 
   resource_manager_->createTexture(request->name, std::move(texture));
 }
 
-void Renderer::handleRequestCustomMesh(std::unique_ptr<RequestCustomMesh> request)
+void Renderer::handleRequestCustomMesh(std::shared_ptr<RequestCustomMesh> request)
 {
+  if (request == nullptr)
+    return;
+
   MeshLoaderRawMesh raw_mesh;
   raw_mesh.vertex_buffer = std::move(request->vertex_buffer);
   raw_mesh.normal_buffer = std::move(request->normal_buffer);
@@ -130,11 +139,20 @@ void Renderer::paintGL()
 
   // update scene upon requests
   // TODO: refactoring comm
-  //std::vector<std::unique_ptr<Request>> requests{request_subscriber_.popAll()};
-  std::vector<std::unique_ptr<Request>> requests;
+  std::vector<std::shared_ptr<Request>> requests;
+  while (true)
+  {
+    auto request = request_subscriber_.pop();
+    printf("%p\n", request);
+
+    if (request != nullptr)
+      requests.push_back(request);
+    else
+      break;
+  }
 
   for (auto&& request : requests)
-    handleRequest(std::move(request));
+    handleRequest(request);
 
   // traverse scene
   auto nodes = scene_manager_->traverseNodes();
@@ -188,18 +206,26 @@ void Renderer::resizeGL(int w, int h)
 
 void Renderer::initializeGL()
 {
+  printf("initializing gl\n");
   auto deleter = [](GlFunctions*)
   {};
   gl_.reset(context()->versionFunctions<GlFunctions>(), deleter);
+
+  printf("got gl functions\n");
 
   gl_->glClearColor(0.8f, 0.8f, 0.8f, 0.f);
   gl_->glEnable(GL_DEPTH_TEST);
   gl_->glEnable(GL_MULTISAMPLE);
 
+  printf("creating resource manager\n");
+
   resource_manager_ = std::make_unique<ResourceManager>(gl_);
 
+  printf("creating light shader\n");
   // shaders
   light_shader_ = std::make_unique<LightShader>(gl_);
+
+  printf("initialize done\n");
 }
 
 void Renderer::mousePressEvent(QMouseEvent* event)

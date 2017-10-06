@@ -26,7 +26,7 @@ class Planner : public Node
 {
 public:
   Planner() = delete;
-  explicit Planner(const PlanningOption& option);
+  Planner(const std::shared_ptr<Manager>& manager, const PlanningOption& option);
   ~Planner() override;
 
   Planner(const Planner& rhs) = delete;

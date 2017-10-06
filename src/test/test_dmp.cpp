@@ -23,8 +23,10 @@
 #include <dmp/planning/objective/objective_grip.h>
 #include <dmp/planning/cost/cost_smoothness.h>
 #include <dmp/planning/cost/cost_collision.h>
+#include <dmp/comm/manager.h>
 
 #include <QApplication>
+#include <QWindow>
 
 int main(int argc, char** argv)
 {
@@ -40,6 +42,9 @@ int main(int argc, char** argv)
   format.setVersion(4, 3);
   format.setProfile(QSurfaceFormat::CoreProfile);
   QSurfaceFormat::setDefaultFormat(format);
+
+  // dmp communication manager
+  auto manager = std::make_shared<dmp::Manager>();
 
   // robot model
   auto robot_model_loader = dmp::RobotModelLoader{};
@@ -65,7 +70,7 @@ int main(int argc, char** argv)
   planning_option.setTimestep(0.1);
   planning_option.setDiscretizations(30);
 
-  auto planner = std::make_shared<dmp::Planner>(planning_option);
+  auto planner = std::make_shared<dmp::Planner>(manager, planning_option);
 
   // task
   auto reach_to_grip =
@@ -92,12 +97,12 @@ int main(int argc, char** argv)
   controller_option.setRobotModel(robot_model);
   controller_option.setMotion(motion);
 
-  auto controller = std::make_shared<dmp::Controller>(controller_option);
+  auto controller = std::make_shared<dmp::Controller>(manager, controller_option);
 
   // renderer
-  auto renderer = std::make_shared<dmp::Renderer>();
+  auto renderer = std::make_shared<dmp::Renderer>(manager);
 
-  dmp::Publisher<dmp::Request> light_publisher;
+  auto light_publisher = manager->createPublisher<dmp::Request>("rendering");
   auto addLight = [&light_publisher](int index,
                                      auto type,
                                      auto position,
@@ -170,6 +175,14 @@ int main(int argc, char** argv)
   planner->getObjectiveSubscriber().subscribeFrom(objective_publisher);
   planner->getCostSubscriber().subscribeFrom(cost_publisher);
    */
+
+  // showing renderer
+  printf("showing window\n");
+  renderer->show();
+  printf("showing done\n");
+  renderer->windowHandle()->setScreen(qApp->screens().last());
+  renderer->move(100, 100);
+  renderer->resize(800, 600);
 
   // run threads
   planner->runThread();

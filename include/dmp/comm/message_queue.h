@@ -57,9 +57,18 @@ public:
     queue_.push(std::shared_ptr<T>(std::move(value)));
   }
 
+  void push(const std::shared_ptr<T>& value)
+  {
+    std::lock_guard<std::mutex> lock{mutex_};
+    queue_.push(value);
+  }
+
   virtual std::shared_ptr<T> pop()
   {
     std::lock_guard<std::mutex> lock{mutex_};
+
+    if (queue_.empty())
+      return nullptr;
 
     auto front = queue_.front();
     queue_.pop();
@@ -108,31 +117,29 @@ public:
   SubscriberMessageQueue(SubscriberMessageQueue&& rhs) = delete;
   SubscriberMessageQueue& operator=(SubscriberMessageQueue&& rhs) = delete;
 
-  void setPublisher(const std::shared_ptr<SubscriberMessageQueue<T>>& publisher)
+  void setPublisher(const std::shared_ptr<PublisherMessageQueue<T>>& publisher)
   {
     publisher_ = publisher;
   }
 
   std::shared_ptr<T> pop() override
   {
-    std::lock_guard<std::mutex> lock{this->mutex_};
-
-    // Obtaining shared ptr to publisher
-    if (auto publisher = publisher_.lock())
     {
-      // Request broadcast to the publisher queue
-      publisher->broadcast();
+      std::lock_guard<std::mutex> lock{broadcast_mutex_};
 
-      // Behaves like pop() of the basis function, but the mutex is already locked.
-      auto front = this->queue_.front();
-      this->queue_.pop();
-      return front;
+      // Obtaining shared ptr to publisher
+      if (auto publisher = publisher_.lock())
+      {
+        // Request broadcast to the publisher queue
+        publisher->broadcast();
+      }
     }
 
-    return nullptr;
+    return MessageQueue<T>::pop();
   }
 
 private:
+  std::mutex broadcast_mutex_;
   std::weak_ptr<PublisherMessageQueue<T>> publisher_;
 };
 

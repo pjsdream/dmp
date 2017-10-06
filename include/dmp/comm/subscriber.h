@@ -14,7 +14,7 @@ class Subscriber
 public:
   Subscriber() = default;
 
-  explicit Subscriber(const std::shared_ptr<SubscriberMessageQueue<T>>& queue)
+  explicit Subscriber(const std::shared_ptr<SubscriberMessageQueue<T>>& queue) noexcept
       : queue_(queue)
   {
   }

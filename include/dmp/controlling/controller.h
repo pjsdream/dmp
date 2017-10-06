@@ -10,6 +10,7 @@
 
 namespace dmp
 {
+class Manager;
 class ControllerOption;
 class RobotModel;
 
@@ -17,7 +18,7 @@ class Controller : public Node
 {
 public:
   Controller() = delete;
-  explicit Controller(const ControllerOption& option);
+  Controller(const std::shared_ptr<Manager>& manager, const ControllerOption& option);
 
 protected:
   void run() override;

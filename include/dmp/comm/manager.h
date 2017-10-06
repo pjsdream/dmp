@@ -20,7 +20,7 @@ public:
   Publisher<T> createPublisher(const std::string& topic)
   {
     if (publisher_queues_.find(topic) == publisher_queues_.end())
-      publisher_queues_[topic] = std::make_shared<MessageQueue<T>>();
+      publisher_queues_[topic] = std::make_shared<PublisherMessageQueue<T>>();
 
     return Publisher<T>(std::dynamic_pointer_cast<PublisherMessageQueue<T>>(publisher_queues_[topic]));
   }
@@ -28,8 +28,17 @@ public:
   template<typename T>
   Subscriber<T> createSubscriber(const std::string& topic)
   {
-    // TODO
-    return Subscriber<T>();
+    if (publisher_queues_.find(topic) == publisher_queues_.end())
+      publisher_queues_[topic] = std::make_shared<PublisherMessageQueue<T>>();
+    auto publisher_queue = std::dynamic_pointer_cast<PublisherMessageQueue<T>>(publisher_queues_[topic]);
+
+    auto subscriber_queue = std::make_shared<SubscriberMessageQueue<T>>();
+    Subscriber<T> subscriber{subscriber_queue};
+
+    publisher_queue->addSubscriber(subscriber_queue);
+    subscriber_queue->setPublisher(publisher_queue);
+
+    return subscriber;
   }
 
 private:

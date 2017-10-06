@@ -13,7 +13,7 @@ class Publisher
 public:
   Publisher() = default;
 
-  explicit Publisher(const std::shared_ptr<PublisherMessageQueue<T>>& queue)
+  explicit Publisher(const std::shared_ptr<PublisherMessageQueue<T>>& queue) noexcept
       : queue_(queue)
   {
   }

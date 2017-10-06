@@ -4,6 +4,7 @@
 #include <dmp/rendering/gl_base.h>
 #include <dmp/rendering/request/request.h>
 #include <dmp/comm/subscriber.h>
+#include <dmp/comm/node.h>
 
 #include <QOpenGLWidget>
 
@@ -16,6 +17,7 @@ class QMouseEvent;
 
 namespace dmp
 {
+class Manager;
 class SceneManager;
 class SceneNode;
 class SceneObject;
@@ -29,12 +31,13 @@ class RequestCustomMesh;
 class LightManager;
 class Camera;
 
-class Renderer : public QOpenGLWidget
+class Renderer : public QOpenGLWidget, public Node
 {
 Q_OBJECT
 
 public:
-  explicit Renderer(QWidget* parent = nullptr);
+  Renderer() = delete;
+  Renderer(const std::shared_ptr<Manager>& manager, QWidget* parent = nullptr);
   ~Renderer() override;
 
   Renderer(const Renderer& rhs) = delete;
@@ -52,12 +55,12 @@ protected:
   void mouseMoveEvent(QMouseEvent* event) override;
 
 private:
-  void handleRequest(std::unique_ptr<Request> request);
-  void handleRequestFrame(std::unique_ptr<RequestFrame> request);
-  void handleRequestMesh(std::unique_ptr<RequestMesh> request);
-  void handleRequestLight(std::unique_ptr<RequestLight> request);
-  void handleRequestCustomTexture(std::unique_ptr<RequestCustomTexture> request);
-  void handleRequestCustomMesh(std::unique_ptr<RequestCustomMesh> request);
+  void handleRequest(std::shared_ptr<Request> request);
+  void handleRequestFrame(std::shared_ptr<RequestFrame> request);
+  void handleRequestMesh(std::shared_ptr<RequestMesh> request);
+  void handleRequestLight(std::shared_ptr<RequestLight> request);
+  void handleRequestCustomTexture(std::shared_ptr<RequestCustomTexture> request);
+  void handleRequestCustomMesh(std::shared_ptr<RequestCustomMesh> request);
 
   std::shared_ptr<GlFunctions> gl_;
 

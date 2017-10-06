@@ -31,7 +31,9 @@ void Shader::loadShader(const std::string& filename, ShaderType type)
   gl_->glShaderSource(shader, 1, &const_source, NULL);
   delete[] source;
 
+  printf("compiling shader %d\n", shader);
   gl_->glCompileShader(shader);
+  printf("shader %d compile done\n", shader);
 
   GLint compiled;
   gl_->glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
