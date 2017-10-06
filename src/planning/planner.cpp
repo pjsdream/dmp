@@ -78,8 +78,6 @@ void Planner::run()
 
   auto rate = Rate::withDuration(timestep_);
 
-  return;
-
   while (!stopRequested())
   {
     // Assume that the previous planning step has been done in time.

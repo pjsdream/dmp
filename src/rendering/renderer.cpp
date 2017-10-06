@@ -48,8 +48,6 @@ Renderer::~Renderer() = default;
 
 void Renderer::handleRequest(std::shared_ptr<Request> request)
 {
-  return;
-
   handleRequestFrame(std::dynamic_pointer_cast<RequestFrame>(request));
   handleRequestMesh(std::dynamic_pointer_cast<RequestMesh>(request));
   handleRequestLight(std::dynamic_pointer_cast<RequestLight>(request));
