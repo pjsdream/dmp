@@ -10,8 +10,8 @@ namespace dmp
 LightShader::LightShader(const std::shared_ptr<GlFunctions>& gl)
     : Shader(gl)
 {
-  //loadShader(PROJECT_SOURCE_DIR + "/shader/light.vert", ShaderType::Vertex);
-  //loadShader(PROJECT_SOURCE_DIR + "/shader/light.frag", ShaderType::Fragment);
+  loadShader(PROJECT_SOURCE_DIR + "/shader/light.vert", ShaderType::Vertex);
+  loadShader(PROJECT_SOURCE_DIR + "/shader/light.frag", ShaderType::Fragment);
 
   linkShader();
 
