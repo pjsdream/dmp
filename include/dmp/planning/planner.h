@@ -21,6 +21,7 @@ class Environment;
 class Shape;
 class CubicSplineTrajectory;
 class RobotConfigurations;
+class PlanningRobotModel;
 
 class Planner : public Node
 {
@@ -45,10 +46,12 @@ private:
   void drawRobotModel();
   void drawEnvironment();
   void drawTrajectory();
+  void drawRobotCollision();
 
   void setRobotModel(const std::shared_ptr<RobotModel>& robot_model);
-  void setMotion(const std::shared_ptr<Motion>& motion);
-  void setEnvironment(const std::shared_ptr<Environment>& environment);
+
+  void createPlanningRobotModel();
+  std::shared_ptr<PlanningRobotModel> planning_robot_model_;
 
   Subscriber<RobotState> robot_state_subscriber_;
   Subscriber<Objective> objective_subscriber_;
@@ -67,10 +70,6 @@ private:
   // Cost computation
   std::tuple<double, Eigen::VectorXd, Eigen::VectorXd> computeCost(const RobotConfiguration& configuration);
   std::tuple<double, Eigen::VectorXd, Eigen::VectorXd> computeObjectiveCost(const RobotConfiguration& configuration);
-
-  // Robot bounding volumes
-  // TODO: need better data container for bounding volumes more efficient for forward kinematics and collision check
-  std::vector<std::vector<std::shared_ptr<Shape>>> bounding_volumes_;
 
   // Robot configurations, storing precomputed resources (e.g., forward kinematics)
   std::vector<RobotConfiguration> configurations_;

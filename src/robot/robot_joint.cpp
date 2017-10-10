@@ -34,6 +34,23 @@ Eigen::Affine3d RobotJoint::getJointTransform(double joint_value) const
   }
 }
 
+std::string RobotJoint::getJointTypeAsString() const noexcept
+{
+  switch (type_)
+  {
+    case RobotJoint::Type::Fixed:
+      return "fixed";
+    case RobotJoint::Type::Continuous:
+      return "continuous";
+    case RobotJoint::Type::Revolute:
+      return "revolute";
+    case RobotJoint::Type::Prismatic:
+      return "prismatic";
+    case RobotJoint::Type::Undefined:
+      return "undefined";
+  }
+}
+
 RobotJoint::Type RobotJoint::getJointType(std::string type) noexcept
 {
   if (type == "fixed")

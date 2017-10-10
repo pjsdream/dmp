@@ -10,7 +10,6 @@
 #include <dmp/shape/cube.h>
 #include <dmp/shape/cylinder.h>
 #include <dmp/shape/sphere.h>
-#include <dmp/shape/bounding_volume_factory.h>
 #include <dmp/trajectory/cubic_spline_trajectory.h>
 #include <dmp/trajectory/cubic_spline.h>
 #include <dmp/rendering/request/request_frame.h>
@@ -24,7 +23,10 @@
 #include <dmp/planning/objective/objective_grip.h>
 #include <dmp/planning/objective/objective_reach_to_grip.h>
 #include <dmp/planning/cost/cost.h>
-#include <include/dmp/robot/robot_configuration.h>
+#include <dmp/robot/robot_configuration.h>
+#include <dmp/robot/planning_robot_model.h>
+#include <dmp/robot/planning_robot_joint.h>
+#include <dmp/robot/planning_robot_link.h>
 
 #include <iostream>
 
@@ -40,8 +42,10 @@ Planner::Planner(const std::shared_ptr<Manager>& manager, const PlanningOption& 
   trajectory_publisher_ = createPublisher<Trajectory>("trajectory");
 
   setRobotModel(option.getRobotModel());
-  setEnvironment(option.getEnvironment());
-  setMotion(option.getMotion());
+  environment_ = option.getEnvironment();
+  motion_ = option.getMotion();
+
+  createPlanningRobotModel();
 
   trajectory_duration_ = option.getTrajectoryDuration();
   trajectory_num_curves_ = option.numTrajectoryCurves();
@@ -55,15 +59,20 @@ Planner::Planner(const std::shared_ptr<Manager>& manager, const PlanningOption& 
   // Allocate robot configurations
   const int num_max_objectives = 10;
   configurations_ =
-      std::vector<RobotConfiguration>(discretizations_ + num_max_objectives,
-                                      RobotConfiguration(robot_model_, motion_));
+      std::vector<RobotConfiguration>(discretizations_ + num_max_objectives, RobotConfiguration(planning_robot_model_));
 
   // Drawing environment
   drawGround();
   drawEnvironment();
+  drawRobotCollision();
 }
 
 Planner::~Planner() = default;
+
+void Planner::createPlanningRobotModel()
+{
+  planning_robot_model_ = std::make_shared<PlanningRobotModel>(robot_model_, motion_->getBodyJoints());
+}
 
 void Planner::run()
 {
@@ -174,14 +183,14 @@ void Planner::run()
        */
 
       const double t = static_cast<double>(j) / trajectory_num_curves_;
-      trajectory_->getSpline("torso_lift_joint").controlPosition(j) = 0.3 * (1-t) + 0.3 * t;
-      trajectory_->getSpline("shoulder_pan_joint").controlPosition(j) = 0.3 * (1-t) + -0.3 * t;
-      trajectory_->getSpline("shoulder_lift_joint").controlPosition(j) = -0.6 * (1-t) + -0.8 * t;
+      trajectory_->getSpline("torso_lift_joint").controlPosition(j) = 0.3 * (1 - t) + 0.3 * t;
+      trajectory_->getSpline("shoulder_pan_joint").controlPosition(j) = 0.3 * (1 - t) + -0.3 * t;
+      trajectory_->getSpline("shoulder_lift_joint").controlPosition(j) = -0.6 * (1 - t) + -0.8 * t;
       trajectory_->getSpline("upperarm_roll_joint").controlPosition(j) = 0.0;
-      trajectory_->getSpline("elbow_flex_joint").controlPosition(j) = 1.1 * (1-t) + 1.0 * t;
+      trajectory_->getSpline("elbow_flex_joint").controlPosition(j) = 1.1 * (1 - t) + 1.0 * t;
       trajectory_->getSpline("forearm_roll_joint").controlPosition(j) = 0.0;
-      trajectory_->getSpline("wrist_flex_joint").controlPosition(j) = 1.07 * (1-t) + 1.37 * t;
-      trajectory_->getSpline("wrist_roll_joint").controlPosition(j) = 0.3 * (1-t) + -0.3 * t;
+      trajectory_->getSpline("wrist_flex_joint").controlPosition(j) = 1.07 * (1 - t) + 1.37 * t;
+      trajectory_->getSpline("wrist_roll_joint").controlPosition(j) = 0.3 * (1 - t) + -0.3 * t;
     }
 
     // Draw the current motion plan in the renderer.
@@ -400,53 +409,6 @@ void Planner::stepForwardTrajectory(double time, std::unique_ptr<RobotState> rob
 void Planner::setRobotModel(const std::shared_ptr<RobotModel>& robot_model)
 {
   robot_model_ = robot_model;
-
-  // Constructing bounding volumes
-  int cnt = 0;
-  const auto num_links = robot_model_->numLinks();
-  for (int i = 0; i < num_links; i++)
-  {
-    const auto& link = robot_model_->getLink(i);
-
-    // TODO: refactoring the code. better storage for bounding volumes
-    bounding_volumes_.emplace_back(std::vector<std::shared_ptr<Shape>>());
-
-    for (const auto& collision : link.getCollisions())
-    {
-      auto future_raw_mesh = MeshLoader::loadMesh(collision.filename);
-      const auto& raw_mesh = future_raw_mesh.get();
-
-      const auto num_vertices = raw_mesh.vertex_buffer.size() / 3;
-
-      // Cllocate vertex vector
-      VectorEigen<Eigen::Vector3d> points(num_vertices);
-      for (int j = 0; j < num_vertices; j++)
-      {
-        points[j] = collision.transform * Eigen::Vector3d(raw_mesh.vertex_buffer[3 * j],
-                                                          raw_mesh.vertex_buffer[3 * j + 1],
-                                                          raw_mesh.vertex_buffer[3 * j + 2]);
-      }
-
-      // Create bounding volume through factory function
-      auto bounding_volume = BoundingVolumeFactory::newBoundingVolumeFromPoints(points);
-
-      // TODO: save computed bounding volume to a storage
-      bounding_volumes_[i].push_back(bounding_volume);
-      cnt++;
-    }
-  }
-
-  printf("%d bounding volumes\n", cnt);
-}
-
-void Planner::setMotion(const std::shared_ptr<Motion>& motion)
-{
-  motion_ = motion;
-}
-
-void Planner::setEnvironment(const std::shared_ptr<Environment>& environment)
-{
-  environment_ = environment;
 }
 
 void Planner::drawGround()
@@ -537,28 +499,6 @@ void Planner::drawRobotModel()
       mesh->frame = frame_name + "_" + collision.filename;
       renderer_publisher_.publish(std::move(mesh));
     }
-
-    // TODO: refactoring the code
-    // TODO: collision shape requests
-    for (int j = 0; j < bounding_volumes_[i].size(); j++)
-    {
-      const auto& aabb = bounding_volumes_[i][j]->as<AABB>();
-
-      auto frame = std::make_unique<RequestFrame>();
-      frame->action = RequestFrame::Action::Set;
-      frame->name = frame_name + "_" + "aabb_" + std::to_string(i) + "_" + std::to_string(j);
-      frame->parent = frame_name;
-      frame->transform = Eigen::Affine3d::Identity();
-      frame->transform.translate((aabb.getMin() + aabb.getMax()) * .5);
-      renderer_publisher_.publish(std::move(frame));
-
-      auto custom_mesh = std::make_unique<RequestCustomMesh>();
-      custom_mesh->name = "aabb_" + std::to_string(i) + "_" + std::to_string(j);
-      custom_mesh->frame = frame_name + "_" + "aabb_" + std::to_string(i) + "_" + std::to_string(j);
-      custom_mesh->createCube(aabb.getMax() - aabb.getMin());
-      custom_mesh->setGlobalColor(Eigen::Vector3f(0.8f, 0.8f, 0.8f));
-      renderer_publisher_.publish(std::move(custom_mesh));
-    }
   }
 }
 
@@ -606,6 +546,36 @@ void Planner::drawEnvironment()
 
     renderer_publisher_.publish(std::move(frame));
     renderer_publisher_.publish(std::move(custom_mesh));
+  }
+}
+
+void Planner::drawRobotCollision()
+{
+  int cube_id = 0;
+
+  for (int i = 0; i < planning_robot_model_->numLinks(); i++)
+  {
+    const auto& link = planning_robot_model_->getLink(i);
+    const auto& bounding_volumes = link.getBoundingVolumes();
+
+    for (const auto& bounding_volume : bounding_volumes)
+    {
+      const auto& cube = bounding_volume->as<Cube>();
+
+      auto frame = std::make_unique<RequestFrame>();
+      frame->action = RequestFrame::Action::Set;
+      frame->name = std::to_string(cube_id);
+      frame->transform = cube.getTransform();
+      renderer_publisher_.publish(std::move(frame));
+
+      auto custom_mesh = std::make_unique<RequestCustomMesh>();
+      custom_mesh->name = std::to_string(cube_id);
+      custom_mesh->frame = custom_mesh->name;
+      custom_mesh->createCube(cube.getSize());
+      renderer_publisher_.publish(std::move(custom_mesh));
+
+      cube_id++;
+    }
   }
 }
 

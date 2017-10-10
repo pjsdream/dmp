@@ -16,12 +16,15 @@ std::tuple<double,
            Eigen::VectorXd,
            Eigen::VectorXd> ObjectiveReachToGrip::computeCost(const RobotConfiguration& configuration)
 {
-  const auto& motion = configuration.getMotion();
-  const auto& gripper_link = motion->getGripperLink();
-  const auto& gripper_xyz = motion->getGripperXyz();
+  // TODO:
+  //const auto& gripper_link = motion->getGripperLink();
+  //const auto& gripper_xyz = motion->getGripperXyz();
+  const std::string gripper_link = "";
+  const Eigen::Vector3d gripper_xyz;
+  const int gripper_link_id = 0;
 
   // Robot link transform
-  auto link_transform = configuration.getTransform(gripper_link);
+  auto link_transform = configuration.getTransform(gripper_link_id);
   link_transform.translate(gripper_xyz);
 
   // Object + grip position transform

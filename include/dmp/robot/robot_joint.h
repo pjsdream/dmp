@@ -24,6 +24,8 @@ public:
 
   Eigen::Affine3d getJointTransform(double joint_value = 0.) const;
 
+  std::string getJointTypeAsString() const noexcept;
+
   void setName(const std::string& name) noexcept;
   const std::string& getName() const noexcept;
 

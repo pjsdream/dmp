@@ -10,7 +10,7 @@
 
 namespace dmp
 {
-class RobotModel;
+class PlanningRobotModel;
 class Motion;
 
 class RobotConfiguration
@@ -18,11 +18,8 @@ class RobotConfiguration
 public:
   RobotConfiguration() = delete;
 
-  // Active joints are the motion body joint names
-  RobotConfiguration(const std::shared_ptr<RobotModel>& robot_model,
-                     const std::shared_ptr<Motion>& motion);
-
-  const std::shared_ptr<Motion>& getMotion() const noexcept;
+  // All joints are active joints.
+  explicit RobotConfiguration(const std::shared_ptr<PlanningRobotModel>& robot_model);
 
   void setPositions(const Eigen::VectorXd& positions) noexcept;
   const Eigen::VectorXd& getPositions() const noexcept;
@@ -32,12 +29,10 @@ public:
 
   void forwardKinematics();
 
-  const Eigen::Affine3d& getTransform(const std::string& link_name) const;
+  const Eigen::Affine3d& getTransform(int link_index) const;
 
 private:
-  std::shared_ptr<RobotModel> robot_model_;
-  std::shared_ptr<Motion> motion_;
-  std::unordered_map<std::string, int> joint_names_to_index_;
+  std::shared_ptr<PlanningRobotModel> robot_model_;
 
   Eigen::VectorXd positions_;
   Eigen::VectorXd velocities_;
