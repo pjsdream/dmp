@@ -39,7 +39,7 @@ Renderer::Renderer(const std::shared_ptr<Manager>& manager, QWidget* parent)
   request_subscriber_ = createSubscriber<Request>("rendering");
 
   QTimer* timer = new QTimer(this);
-  timer->setInterval(16);
+  timer->setInterval(1);
   connect(timer, SIGNAL(timeout()), this, SLOT(update()));
   timer->start();
 }

@@ -262,7 +262,7 @@ void Planner::optimize(double remaining_time)
                                  { return optimizer->computeObjectiveCost(configuration); }));
     }
 
-    printf("[%lf ms] Created all tasks\n", stopwatch.time() * 1000.);
+    //printf("[%lf ms] Created all tasks\n", stopwatch.time() * 1000.);
 
     for (int i = 0; i < costs.size(); i++)
     {
@@ -277,7 +277,7 @@ void Planner::optimize(double remaining_time)
       // TODO
     }
 
-    printf("[%lf ms] Joined all tasks\n", stopwatch.time() * 1000.);
+    //printf("[%lf ms] Joined all tasks\n", stopwatch.time() * 1000.);
 
     // Move the trajectory along the gradient.
 
@@ -292,10 +292,12 @@ void Planner::optimize(double remaining_time)
     // Move the objective completion time along the gradient.
 
 
+    /*
     printf("Objective completion times:");
     for (int i = 0; i < objective_completion_times_.size(); i++)
       printf(" %lf", objective_completion_times_[i]);
     printf("\n");
+     */
   }
 }
 
