@@ -166,7 +166,6 @@ int main(int argc, char** argv)
            Eigen::Vector3f(1.f, 0.07f, 0.017f));
 
   // showing renderer
-  renderer->move(100, 100);
   renderer->resize(800, 600);
   renderer->show();
 

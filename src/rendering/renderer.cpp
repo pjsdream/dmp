@@ -29,8 +29,7 @@ namespace dmp
 // Renderer::Impl
 //
 Renderer::Renderer(const std::shared_ptr<Manager>& manager, QWidget* parent)
-    : QOpenGLWidget(parent),
-      Node(manager, "renderer"),
+    : Node(manager, "renderer"),
       camera_(std::make_unique<Camera>()),
       scene_manager_(std::make_unique<SceneManager>()),
       light_manager_(std::make_unique<LightManager>())

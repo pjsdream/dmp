@@ -8,6 +8,8 @@
 
 #include <Eigen/Dense>
 
+#include <experimental/filesystem>
+
 namespace dmp
 {
 class Shader
@@ -25,6 +27,9 @@ public:
 
   void loadShader(const std::string& filename, ShaderType type);
   void linkShader();
+
+  bool loadProgramBinary(const std::string& filename, std::experimental::filesystem::file_time_type last_write_time);
+  void saveProgramBinary(const std::string& filename);
 
   void start();
   void end();

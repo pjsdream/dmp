@@ -1,7 +1,11 @@
 #include <include/dmp/rendering/shader/shader.h>
 
+#include <iostream>
+
 namespace dmp
 {
+namespace fs = std::experimental::filesystem;
+
 Shader::Shader(const std::shared_ptr<GlFunctions>& gl)
     : gl_(gl)
 {
@@ -94,6 +98,75 @@ void Shader::linkShader()
   // Detach shaders after a successful link
   for (GLuint shader : shaders_)
     gl_->glDetachShader(program_, shader);
+}
+
+bool Shader::loadProgramBinary(const std::string& filename, fs::file_time_type last_write_time)
+{
+  fs::path path = filename;
+
+  if (!fs::exists(path))
+    return false;
+
+  // If the shaders has been changed, the current binary should be ignored
+  if (fs::last_write_time(path) < last_write_time)
+    return false;
+
+  // Load binary
+  FILE* fp = fopen(filename.c_str(), "rb");
+
+  GLenum binary_format;
+
+  fseek(fp, 0, SEEK_END);
+  int len = ftell(fp);
+  len -= sizeof(binary_format); // subtract the size of binary format
+  fseek(fp, 0, SEEK_SET);
+
+  GLchar* binary = new GLchar[len + 1];
+  fread(&binary_format, 1, sizeof(binary_format), fp);
+  fread(binary, sizeof(GLchar), len, fp);
+  fclose(fp);
+
+  binary[len] = 0;
+
+  // Create the program from binary
+  printf("Loading binary\n");
+  program_ = gl_->glCreateProgram();
+  gl_->glProgramBinary(program_, binary_format, binary, len);
+  printf("Loading binary complete\n");
+
+  return true;
+}
+
+void Shader::saveProgramBinary(const std::string& filename)
+{
+  /*
+  GLint num_binary_formats;
+  gl_->glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &num_binary_formats);
+
+  GLint* binary_formats = new GLint[num_binary_formats];
+  gl_->glGetIntegerv(GL_PROGRAM_BINARY_FORMATS, binary_formats);
+
+  printf("num binary formats: %d\n", num_binary_formats);
+  for (int i=0; i<num_binary_formats; i++)
+    printf("binary format[%d] = %d\n", i, binary_formats[i]);
+    */
+
+  // Obtain binary from linked shader
+  GLint binary_length;
+  gl_->glGetProgramiv(program_, GL_PROGRAM_BINARY_LENGTH, &binary_length);
+
+  GLchar* binary = new GLchar[binary_length + 1];
+  GLenum binary_format;
+  gl_->glGetProgramBinary(program_, binary_length, NULL, &binary_format, binary);
+
+  // Save it to binary file
+  FILE* fp = fopen(filename.c_str(), "wb");
+  fwrite(&binary_format, sizeof(GLenum), 1, fp);
+  fwrite(binary, sizeof(GLchar), binary_length, fp);
+  fclose(fp);
+
+  // Release the binary memory
+  delete binary;
 }
 
 GLuint Shader::shaderTypeToGlType(ShaderType type)

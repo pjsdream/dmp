@@ -173,6 +173,7 @@ target_link_libraries(dmp
   #${YAML_CPP_LIBRARIES}
   ${Qt5Widgets_LIBRARIES}
   ${Qt5OpenGL_LIBRARIES}
+  stdc++fs
   )
 
 add_executable(test_dmp src/test/test_dmp.cpp)

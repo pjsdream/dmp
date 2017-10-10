@@ -5,15 +5,27 @@
 #include <dmp/rendering/resource/resource_texture.h>
 #include <dmp/common.h>
 
+#include <experimental/filesystem>
+
 namespace dmp
 {
+namespace fs = std::experimental::filesystem;
+
 LightShader::LightShader(const std::shared_ptr<GlFunctions>& gl)
     : Shader(gl)
 {
-  loadShader(PROJECT_SOURCE_DIR + "/shader/light.vert", ShaderType::Vertex);
-  loadShader(PROJECT_SOURCE_DIR + "/shader/light.frag", ShaderType::Fragment);
+  if (!loadProgramBinary(PROJECT_SOURCE_DIR + "/shader/light.pcb",
+                         std::min(fs::last_write_time(PROJECT_SOURCE_DIR + "/shader/light.vert"),
+                                  fs::last_write_time(PROJECT_SOURCE_DIR + "/shader/light.frag"))))
+  {
+    // On failure of loading program binary, compile/link from sources
+    loadShader(PROJECT_SOURCE_DIR + "/shader/light.vert", ShaderType::Vertex);
+    loadShader(PROJECT_SOURCE_DIR + "/shader/light.frag", ShaderType::Fragment);
+    linkShader();
 
-  linkShader();
+    // Save as binary
+    saveProgramBinary(PROJECT_SOURCE_DIR + "/shader/light.pcb");
+  }
 
   setUniformLocations();
 }
@@ -34,7 +46,7 @@ void LightShader::setUniformLocations()
   loc_global_color_ = getUniformLocation("global_color");
   loc_has_material_ = getUniformLocation("has_material");
 
-  for (int i=0; i<NUM_LIGHTS; i++)
+  for (int i = 0; i < NUM_LIGHTS; i++)
   {
     const std::string varname = std::string("lights[") + std::to_string(i) + "]";
     loc_lights_[i].use = getUniformLocation(varname + ".use");

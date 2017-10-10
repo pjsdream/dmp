@@ -6,7 +6,7 @@
 #include <dmp/comm/subscriber.h>
 #include <dmp/comm/node.h>
 
-#include <QOpenGLWidget>
+#include <QOpenGLWindow>
 
 #include <memory>
 #include <unordered_map>
@@ -31,7 +31,7 @@ class RequestCustomMesh;
 class LightManager;
 class Camera;
 
-class Renderer : public QOpenGLWidget, public Node
+class Renderer : public QOpenGLWindow, public Node
 {
 Q_OBJECT
 
