@@ -36,11 +36,6 @@ Renderer::Renderer(const std::shared_ptr<Manager>& manager, QWidget* parent)
 {
   // Subscriber
   request_subscriber_ = createSubscriber<Request>("rendering");
-
-  QTimer* timer = new QTimer(this);
-  timer->setInterval(1);
-  connect(timer, SIGNAL(timeout()), this, SLOT(update()));
-  timer->start();
 }
 
 Renderer::~Renderer() = default;
@@ -190,8 +185,6 @@ void Renderer::paintGL()
     }
   }
   light_shader_->end();
-
-  update();
 }
 
 void Renderer::resizeGL(int w, int h)
@@ -238,17 +231,18 @@ void Renderer::mouseMoveEvent(QMouseEvent* event)
   {
     case Qt::LeftButton:
       camera_->rotatePixel(dx, dy);
+      update();
       break;
 
     case Qt::RightButton:
       camera_->translatePixel(dx, dy);
+      update();
       break;
 
     case Qt::LeftButton | Qt::RightButton:
       camera_->zoomPixel(dx, dy);
+      update();
       break;
   }
-
-  update();
 }
 }

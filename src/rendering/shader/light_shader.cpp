@@ -14,6 +14,7 @@ namespace fs = std::experimental::filesystem;
 LightShader::LightShader(const std::shared_ptr<GlFunctions>& gl)
     : Shader(gl)
 {
+  /*
   if (!loadProgramBinary(PROJECT_SOURCE_DIR + "/shader/light.pcb",
                          std::min(fs::last_write_time(PROJECT_SOURCE_DIR + "/shader/light.vert"),
                                   fs::last_write_time(PROJECT_SOURCE_DIR + "/shader/light.frag"))))
@@ -26,6 +27,12 @@ LightShader::LightShader(const std::shared_ptr<GlFunctions>& gl)
     // Save as binary
     saveProgramBinary(PROJECT_SOURCE_DIR + "/shader/light.pcb");
   }
+   */
+
+  loadShader(PROJECT_SOURCE_DIR + "/shader/light.vert", ShaderType::Vertex);
+  loadShader(PROJECT_SOURCE_DIR + "/shader/light.frag", ShaderType::Fragment);
+  linkShader();
+  saveProgramBinary(PROJECT_SOURCE_DIR + "/shader/light.pcb");
 
   setUniformLocations();
 }
