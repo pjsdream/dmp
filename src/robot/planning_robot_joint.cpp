@@ -21,7 +21,7 @@ PlanningRobotJoint::PlanningRobotJoint(const std::string& type)
     type_ = PlanningRobotJoint::Type::Fixed;
 }
 
-Eigen::Affine3d PlanningRobotJoint::getJointTransform(double joint_value)
+Eigen::Affine3d PlanningRobotJoint::getJointTransform(double joint_value) const noexcept
 {
   switch (type_)
   {

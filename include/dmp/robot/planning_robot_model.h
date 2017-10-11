@@ -13,6 +13,7 @@ namespace dmp
 class RobotModel;
 class PlanningRobotJoint;
 class PlanningRobotLink;
+class Motion;
 
 //
 // Robot model with n joints.
@@ -25,12 +26,13 @@ class PlanningRobotModel
 {
 public:
   PlanningRobotModel() = delete;
-  PlanningRobotModel(const std::shared_ptr<RobotModel>& robot_model, const std::vector<std::string>& joint_names);
+  PlanningRobotModel(const std::shared_ptr<RobotModel>& robot_model, const std::shared_ptr<Motion>& motion);
 
   int numLinks() const noexcept;
   int numJoints() const noexcept;
   const PlanningRobotLink& getLink(int index) const noexcept;
   const PlanningRobotJoint& getJoint(int index) const noexcept;
+  int getParentLinkIndex(int joint_index) const noexcept;
 
 private:
   std::vector<int> parents_;

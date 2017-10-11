@@ -8,14 +8,16 @@
 #include <dmp/shape/bounding_volume_factory.h>
 #include <dmp/shape/aabb.h>
 #include <dmp/shape/cube.h>
+#include <dmp/planning/motion/motion.h>
 
 #include <iostream>
 
 namespace dmp
 {
 PlanningRobotModel::PlanningRobotModel(const std::shared_ptr<RobotModel>& robot_model,
-                                       const std::vector<std::string>& joint_names)
+                                       const std::shared_ptr<Motion>& motion)
 {
+  const auto& joint_names = motion->getBodyJoints();
   std::unordered_set<std::string> joint_name_set(joint_names.cbegin(), joint_names.cend());
 
   links_.resize(1);
@@ -39,6 +41,7 @@ PlanningRobotModel::PlanningRobotModel(const std::shared_ptr<RobotModel>& robot_
         joint.setOrigin(model_joint.getOrigin());
         joint.setAxis(model_joint.getAxis());
         joints_.push_back(joint);
+        parents_.push_back(link_index[parent_index]);
 
         links_.emplace_back();
 
@@ -77,6 +80,8 @@ PlanningRobotModel::PlanningRobotModel(const std::shared_ptr<RobotModel>& robot_
 
       links_[link_index[i]].addBoundingVolume(cube);
     }
+
+    // TODO: Gripper
   }
 }
 
@@ -98,5 +103,10 @@ const PlanningRobotLink& PlanningRobotModel::getLink(int index) const noexcept
 const PlanningRobotJoint& PlanningRobotModel::getJoint(int index) const noexcept
 {
   return joints_[index];
+}
+
+int PlanningRobotModel::getParentLinkIndex(int joint_index) const noexcept
+{
+  return parents_[joint_index];
 }
 }

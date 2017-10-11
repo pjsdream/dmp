@@ -63,7 +63,7 @@ Planner::Planner(const std::shared_ptr<Manager>& manager, const PlanningOption& 
 
   // Drawing environment
   drawGround();
-  drawEnvironment();
+  //drawEnvironment();
   drawRobotCollision();
 }
 
@@ -71,7 +71,7 @@ Planner::~Planner() = default;
 
 void Planner::createPlanningRobotModel()
 {
-  planning_robot_model_ = std::make_shared<PlanningRobotModel>(robot_model_, motion_->getBodyJoints());
+  planning_robot_model_ = std::make_shared<PlanningRobotModel>(robot_model_, motion_);
 }
 
 void Planner::run()
@@ -558,18 +558,30 @@ void Planner::drawRobotCollision()
     const auto& link = planning_robot_model_->getLink(i);
     const auto& bounding_volumes = link.getBoundingVolumes();
 
+    auto frame = std::make_unique<RequestFrame>();
+    frame->action = RequestFrame::Action::Set;
+    frame->name = "collision_" + std::to_string(i);
+    frame->transform = Eigen::Affine3d::Identity();
+    if (i > 0)
+    {
+      frame->parent = "collision_" + std::to_string(planning_robot_model_->getParentLinkIndex(i - 1));
+      frame->transform = planning_robot_model_->getJoint(i-1).getJointTransform(0.);
+    }
+    renderer_publisher_.publish(std::move(frame));
+
     for (const auto& bounding_volume : bounding_volumes)
     {
       const auto& cube = bounding_volume->as<Cube>();
 
       auto frame = std::make_unique<RequestFrame>();
       frame->action = RequestFrame::Action::Set;
-      frame->name = std::to_string(cube_id);
+      frame->name = "bv_" + std::to_string(cube_id);
+      frame->parent = "collision_" + std::to_string(i);
       frame->transform = cube.getTransform();
       renderer_publisher_.publish(std::move(frame));
 
       auto custom_mesh = std::make_unique<RequestCustomMesh>();
-      custom_mesh->name = std::to_string(cube_id);
+      custom_mesh->name = "bv_" + std::to_string(cube_id);
       custom_mesh->frame = custom_mesh->name;
       custom_mesh->createCube(cube.getSize());
       renderer_publisher_.publish(std::move(custom_mesh));

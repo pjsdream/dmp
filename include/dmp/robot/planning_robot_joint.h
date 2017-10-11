@@ -26,7 +26,7 @@ public:
   void setAxis(const Eigen::Vector3d& axis) noexcept;
   const Eigen::Vector3d& getAxis() const noexcept;
 
-  Eigen::Affine3d getJointTransform(double joint_value);
+  Eigen::Affine3d getJointTransform(double joint_value) const noexcept;
 
 private:
   Type type_;
