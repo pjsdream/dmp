@@ -24,7 +24,7 @@
     ],
     "gripping_position": {
       "link": "gripper_link",
-      "xyz": [0, 0, 0],
+      "xyz": [0.2, 0, 0],
       "width": 0.1
     }
   }

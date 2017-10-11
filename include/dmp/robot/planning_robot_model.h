@@ -34,10 +34,20 @@ public:
   const PlanningRobotJoint& getJoint(int index) const noexcept;
   int getParentLinkIndex(int joint_index) const noexcept;
 
+  int getGripperLinkIndex() const noexcept;
+  const Eigen::Affine3d& getGripperTransform() const noexcept;
+  const std::vector<int>& getLinkIndicesToGripper() const noexcept;
+
 private:
   std::vector<int> parents_;
   std::vector<PlanningRobotLink> links_;
   std::vector<PlanningRobotJoint> joints_;
+
+  int gripper_link_index_;
+  Eigen::Affine3d gripper_transform_;
+
+  // Index chain from base to gripper
+  std::vector<int> link_indices_to_gripper_;
 };
 }
 

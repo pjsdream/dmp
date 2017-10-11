@@ -46,7 +46,7 @@ private:
   void drawRobotModel();
   void drawEnvironment();
   void drawTrajectory();
-  void drawRobotCollision();
+  void drawRobotStatus(const Eigen::VectorXd& p);
 
   void setRobotModel(const std::shared_ptr<RobotModel>& robot_model);
 

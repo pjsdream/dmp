@@ -64,7 +64,10 @@ Planner::Planner(const std::shared_ptr<Manager>& manager, const PlanningOption& 
   // Drawing environment
   drawGround();
   //drawEnvironment();
-  drawRobotCollision();
+
+  Eigen::VectorXd p(8);
+  p.setZero();
+  drawRobotStatus(p);
 }
 
 Planner::~Planner() = default;
@@ -549,8 +552,13 @@ void Planner::drawEnvironment()
   }
 }
 
-void Planner::drawRobotCollision()
+void Planner::drawRobotStatus(const Eigen::VectorXd& p)
 {
+  RobotConfiguration configuration(planning_robot_model_);
+  configuration.setPositions(p);
+  configuration.forwardKinematics();
+  configuration.computeGripperTransformDerivative();
+
   int cube_id = 0;
 
   for (int i = 0; i < planning_robot_model_->numLinks(); i++)
@@ -560,15 +568,11 @@ void Planner::drawRobotCollision()
 
     auto frame = std::make_unique<RequestFrame>();
     frame->action = RequestFrame::Action::Set;
-    frame->name = "collision_" + std::to_string(i);
-    frame->transform = Eigen::Affine3d::Identity();
-    if (i > 0)
-    {
-      frame->parent = "collision_" + std::to_string(planning_robot_model_->getParentLinkIndex(i - 1));
-      frame->transform = planning_robot_model_->getJoint(i-1).getJointTransform(0.);
-    }
+    frame->name = "status_" + std::to_string(i);
+    frame->transform = configuration.getTransform(i);
     renderer_publisher_.publish(std::move(frame));
 
+    // Bounding volumes
     for (const auto& bounding_volume : bounding_volumes)
     {
       const auto& cube = bounding_volume->as<Cube>();
@@ -576,7 +580,7 @@ void Planner::drawRobotCollision()
       auto frame = std::make_unique<RequestFrame>();
       frame->action = RequestFrame::Action::Set;
       frame->name = "bv_" + std::to_string(cube_id);
-      frame->parent = "collision_" + std::to_string(i);
+      frame->parent = "status_" + std::to_string(i);
       frame->transform = cube.getTransform();
       renderer_publisher_.publish(std::move(frame));
 
@@ -588,6 +592,28 @@ void Planner::drawRobotCollision()
 
       cube_id++;
     }
+
+    // TODO: attach visual meshes
+  }
+
+  // Gripper
+  auto frame = std::make_unique<RequestFrame>();
+  frame->action = RequestFrame::Action::Set;
+  frame->name = "gripper";
+  frame->transform = configuration.getGripperTransformFromBase();
+
+  auto custom_mesh = std::make_unique<RequestCustomMesh>();
+  custom_mesh->name = "gripper_marker";
+  custom_mesh->frame = "gripper";
+  custom_mesh->createCube(Eigen::Vector3d(0.1, 0.1, 0.1));
+  custom_mesh->setGlobalColor(Eigen::Vector3f(1.f, 0.f, 0.f));
+
+  renderer_publisher_.publish(std::move(frame));
+  renderer_publisher_.publish(std::move(custom_mesh));
+
+  // Todo: Gripper derivative
+  for (int i=0; i<planning_robot_model_->numJoints(); i++)
+  {
   }
 }
 

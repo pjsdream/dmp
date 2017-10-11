@@ -27,9 +27,14 @@ public:
   void setVelocities(const Eigen::VectorXd& velocities) noexcept;
   const Eigen::VectorXd& getVelocities() const noexcept;
 
+  // Precondition: setPositions()
   void forwardKinematics();
-
   const Eigen::Affine3d& getTransform(int link_index) const;
+  Eigen::Affine3d getGripperTransformFromBase() const;
+
+  // Precondition: forwardKinematics()
+  void computeGripperTransformDerivative();
+  Eigen::Matrix4d getGripperDerivativeTransform(int joint_index) const;
 
 private:
   std::shared_ptr<PlanningRobotModel> robot_model_;
@@ -37,7 +42,8 @@ private:
   Eigen::VectorXd positions_;
   Eigen::VectorXd velocities_;
 
-  VectorEigen<Eigen::Affine3d> transforms_;
+  VectorEigen<Eigen::Affine3d> transforms_; // link_index
+  VectorEigen<Eigen::Matrix4d> gripper_transform_derivatives_; // joint_index
 };
 }
 

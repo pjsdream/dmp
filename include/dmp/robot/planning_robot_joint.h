@@ -27,6 +27,7 @@ public:
   const Eigen::Vector3d& getAxis() const noexcept;
 
   Eigen::Affine3d getJointTransform(double joint_value) const noexcept;
+  Eigen::Matrix4d getJointDerivativeTransform(double joint_value) const noexcept;
 
 private:
   Type type_;
