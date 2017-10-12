@@ -46,7 +46,7 @@ private:
   void drawRobotModel();
   void drawEnvironment();
   void drawTrajectory();
-  void drawRobotStatus(const Eigen::VectorXd& p);
+  void drawRobotStatus(const Eigen::VectorXd& p, std::string tag);
 
   void setRobotModel(const std::shared_ptr<RobotModel>& robot_model);
 
@@ -69,7 +69,8 @@ private:
 
   // Cost computation
   std::tuple<double, Eigen::VectorXd, Eigen::VectorXd> computeCost(const RobotConfiguration& configuration);
-  std::tuple<double, Eigen::VectorXd, Eigen::VectorXd> computeObjectiveCost(const RobotConfiguration& configuration);
+  std::tuple<double, Eigen::VectorXd, Eigen::VectorXd> computeObjectiveCost(const RobotConfiguration& configuration,
+                                                                            int objective_index);
 
   // Robot configurations, storing precomputed resources (e.g., forward kinematics)
   std::vector<RobotConfiguration> configurations_;

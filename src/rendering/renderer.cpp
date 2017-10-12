@@ -131,13 +131,11 @@ void Renderer::paintGL()
 {
   gl_->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  // update scene upon requests
-  // TODO: refactoring comm
+  // Update scene upon requests
   std::vector<std::shared_ptr<Request>> requests;
   while (true)
   {
     auto request = request_subscriber_.pop();
-
     if (request != nullptr)
       requests.push_back(request);
     else

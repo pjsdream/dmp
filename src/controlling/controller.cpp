@@ -12,6 +12,9 @@ namespace dmp
 Controller::Controller(const std::shared_ptr<Manager>& manager, const ControllerOption& option)
     : Node(manager, "controller")
 {
+  trajectory_subscriber_ = createSubscriber<Trajectory>("trajectory");
+  renderer_publisher_ = createPublisher<Request>("rendering");
+
   robot_model_ = option.getRobotModel();
 }
 
@@ -71,8 +74,8 @@ void Controller::drawRobot(const Eigen::VectorXd& joint_values, std::string tag)
   }
 
   // TODO: remove static local variable (using int temporarily)
-  //if (!mesh_attached)
-  //  mesh_attached = true;
+  if (!mesh_attached)
+    mesh_attached = true;
 }
 
 void Controller::run()
@@ -84,8 +87,17 @@ void Controller::run()
   for (int i = 0; i < 100 * 100 && !stopRequested(); i++)
   {
     // TODO: refactoring comm
-    //auto requests = trajectory_subscriber_.popAll();
-    std::vector<std::unique_ptr<Trajectory>> requests;
+    std::vector<std::shared_ptr<Trajectory>> requests;
+
+    while (true)
+    {
+      auto request = trajectory_subscriber_.pop();
+
+      if (request != nullptr)
+        requests.push_back(request);
+      else
+        break;
+    }
 
     // rendering the current robot state
     // TODO: render the robot state of the recentest trajectory
@@ -117,8 +129,7 @@ void Controller::run()
           }
         }
 
-        drawRobot(joint_values, std::to_string(cnt));
-        cnt++;
+        drawRobot(joint_values, "0");
       }
     }
 

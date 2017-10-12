@@ -1,7 +1,7 @@
 #include <dmp/planning/objective/objective_reach_to_grip.h>
 #include <dmp/planning/environment/interactable_object.h>
 #include <include/dmp/robot/robot_configuration.h>
-#include <dmp/planning/motion/motion.h>
+#include <dmp/robot/planning_robot_model.h>
 
 #include <iostream>
 
@@ -16,26 +16,30 @@ std::tuple<double,
            Eigen::VectorXd,
            Eigen::VectorXd> ObjectiveReachToGrip::computeCost(const RobotConfiguration& configuration)
 {
-  // TODO:
-  //const auto& gripper_link = motion->getGripperLink();
-  //const auto& gripper_xyz = motion->getGripperXyz();
-  const std::string gripper_link = "";
-  const Eigen::Vector3d gripper_xyz;
-  const int gripper_link_id = 0;
-
   // Robot link transform
-  auto link_transform = configuration.getTransform(gripper_link_id);
-  link_transform.translate(gripper_xyz);
+  auto gripper_transform = configuration.getGripperTransformFromBase();
 
   // Object + grip position transform
   auto object_transform = object_->getTransform() * object_->getGripTransform();
 
-  const auto cost = (link_transform.translation() - object_transform.translation()).squaredNorm();
+  Eigen::Vector3d diff = gripper_transform.translation() - object_transform.translation();
 
-  // TODO: Gradient
-  Eigen::VectorXd zeroes(configuration.getPositions().rows());
+  const auto cost = diff.squaredNorm();
+
+  // Gradient
+  Eigen::VectorXd gradient(configuration.getPositions().rows());
+
+  auto robot_model = configuration.getRobotModel();
+
+  for (int i = 0; i < robot_model->numJoints(); i++)
+  {
+    Eigen::Vector3d der = configuration.getGripperDerivativeTransform(i).block(0, 3, 3, 1);
+    gradient(i) = 2. * der.dot(diff);
+  }
+
+  Eigen::VectorXd zeroes(configuration.getVelocities().rows());
   zeroes.setZero();
 
-  return std::make_tuple(cost, zeroes, zeroes);
+  return std::make_tuple(cost, gradient, zeroes);
 }
 }

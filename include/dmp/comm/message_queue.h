@@ -75,6 +75,20 @@ public:
     return front;
   }
 
+  virtual std::vector<std::shared_ptr<T>> popAll()
+  {
+    std::lock_guard<std::mutex> lock{mutex_};
+
+    std::vector<std::shared_ptr<T>> result;
+    while (!queue_.empty())
+    {
+      result.push_back(queue_.front());
+      queue_.pop();
+    }
+
+    return result;
+  }
+
 protected:
   std::mutex mutex_;
   std::queue<std::shared_ptr<T>> queue_{};
@@ -136,6 +150,22 @@ public:
     }
 
     return MessageQueue<T>::pop();
+  }
+
+  std::vector<std::shared_ptr<T>> popAll() override
+  {
+    {
+      std::lock_guard<std::mutex> lock{broadcast_mutex_};
+
+      // Obtaining shared ptr to publisher
+      if (auto publisher = publisher_.lock())
+      {
+        // Request broadcast to the publisher queue
+        publisher->broadcast();
+      }
+    }
+
+    return MessageQueue<T>::popAll();
   }
 
 private:

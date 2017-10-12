@@ -4,6 +4,8 @@
 #include <dmp/robot/planning_robot_link.h>
 #include <dmp/planning/motion/motion.h>
 
+#include <iostream>
+
 namespace dmp
 {
 RobotConfiguration::RobotConfiguration(const std::shared_ptr<PlanningRobotModel>& robot_model)
@@ -11,6 +13,11 @@ RobotConfiguration::RobotConfiguration(const std::shared_ptr<PlanningRobotModel>
 {
   transforms_.resize(robot_model_->numLinks());
   gripper_transform_derivatives_.resize(robot_model_->numJoints());
+}
+
+std::shared_ptr<PlanningRobotModel> RobotConfiguration::getRobotModel() const
+{
+  return robot_model_;
 }
 
 void RobotConfiguration::setPositions(const Eigen::VectorXd& positions) noexcept

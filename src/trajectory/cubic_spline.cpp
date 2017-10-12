@@ -56,6 +56,37 @@ double CubicSpline::velocity(int i, double u) const
       + (3. * u2 - 2. * u) * v_[i + 1];
 }
 
+int CubicSpline::getCurveIndex(double t) const noexcept
+{
+  auto i = static_cast<int>(t);
+  if (i == p_.size() - 1)
+    i--;
+  return i;
+}
+
+Eigen::Vector4d CubicSpline::getPositionCoefficients(double t) const noexcept
+{
+  const auto i = getCurveIndex(t);
+  const auto u = t - i;
+  const auto u2 = u * u;
+  const auto u3 = u2 * u;
+
+  Eigen::Vector4d coeffs;
+  coeffs << 2. * u3 - 3. * u2 + 1., u3 - 2. * u2 + u, -2. * u3 + 3. * u2, u3 - u2;
+  return coeffs;
+}
+
+Eigen::Vector4d CubicSpline::getVelocityCoefficients(double t) const noexcept
+{
+  const auto i = getCurveIndex(t);
+  const auto u = t - i;
+  const auto u2 = u * u;
+
+  Eigen::Vector4d coeffs;
+  coeffs << 6. * u2 - 6. * u, 3. * u2 - 4. * u + 1., -6. * u2 + 6. * u, 3. * u2 - 2. * u;
+  return coeffs;
+}
+
 void CubicSpline::fitting(const std::vector<std::tuple<double, double>>& samples, double p0, double v0)
 {
   // Construct least square problem

@@ -21,6 +21,8 @@ public:
   // All joints are active joints.
   explicit RobotConfiguration(const std::shared_ptr<PlanningRobotModel>& robot_model);
 
+  std::shared_ptr<PlanningRobotModel> getRobotModel() const;
+
   void setPositions(const Eigen::VectorXd& positions) noexcept;
   const Eigen::VectorXd& getPositions() const noexcept;
 

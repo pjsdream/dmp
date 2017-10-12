@@ -15,6 +15,8 @@ std::tuple<double,
   Eigen::VectorXd zeroes(configuration.getPositions().size());
   zeroes.setZero();
 
-  return std::make_tuple(0., zeroes, zeroes);
+  const auto& velocities = configuration.getVelocities();
+
+  return std::make_tuple(velocities.squaredNorm() * getWeight(), zeroes, 2. * getWeight() * velocities);
 }
 }

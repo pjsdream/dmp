@@ -80,15 +80,15 @@ int main(int argc, char** argv)
       std::make_unique<dmp::ObjectiveGrip>(std::dynamic_pointer_cast<dmp::InteractableObject>(environment->getObject(
           "red block")));
 
-  dmp::Publisher<dmp::Objective> objective_publisher;
+  auto objective_publisher = manager->createPublisher<dmp::Objective>("objective");
   objective_publisher.publish(std::move(reach_to_grip));
   objective_publisher.publish(std::move(grip));
 
   // cost
-  auto smoothness_cost = std::make_unique<dmp::CostSmoothness>(1.);
+  auto smoothness_cost = std::make_unique<dmp::CostSmoothness>(1e-2);
   auto collision_cost = std::make_unique<dmp::CostCollision>(1.);
 
-  dmp::Publisher<dmp::Cost> cost_publisher;
+  auto cost_publisher = manager->createPublisher<dmp::Cost>("cost");
   cost_publisher.publish(std::move(smoothness_cost));
   cost_publisher.publish(std::move(collision_cost));
 

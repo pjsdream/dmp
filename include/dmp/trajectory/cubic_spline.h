@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#include <Eigen/Dense>
+
 namespace dmp
 {
 class CubicSpline
@@ -18,6 +20,10 @@ public:
   double& controlVelocity(int i);
 
   void fitting(const std::vector<std::tuple<double, double>>& samples, double p0, double v0);
+
+  int getCurveIndex(double t) const noexcept;
+  Eigen::Vector4d getPositionCoefficients(double t) const noexcept;
+  Eigen::Vector4d getVelocityCoefficients(double t) const noexcept;
 
 private:
   double position(int i, double u) const;

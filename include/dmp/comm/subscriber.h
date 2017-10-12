@@ -26,6 +26,13 @@ public:
     return nullptr;
   }
 
+  std::vector<std::shared_ptr<T>> popAll()
+  {
+    if (queue_)
+      return queue_->popAll();
+    return std::vector<std::shared_ptr<T>>();
+  }
+
 private:
   std::shared_ptr<SubscriberMessageQueue<T>> queue_;
 };
