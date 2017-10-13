@@ -17,7 +17,6 @@
 #include <dmp/comm/manager.h>
 #include <dmp/comm/subscriber.h>
 
-#include <QTimer>
 #include <QMouseEvent>
 
 #include <iostream>

@@ -57,6 +57,7 @@ Planner::Planner(const std::shared_ptr<Manager>& manager, const PlanningOption& 
   trajectory_ = std::make_unique<CubicSplineTrajectory>(motion_->getBodyJoints(), trajectory_num_curves_);
 
   // TODO: initial trajectory pose
+  /*
   trajectory_->getSpline(0).controlPosition(0) = 0.3;
   trajectory_->getSpline(1).controlPosition(0) = 0.3;
   trajectory_->getSpline(2).controlPosition(0) = -0.6;
@@ -65,6 +66,7 @@ Planner::Planner(const std::shared_ptr<Manager>& manager, const PlanningOption& 
   trajectory_->getSpline(5).controlPosition(0) = 0.0;
   trajectory_->getSpline(6).controlPosition(0) = 1.07;
   trajectory_->getSpline(7).controlPosition(0) = 0.3;
+   */
 
   // Allocate robot configurations
   const int num_max_objectives = 10;
@@ -673,7 +675,7 @@ void Planner::drawRobotStatus(const Eigen::VectorXd& p, std::string tag)
   // Gripper
   auto frame = std::make_unique<RequestFrame>();
   frame->action = RequestFrame::Action::Set;
-  frame->name = "gripper";
+  frame->name = "gripper_" + tag;
   frame->transform = configuration.getGripperTransformFromBase();
   renderer_publisher_.publish(std::move(frame));
 
@@ -681,7 +683,7 @@ void Planner::drawRobotStatus(const Eigen::VectorXd& p, std::string tag)
   {
     auto custom_mesh = std::make_unique<RequestCustomMesh>();
     custom_mesh->name = "gripper_marker";
-    custom_mesh->frame = "gripper";
+    custom_mesh->frame = "gripper_" + tag;
     custom_mesh->createCube(Eigen::Vector3d(0.1, 0.1, 0.1));
     custom_mesh->setGlobalColor(Eigen::Vector3f(1.f, 0.f, 0.f));
     renderer_publisher_.publish(std::move(custom_mesh));
