@@ -66,104 +66,159 @@ set(DMP_SOURCE_FILES
   # source files
   include/dmp/rendering/renderer.h
   include/dmp/rendering/shader/shader.h
+  include/dmp/rendering/request/request_custom_mesh.h
+  include/dmp/rendering/request/request_custom_texture.h
   include/dmp/rendering/gl_base.h
-  src/rendering/renderer.cpp
-  src/rendering/shader/shader.cpp
-  src/rendering/gl_base.cpp
   include/dmp/rendering/scene/scene_manager.h
-  src/rendering/scene/scene_manager.cpp
-  src/rendering/scene/scene_node.cpp
   include/dmp/rendering/scene/scene_node.h
   include/dmp/rendering/resource/resource_manager.h
-  src/rendering/resource/resource_manager.cpp
-  src/rendering/resource/resource.cpp
-  src/rendering/resource/resource_mesh.cpp
   include/dmp/rendering/resource/resource.h
   include/dmp/rendering/resource/resource_mesh.h
-  src/rendering/shader/light_shader.cpp
   include/dmp/rendering/shader/light_shader.h
   include/dmp/rendering/scene/scene_edge.h
-  src/rendering/scene/scene_edge.cpp
   include/dmp/rendering/request/request.h
-  src/rendering/request/request.cpp
-  include/dmp/json/json.h src/json/json.cpp
-  src/planning/planner.cpp include/dmp/planning/planner.h
-  include/dmp/robot/tree_robot_model.h
-  src/robot/tree_robot_model.cpp
-  include/dmp/robot/robot_model_loader.h
-  src/robot/robot_model_loader.cpp
   include/dmp/rendering/resource/resource_texture.h
-  src/rendering/resource/resource_texture.cpp
   include/dmp/rendering/resource/resource_dynamic_mesh.h
-  src/rendering/resource/resource_dynamic_mesh.cpp
   include/dmp/rendering/request/request_frame.h
-  src/rendering/request/request_frame.cpp
   include/dmp/rendering/request/request_mesh.h
-  src/rendering/request/request_mesh.cpp
   include/dmp/rendering/camera/camera.h
-  src/rendering/camera/camera.cpp
   include/dmp/rendering/light/light.h
   include/dmp/rendering/material/material.h
-  src/rendering/light/light.cpp
-  src/rendering/light/light_manager.cpp
   include/dmp/rendering/light/light_manager.h
   include/dmp/rendering/request/request_light.h
-  src/rendering/request/request_light.cpp
-  include/dmp/robot/tree_robot_link.h
-  include/dmp/robot/tree_robot_joint.h
-  src/robot/tree_robot_joint.cpp
-  src/robot/tree_robot_link.cpp
-  include/dmp/utils/mesh_loader.h
-  include/dmp/utils/texture_loader.h
-  src/utils/texture_loader.cpp
-  src/utils/mesh_loader.cpp
-  include/dmp/planning/environment/environment.h
-  include/dmp/planning/environment/environment_loader.h
   include/dmp/shape/shape.h
   include/dmp/shape/sphere.h
   include/dmp/shape/cube.h
-  src/shape/shape.cpp
-  src/shape/cube.cpp
-  src/shape/sphere.cpp
-  include/dmp/rendering/request/request_custom_mesh.h
-  src/rendering/request/request_custom_mesh.cpp
-  include/dmp/rendering/request/request_custom_texture.h
-  src/rendering/request/request_custom_texture.cpp
-  src/planning/environment/environment.cpp
-  src/planning/environment/environment_loader.cpp
+  include/dmp/shape/distance_query.h
+  include/dmp/shape/aabb.h
+  include/dmp/shape/bounding_volume_factory.h
+  include/dmp/shape/cylinder.h
   include/dmp/planning/environment/object.h
   include/dmp/planning/environment/interactable_object.h
   include/dmp/planning/environment/obstacle.h
-  include/dmp/json/json_loader.h
-  src/json/json_loader.cpp
-  src/planning/environment/obstacle.cpp
-  src/planning/environment/object.cpp
-  include/dmp/shape/cylinder.h
-  src/shape/cylinder.cpp
-  include/dmp/planning/motion/motion_loader.h
-  src/planning/motion/motion_loader.cpp
-  src/planning/motion/motion.cpp
+  include/dmp/planning/environment/environment.h
+  include/dmp/planning/environment/environment_loader.h
+  include/dmp/planning/cost/cost.h
+  include/dmp/planning/cost/cost_smoothness.h
+  include/dmp/planning/cost/cost_collision.h
+  include/dmp/planning/objective/objective.h
+  include/dmp/planning/objective/objective_sequence.h
+  include/dmp/planning/objective/objective_reach_to_grip.h
+  include/dmp/planning/objective/objective_grip.h
+  include/dmp/planning/objective/objective_reach_to_place.h
   include/dmp/planning/motion/motion.h
+  include/dmp/planning/planning_option.h
+  include/dmp/planning/motion/motion_loader.h
+  include/dmp/planning/planner.h
+  include/dmp/json/json_loader.h
+  include/dmp/json/json.h
+  include/dmp/robot/tree_robot_model.h
+  include/dmp/robot/robot_model_loader.h
+  include/dmp/utils/mesh_loader.h
+  include/dmp/utils/texture_loader.h
+  include/dmp/robot/tree_robot_link.h
+  include/dmp/robot/tree_robot_joint.h
   include/dmp/trajectory/trajectory.h
   include/dmp/trajectory/trajectory_point.h
-  src/trajectory/trajectory.cpp
-  src/trajectory/trajectory_point.cpp
-  include/dmp/planning/planning_option.h
-  src/planning/planning_option.cpp
-  include/dmp/shape/distance_query.h
-  src/shape/distance_query.cpp
-  include/dmp/shape/aabb.h
-  src/shape/aabb.cpp
   include/dmp/robot/robot_model.h
-  src/robot/robot_model.cpp
   include/dmp/utils/vector_eigen.h
   include/dmp/robot/robot_joint.h
-  src/robot/robot_joint.cpp
   include/dmp/robot/robot_link.h
-  src/robot/robot_link.cpp
-  include/dmp/shape/bounding_volume_factory.h
+  include/dmp/comm/node.h
+  include/dmp/comm/publisher.h
+  include/dmp/comm/subscriber.h
+  include/dmp/comm/message_queue.h
+  include/dmp/controlling/controller.h
+  include/dmp/controlling/controller_option.h
+  include/dmp/utils/rate.h
+  include/dmp/robot/robot_state.h
+  include/dmp/common.h
+  include/dmp/trajectory/cubic_spline_trajectory.h
+  include/dmp/trajectory/cubic_spline.h
+  include/dmp/utils/timer.h
+  include/dmp/utils/stopwatch.h
+  include/dmp/robot/robot_configuration.h
+  include/dmp/comm/manager.h
+  include/dmp/robot/planning_robot_model.h
+  include/dmp/robot/planning_robot_joint.h
+  include/dmp/robot/planning_robot_link.h
+  include/dmp/comm/serializer.h
+  include/dmp/comm/deserializer.h
+  src/rendering/renderer.cpp
+  src/rendering/shader/shader.cpp
+  src/rendering/gl_base.cpp
+  src/rendering/scene/scene_manager.cpp
+  src/rendering/scene/scene_node.cpp
+  src/rendering/resource/resource_manager.cpp
+  src/rendering/resource/resource.cpp
+  src/rendering/resource/resource_mesh.cpp
+  src/rendering/shader/light_shader.cpp
+  src/rendering/scene/scene_edge.cpp
+  src/rendering/request/request.cpp
+  src/rendering/resource/resource_texture.cpp
+  src/rendering/resource/resource_dynamic_mesh.cpp
+  src/rendering/request/request_frame.cpp
+  src/rendering/request/request_mesh.cpp
+  src/rendering/camera/camera.cpp
+  src/rendering/light/light.cpp
+  src/rendering/light/light_manager.cpp
+  src/rendering/request/request_light.cpp
+  src/rendering/request/request_custom_mesh.cpp
+  src/rendering/request/request_custom_texture.cpp
+  src/shape/distance_query.cpp
+  src/shape/aabb.cpp
   src/shape/bounding_volume_factory.cpp
-  include/dmp/comm/node.h src/comm/node.cpp include/dmp/comm/publisher.h include/dmp/comm/subscriber.h include/dmp/comm/message_queue.h include/dmp/controlling/controller.h include/dmp/controlling/controller_option.h src/controlling/controller.cpp src/controlling/controller_option.cpp include/dmp/utils/rate.h src/utils/rate.cpp include/dmp/planning/objective/objective.h include/dmp/planning/objective/objective_sequence.h src/planning/objective/objective.cpp src/planning/objective/objective_sequence.cpp include/dmp/planning/objective/objective_reach_to_grip.h include/dmp/planning/objective/objective_grip.h src/planning/objective/objective_reach_to_grip.cpp src/planning/objective/objective_grip.cpp include/dmp/planning/objective/objective_reach_to_place.h src/planning/objective/objective_reach_to_place.cpp include/dmp/robot/robot_state.h src/robot/robot_state.cpp include/dmp/common.h include/dmp/trajectory/cubic_spline_trajectory.h include/dmp/trajectory/cubic_spline.h src/trajectory/cubic_spline.cpp src/trajectory/cubic_spline_trajectory.cpp include/dmp/utils/timer.h src/utils/timer.cpp include/dmp/utils/stopwatch.h src/utils/stopwatch.cpp include/dmp/planning/cost/cost.h include/dmp/planning/cost/cost_smoothness.h include/dmp/planning/cost/cost_collision.h src/planning/cost/cost.cpp src/planning/cost/cost_smoothness.cpp src/planning/cost/cost_collision.cpp include/dmp/robot/robot_configuration.h src/robot/robot_configuration.cpp src/planning/environment/interactable_object.cpp include/dmp/comm/manager.h src/comm/manager.cpp include/dmp/robot/planning_robot_model.h include/dmp/robot/planning_robot_joint.h include/dmp/robot/planning_robot_link.h src/robot/planning_robot_link.cpp src/robot/planning_robot_joint.cpp src/robot/planning_robot_model.cpp include/dmp/comm/serializer.h src/comm/serializer.cpp include/dmp/comm/deserializer.h src/comm/deserializer.cpp)
+  src/shape/shape.cpp
+  src/shape/cube.cpp
+  src/shape/sphere.cpp
+  src/shape/cylinder.cpp
+  src/json/json.cpp
+  src/robot/tree_robot_model.cpp
+  src/robot/robot_model_loader.cpp
+  src/robot/tree_robot_joint.cpp
+  src/robot/tree_robot_link.cpp
+  src/utils/texture_loader.cpp
+  src/utils/mesh_loader.cpp
+  src/json/json_loader.cpp
+  src/planning/planner.cpp
+  src/planning/environment/environment.cpp
+  src/planning/environment/environment_loader.cpp
+  src/planning/environment/obstacle.cpp
+  src/planning/environment/object.cpp
+  src/planning/motion/motion_loader.cpp
+  src/planning/motion/motion.cpp
+  src/planning/planning_option.cpp
+  src/planning/objective/objective.cpp
+  src/planning/objective/objective_sequence.cpp
+  src/planning/objective/objective_reach_to_grip.cpp
+  src/planning/objective/objective_grip.cpp
+  src/planning/objective/objective_reach_to_place.cpp
+  src/planning/cost/cost.cpp
+  src/planning/cost/cost_smoothness.cpp
+  src/planning/cost/cost_collision.cpp
+  src/planning/environment/interactable_object.cpp
+  src/trajectory/trajectory.cpp
+  src/trajectory/trajectory_point.cpp
+  src/trajectory/cubic_spline.cpp
+  src/trajectory/cubic_spline_trajectory.cpp
+  src/robot/robot_model.cpp
+  src/robot/robot_joint.cpp
+  src/robot/robot_link.cpp
+  src/controlling/controller.cpp
+  src/controlling/controller_option.cpp
+  src/utils/rate.cpp
+  src/robot/robot_state.cpp
+  src/utils/timer.cpp
+  src/utils/stopwatch.cpp
+  src/robot/robot_configuration.cpp
+  src/robot/planning_robot_link.cpp
+  src/robot/planning_robot_joint.cpp
+  src/robot/planning_robot_model.cpp
+  src/comm/manager.cpp
+  src/comm/node.cpp
+  src/comm/serializer.cpp
+  src/comm/deserializer.cpp
+)
 
 add_library(dmp ${DMP_SOURCE_FILES})
 target_link_libraries(dmp
