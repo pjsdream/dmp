@@ -13,6 +13,12 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # eigen
 find_package(Eigen3 REQUIRED)
 
+# assimp
+find_package(assimp REQUIRED)
+
+# lodepng
+set(LODEPNG_SOURCE_FILES lib/lodepng/lodepng.h lib/lodepng/lodepng.cpp)
+
 # Qt5
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -45,20 +51,70 @@ include_directories(
   ${EIGEN3_INCLUDE_DIRS}
   ${Qt5Widgets_INCLUDE_DIRS}
   ${Qt5OpenGL_INCLUDE_DIRS}
+  ${DMP_CORE_INCLUDE_DIRS}
+  ${ASSIMP_INCLUDE_DIRS}
 )
 
 set(DMP_RENDERER_SOURCE_FILES
-  # source files
-  )
+  # lodepng
+  ${LODEPNG_SOURCE_FILES}
 
-add_library(dmp_renderer ${DMP_RENDERER_SOURCE_FILES})
-target_link_libraries(dmp_renderer
+  include/renderer/gl_base.h
+  include/renderer/camera/camera.h
+  include/renderer/renderer_window.h
+  include/renderer/shader/shader.h
+  include/renderer/shader/light_shader.h
+  include/renderer/scene/scene_manager.h
+  include/renderer/scene/scene_node.h
+  include/renderer/light/light_manager.h
+  include/renderer/resource/resource.h
+  include/renderer/resource/resource_manager.h
+  include/renderer/resource/resource_mesh.h
+  include/renderer/resource/resource_texture.h
+  include/renderer/resource/mesh_loader.h
+  include/renderer/resource/texture_loader.h
+  include/renderer/renderer_ostream.h
+
+  src/camera/camera.cpp
+  src/renderer_window.cpp
+  src/shader/shader.cpp
+  src/shader/light_shader.cpp
+  src/scene/scene_manager.cpp
+  src/scene/scene_node.cpp
+  src/light/light_manager.cpp
+  src/resource/resource.cpp
+  src/resource/resource_manager.cpp
+  src/resource/resource_mesh.cpp
+  src/resource/resource_texture.cpp
+  src/resource/mesh_loader.cpp
+  src/resource/texture_loader.cpp
+  src/renderer_ostream.cpp
+
+  src/main.cpp)
+
+add_executable(renderer ${DMP_RENDERER_SOURCE_FILES})
+target_link_libraries(renderer
   Threads::Threads
   ${Qt5Widgets_LIBRARIES}
   ${Qt5OpenGL_LIBRARIES}
+  ${ASSIMP_LIBRARIES}
   ${DMP_CORE_LIBRARIES}
   stdc++fs
   )
 
-#add_executable(renderer src/renderer.cpp)
-#target_link_libraries(renderer dmp_renderer)
+add_executable(test_renderer
+  src/test_renderer.cpp
+
+  # Requests
+  include/renderer/request/request.h
+  include/renderer/request/request_mesh.h
+  include/renderer/renderer_ostream.h
+
+  src/request/request.cpp
+  src/request/request_mesh.cpp
+  src/renderer_ostream.cpp
+  )
+
+target_link_libraries(test_renderer
+  ${DMP_CORE_LIBRARIES}
+  )

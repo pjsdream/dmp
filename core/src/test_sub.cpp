@@ -7,8 +7,7 @@ int main()
 {
   std::cout << "Testing subscriber\n";
 
-  dmp::Context context;
-  dmp::Subscriber<double> subscriber{context, "localhost"};
+  dmp::Subscriber subscriber("127.0.0.1", "temp");
 
   while (true)
   {
@@ -19,14 +18,9 @@ int main()
     if (subscriber.receive(d))
     {
       std::cout << "received " << d << "\n";
-
-    }
-    else
-    {
-      std::cout << "not received\n";
     }
 
-    std::this_thread::sleep_for(1s);
+    std::this_thread::sleep_for(16ms);
   }
 
   return 0;

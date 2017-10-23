@@ -19,9 +19,6 @@ find_package(assimp REQUIRED)
 # tinyxml2
 set(TINYXML2_SOURCE_FILES lib/tinyxml2/tinyxml2.h lib/tinyxml2/tinyxml2.cpp)
 
-# lodepng
-set(LODEPNG_SOURCE_FILES lib/lodepng/lodepng.h lib/lodepng/lodepng.cpp)
-
 # DMP core
 link_directories(${CMAKE_BINARY_DIR}/core)
 set(DMP_CORE_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/core/include)
@@ -37,9 +34,6 @@ include_directories(
 set(DMP_PLANNER_SOURCE_FILES
   # tinyxml2
   ${TINYXML2_SOURCE_FILES}
-
-  # lodepng
-  ${LODEPNG_SOURCE_FILES}
 
   # source files
 )

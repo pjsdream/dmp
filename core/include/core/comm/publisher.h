@@ -8,17 +8,22 @@
 
 namespace dmp
 {
-template<typename T>
 class Publisher
 {
 public:
-  Publisher() = delete;
+  Publisher() = default;
 
-  explicit Publisher(Context& context, std::string topic)
-      : zmq_socket_(context.createPublisherSocket())
+  explicit Publisher(std::string ip)
   {
+    connect(ip);
   }
 
+  void connect(std::string ip)
+  {
+    zmq_socket_ = Context::getInstance()->createPublisherSocket(ip);
+  }
+
+  template<typename T>
   void publish(const T& message)
   {
     // Fill up the message buffer
@@ -28,13 +33,12 @@ public:
 
     // Send through zmq message
     // TODO: remove unnecessary copy from byte buffer to zmq message
-    zmq::message_t zmq_message(buffer.size());
-    memcpy(zmq_message.data(), buffer.data(), sizeof(buffer[0]) * buffer.size());
-    zmq_socket_.send(zmq_message);
+    zmq::message_t zmq_message(buffer.data(), sizeof(buffer[0]) * buffer.size());
+    zmq_socket_->send(zmq_message);
   }
 
 private:
-  zmq::socket_t zmq_socket_;
+  std::unique_ptr<zmq::socket_t> zmq_socket_;
 };
 }
 

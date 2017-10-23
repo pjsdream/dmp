@@ -10,23 +10,23 @@
 
 namespace dmp
 {
-template<typename T>
 class Subscriber
 {
 public:
   Subscriber() = delete;
 
-  Subscriber(Context& context, std::string ip, std::string topic)
-      : zmq_socket_(context.createSubscriberSocket(ip, topic))
+  Subscriber(std::string ip, std::string topic)
+      : zmq_socket_(Context::getInstance()->createSubscriberSocket(ip))
   {
   }
 
   // Returns true when it received message successfully
+  template<typename T>
   bool receive(T& result)
   {
     // Receive message through zmq
     zmq::message_t zmq_message;
-    auto received = zmq_socket_.recv(&zmq_message, ZMQ_NOBLOCK);
+    auto received = zmq_socket_->recv(&zmq_message, ZMQ_NOBLOCK);
     if (!received)
       return false;
 
@@ -39,7 +39,7 @@ public:
   }
 
 private:
-  zmq::socket_t zmq_socket_;
+  std::unique_ptr<zmq::socket_t> zmq_socket_;
 };
 }
 

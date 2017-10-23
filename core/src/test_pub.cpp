@@ -7,15 +7,13 @@ int main()
 {
   std::cout << "Testing publisher\n";
 
-  dmp::Context context;
-  dmp::Publisher<double> publisher{context};
+  dmp::Publisher publisher("127.0.0.1");
 
   using namespace std::chrono_literals;
-  std::this_thread::sleep_for(1s);
+  std::this_thread::sleep_for(100ms);
 
-  for (int i=0; i<100; i++)
+  for (int i=0; i<10; i++)
   {
-
     auto d = static_cast<double>(i);
     std::cout << "publishing " << d << "\n";
 
