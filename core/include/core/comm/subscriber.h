@@ -32,8 +32,7 @@ public:
 
     // Deserialize
     // TODO: remove unnecessary buffer creation and copy
-    std::vector<char> buffer((char *)zmq_message.data(), (char *)zmq_message.data() + zmq_message.size());
-    Deserializer deserializer(buffer);
+    Deserializer deserializer(zmq_message.data());
     deserializer >> result;
     return true;
   }

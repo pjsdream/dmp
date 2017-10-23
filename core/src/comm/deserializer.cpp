@@ -2,7 +2,7 @@
 
 namespace dmp
 {
-Deserializer::Deserializer(const std::vector<char>& buffer)
+Deserializer::Deserializer(char* buffer)
     : buffer_(buffer)
 {
 }

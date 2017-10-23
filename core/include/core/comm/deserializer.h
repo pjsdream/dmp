@@ -10,7 +10,7 @@ class Deserializer
 {
 public:
   Deserializer() = delete;
-  explicit Deserializer(const std::vector<char>& buffer);
+  explicit Deserializer(char* buffer);
 
   // Forward & operator with any type to corresponding << operators
   template<typename T>
@@ -40,10 +40,9 @@ public:
     } u;
 
     for (int i = 0; i < size; i++)
-      u.c[i] = buffer_[index_ + i];
+      u.c[i] = *(char*)(buffer_++);
     v = u.value;
 
-    index_ += size;
     return *this;
   };
 
@@ -63,7 +62,7 @@ public:
 
     s.resize(length);
     for (auto i = 0; i < length; i++)
-      s[i] = buffer_[index_++];
+      s[i] = *(char*)(buffer_++);
 
     return *this;
   }
@@ -83,8 +82,7 @@ public:
   }
 
 private:
-  const std::vector<char>& buffer_;
-  int index_{0};
+  char* buffer_;
 };
 }
 

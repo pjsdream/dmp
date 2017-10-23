@@ -32,7 +32,7 @@ set(DMP_CORE_SOURCE_FILES
 
   src/comm/serializer.cpp
   src/comm/deserializer.cpp
-  src/comm/context.cpp)
+  src/comm/context.cpp include/core/comm/zmq_serializer.h include/core/comm/zmq_deserializer.h)
 
 add_library(dmp_core ${DMP_CORE_SOURCE_FILES})
 target_link_libraries(dmp_core
@@ -46,3 +46,6 @@ target_link_libraries(test_pub dmp_core)
 
 add_executable(test_sub src/test_sub.cpp)
 target_link_libraries(test_sub dmp_core)
+
+add_executable(test_serialize src/test_serialize.cpp)
+target_link_libraries(test_serialize dmp_core)

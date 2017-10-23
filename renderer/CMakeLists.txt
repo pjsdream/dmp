@@ -110,8 +110,6 @@ add_executable(test_renderer
   include/renderer/request/request_mesh.h
   include/renderer/renderer_ostream.h
 
-  src/request/request.cpp
-  src/request/request_mesh.cpp
   src/renderer_ostream.cpp
   )
 

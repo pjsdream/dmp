@@ -71,7 +71,16 @@ public:
   Serializer& operator<<(std::vector<T>&& v)
   {
     *this << v.size();
-    for (const auto& element : v)
+    for (auto& element : v)
+      *this << element;
+    return *this;
+  }
+
+  template<typename T>
+  Serializer& operator<<(std::vector<T>& v)
+  {
+    *this << v.size();
+    for (auto& element : v)
       *this << element;
     return *this;
   }
