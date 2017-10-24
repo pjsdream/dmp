@@ -12,9 +12,15 @@ namespace dmp
 class Publisher
 {
 public:
-  Publisher() = default;
+  Publisher() = delete;
 
-  explicit Publisher(std::string ip)
+  explicit Publisher(std::string topic)
+  : topic_(std::move(topic))
+  {
+  }
+
+  Publisher(std::string topic, std::string ip)
+  : topic_(std::move(topic))
   {
     connect(ip);
   }
@@ -28,14 +34,15 @@ public:
   void publish(T& message)
   {
     ZmqSerializerSizeEvaluator size_evaluator;
-    size_evaluator << message;
+    size_evaluator << topic_ << message;
 
     ZmqSerializer serializer(size_evaluator.size());
-    serializer << message;
+    serializer << topic_ << message;
     zmq_socket_->send(serializer.getMessage());
   }
 
 private:
+  std::string topic_;
   std::unique_ptr<zmq::socket_t> zmq_socket_;
 };
 }

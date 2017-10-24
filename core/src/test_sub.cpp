@@ -7,17 +7,17 @@ int main()
 {
   std::cout << "Testing subscriber\n";
 
-  dmp::Subscriber subscriber("127.0.0.1");
+  dmp::Subscriber subscriber("testing_topic", "127.0.0.1");
 
   while (true)
   {
     using namespace std::chrono_literals;
 
-    auto d = subscriber.receive<double>();
+    double d;
 
-    if (d != nullptr)
+    if (subscriber.receive(d))
     {
-      std::cout << "received " << *d << "\n";
+      std::cout << "[" << std::chrono::high_resolution_clock::now().time_since_epoch().count() << "] received " << d << "\n";
     }
 
     std::this_thread::sleep_for(16ms);
