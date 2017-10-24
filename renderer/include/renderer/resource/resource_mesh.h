@@ -10,7 +10,7 @@
 
 namespace dmp
 {
-struct MeshLoaderRawMesh;
+class RawMesh;
 struct TextureLoaderRawTexture;
 class ResourceTexture;
 class ResourceMesh : public Resource
@@ -27,7 +27,7 @@ public:
   ResourceMesh(ResourceMesh&& rhs) = delete;
   ResourceMesh& operator=(ResourceMesh&& rhs) = delete;
 
-  void loadMesh(MeshLoaderRawMesh&& raw_mesh);
+  void loadMesh(RawMesh&& raw_mesh);
 
   bool hasTexture();
   std::shared_ptr<ResourceTexture> getTexture();
@@ -50,7 +50,7 @@ private:
 
   ColorOption color_option_;
 
-  std::future<MeshLoaderRawMesh> future_raw_mesh_;
+  std::future<RawMesh> future_raw_mesh_;
   std::future<TextureLoaderRawTexture> future_texture_;
 
   void prepareGlBuffers();

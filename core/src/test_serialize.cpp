@@ -5,13 +5,21 @@
 #include <iostream>
 #include <core/comm/zmq_deserializer.h>
 
+#include <../../renderer/include/renderer/request/request_mesh.h>
+
 class TestClass
 {
 public:
   TestClass() : s("default")
   {}
 
-  TestClass(int i, char c, float f, double d, std::string s, std::initializer_list<int> il, std::initializer_list<std::string> sl)
+  TestClass(int i,
+            char c,
+            float f,
+            double d,
+            std::string s,
+            std::initializer_list<int> il,
+            std::initializer_list<std::string> sl)
       : i(i), c(c), f(f), d(d), s(s), v(il), vs(sl)
   {}
 
@@ -99,7 +107,7 @@ int main()
     const auto& message = serializer.getMessage();
 
     std::cout << "message size: " << message.size() << "\n";
-    for (int i=0; i<message.size(); i++)
+    for (int i = 0; i < message.size(); i++)
       std::cout << static_cast<int>(*(message.data<char>() + i)) << ' ';
     std::cout << "\n";
 
@@ -107,5 +115,32 @@ int main()
     TestClass deserialized_value;
     deserializer >> deserialized_value;
     deserialized_value.print();
+  }
+
+  // Zmq serializer / deserializer for renderer request
+  {
+    RequestMesh request;
+    request.filename = "/tmp/mesh.obj";
+    request.name = "frame";
+
+    ZmqSerializerSizeEvaluator size_evaluator;
+    size_evaluator << request;
+
+    ZmqSerializer serializer(size_evaluator.size());
+    serializer << request;
+    const auto& message = serializer.getMessage();
+
+    std::cout << "message size: " << message.size() << "\n";
+    for (int i = 0; i < message.size(); i++)
+      std::cout << static_cast<int>(*(message.data<char>() + i)) << ' ';
+    std::cout << "\n";
+
+    ZmqDeserializer deserializer(message);
+    RequestMesh deserialized_value;
+    deserializer >> deserialized_value;
+
+    std::cout << "action: " << static_cast<int>(deserialized_value.action) << "\n"
+              << "filename: " << deserialized_value.filename << "\n"
+              << "frame: " << deserialized_value.frame << "\n";
   }
 }

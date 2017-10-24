@@ -21,7 +21,9 @@ Context::Context()
 std::unique_ptr<zmq::socket_t> Context::createPublisherSocket(std::string ip, int port)
 {
   auto socket = std::make_unique<zmq::socket_t>(zmq_context_, ZMQ_PUB);
-  socket->connect(("tcp://" + ip + ":" + std::to_string(port)).c_str());
+
+  std::cout << "connecting to " << ("tcp://" + ip + ":" + std::to_string(port)) << "\n";
+  socket->connect("tcp://" + ip + ":" + std::to_string(port));
 
   return socket;
 }
@@ -29,12 +31,11 @@ std::unique_ptr<zmq::socket_t> Context::createPublisherSocket(std::string ip, in
 std::unique_ptr<zmq::socket_t> Context::createSubscriberSocket(std::string ip, int port)
 {
   auto socket = std::make_unique<zmq::socket_t>(zmq_context_, ZMQ_SUB);
-  socket->setsockopt(ZMQ_SUBSCRIBE, nullptr, 0);
 
   std::cout << "binding to " << ("tcp://" + ip + ":" + std::to_string(port)) << "\n";
-  socket->bind(("tcp://" + ip + ":" + std::to_string(port)).c_str());
+  socket->bind("tcp://" + ip + ":" + std::to_string(port));
 
-  std::cout << "binding to " << ("tcp://" + ip + ":" + std::to_string(port)) << " complete\n";
+  socket->setsockopt(ZMQ_SUBSCRIBE, nullptr, 0);
 
   return socket;
 }

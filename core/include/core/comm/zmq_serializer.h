@@ -3,6 +3,8 @@
 
 #include <zmq.hpp>
 
+#include <type_traits>
+
 namespace dmp
 {
 class ZmqSerializer
@@ -10,15 +12,20 @@ class ZmqSerializer
 public:
   ZmqSerializer() = delete;
 
-  const zmq::message_t& getMessage() const
-  {
-    return message_;
-  }
-
   explicit ZmqSerializer(int size)
       : message_(size)
   {
     buffer_ = static_cast<char*>(message_.data());
+  }
+
+  zmq::message_t& getMessage()
+  {
+    return message_;
+  }
+
+  const zmq::message_t& getMessage() const
+  {
+    return message_;
   }
 
   template<typename T>
@@ -32,7 +39,10 @@ public:
   ZmqSerializer& operator<<(T&& v)
   {
     using type = typename std::remove_reference_t<T>;
-    return serialize(std::forward<type>(v), std::is_compound<type>());
+    return serialize(std::forward<type>(v),
+                     std::is_same<std::integral_constant<bool,
+                                                         std::is_compound<type>::value && !std::is_enum<type>::value>,
+                                  std::true_type>());
   }
 
   template<typename T>
@@ -51,7 +61,7 @@ public:
       T value;
     } u{.value = v};
 
-    for (int i=0; i<8; i++)
+    for (int i = 0; i < 8; i++)
       buffer_[i] = u.c[i];
     buffer_ += 8;
 
@@ -64,11 +74,11 @@ public:
     auto len = s.length();
     *this << len;
 
-    for (auto i=0; i<len; i++)
+    for (auto i = 0; i < len; i++)
       buffer_[i] = s[i];
 
     auto aligned_len = (len + 7) / 8 * 8;
-    for (auto i=len; i<aligned_len; i++)
+    for (auto i = len; i < aligned_len; i++)
       buffer_[i] = 0;
 
     buffer_ += aligned_len;
@@ -79,11 +89,11 @@ public:
     auto len = s.length();
     *this << len;
 
-    for (auto i=0; i<len; i++)
+    for (auto i = 0; i < len; i++)
       buffer_[i] = s[i];
 
     auto aligned_len = (len + 7) / 8 * 8;
-    for (auto i=len; i<aligned_len; i++)
+    for (auto i = len; i < aligned_len; i++)
       buffer_[i] = 0;
 
     buffer_ += aligned_len;
@@ -132,7 +142,8 @@ public:
   ZmqSerializerSizeEvaluator& operator<<(T&& v)
   {
     using type = typename std::remove_reference_t<T>;
-    addSize(std::forward<type>(v), std::is_compound<type>());
+    std::integral_constant<bool, std::is_compound<type>::value && !std::is_enum<type>::value> tmp;
+    addSize(std::forward<type>(v), std::is_same<std::integral_constant<bool, std::is_compound<type>::value && !std::is_enum<type>::value>, std::true_type>());
     return *this;
   }
 

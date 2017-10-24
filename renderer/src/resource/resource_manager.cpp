@@ -10,7 +10,7 @@ ResourceManager::ResourceManager(const std::shared_ptr<GlFunctions>& gl)
 {
 }
 
-std::shared_ptr<ResourceMesh> ResourceManager::createMesh(const std::string& name, MeshLoaderRawMesh&& raw_mesh)
+std::shared_ptr<ResourceMesh> ResourceManager::createMesh(const std::string& name, RawMesh&& raw_mesh)
 {
   auto mesh = std::make_shared<ResourceMesh>(gl_);
   mesh->loadMesh(std::move(raw_mesh));

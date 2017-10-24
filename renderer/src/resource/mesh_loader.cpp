@@ -1,4 +1,5 @@
 #include <renderer/resource/mesh_loader.h>
+#include <renderer/resource/raw_mesh.h>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -7,10 +8,10 @@
 
 namespace dmp
 {
-std::future<MeshLoaderRawMesh> MeshLoader::loadMesh(const std::string& filename)
+std::future<RawMesh> MeshLoader::loadMesh(const std::string& filename)
 {
   return std::async(std::launch::async, [filename](){
-    MeshLoaderRawMesh raw_mesh;
+    RawMesh raw_mesh;
 
     Assimp::Importer assimp_importer{};
     const aiScene* scene =

@@ -7,17 +7,17 @@ int main()
 {
   std::cout << "Testing subscriber\n";
 
-  dmp::Subscriber subscriber("127.0.0.1", "temp");
+  dmp::Subscriber subscriber("127.0.0.1");
 
   while (true)
   {
     using namespace std::chrono_literals;
 
-    double d;
+    auto d = subscriber.receive<double>();
 
-    if (subscriber.receive(d))
+    if (d != nullptr)
     {
-      std::cout << "received " << d << "\n";
+      std::cout << "received " << *d << "\n";
     }
 
     std::this_thread::sleep_for(16ms);

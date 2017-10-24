@@ -2,7 +2,7 @@
 #define DMP_SUBSCRIBER_H
 
 #include "context.h"
-#include "deserializer.h"
+#include "zmq_deserializer.h"
 
 #include <type_traits>
 #include <memory>
@@ -15,26 +15,26 @@ class Subscriber
 public:
   Subscriber() = delete;
 
-  Subscriber(std::string ip, std::string topic)
+  explicit Subscriber(std::string ip)
       : zmq_socket_(Context::getInstance()->createSubscriberSocket(ip))
   {
   }
 
   // Returns true when it received message successfully
   template<typename T>
-  bool receive(T& result)
+  std::unique_ptr<T> receive(T& v)
   {
     // Receive message through zmq
     zmq::message_t zmq_message;
     auto received = zmq_socket_->recv(&zmq_message, ZMQ_NOBLOCK);
     if (!received)
-      return false;
+      return nullptr;
 
     // Deserialize
-    // TODO: remove unnecessary buffer creation and copy
-    Deserializer deserializer(zmq_message.data());
-    deserializer >> result;
-    return true;
+    auto result = std::make_unique<T>();
+    ZmqDeserializer deserializer(zmq_message);
+    deserializer >> *result;
+    return result;
   }
 
 private:

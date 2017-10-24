@@ -2,6 +2,7 @@
 #include <renderer/resource/resource_texture.h>
 #include <renderer/resource/mesh_loader.h>
 #include <renderer/resource/texture_loader.h>
+#include <renderer/resource/raw_mesh.h>
 
 namespace dmp
 {
@@ -66,7 +67,7 @@ void ResourceMesh::draw()
   }
 }
 
-void ResourceMesh::loadMesh(MeshLoaderRawMesh&& raw_mesh)
+void ResourceMesh::loadMesh(RawMesh&& raw_mesh)
 {
   gl_->glGenVertexArrays(1, &vao_);
 

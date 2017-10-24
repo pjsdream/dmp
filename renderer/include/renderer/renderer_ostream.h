@@ -12,11 +12,12 @@ class RendererOstream
 {
 public:
   RendererOstream();
-  ~RendererOstream();
 
   RendererOstream& operator<<(RequestMesh& mesh);
 
 private:
+  Publisher publisher_;
+
   std::shared_ptr<Context> context_;
 };
 

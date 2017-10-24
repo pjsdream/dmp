@@ -10,8 +10,9 @@ namespace dmp
 {
 class ResourceMesh;
 class ResourceTexture;
-class MeshLoaderRawMesh;
+class RawMesh;
 class TextureLoaderRawTexture;
+
 class ResourceManager
 {
 public:
@@ -25,7 +26,7 @@ public:
   ResourceManager(ResourceManager&& rhs) = delete;
   ResourceManager& operator=(ResourceManager&& rhs) = delete;
 
-  std::shared_ptr<ResourceMesh> createMesh(const std::string& name, MeshLoaderRawMesh&& raw_mesh);
+  std::shared_ptr<ResourceMesh> createMesh(const std::string& name, RawMesh&& raw_mesh);
   std::shared_ptr<ResourceMesh> getMesh(const std::string& filename);
   std::shared_ptr<ResourceTexture> createTexture(const std::string& name, TextureLoaderRawTexture&& raw_texture);
   std::shared_ptr<ResourceTexture> getTexture(const std::string& name);

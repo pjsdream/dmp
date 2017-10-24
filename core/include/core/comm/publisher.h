@@ -5,6 +5,7 @@
 
 #include "context.h"
 #include "serializer.h"
+#include "zmq_serializer.h"
 
 namespace dmp
 {
@@ -24,10 +25,14 @@ public:
   }
 
   template<typename T>
-  void publish(const T& message)
+  void publish(T& message)
   {
-    // Send through zmq message
-    zmq_socket_->send(message.createMessage());
+    ZmqSerializerSizeEvaluator size_evaluator;
+    size_evaluator << message;
+
+    ZmqSerializer serializer(size_evaluator.size());
+    serializer << message;
+    zmq_socket_->send(serializer.getMessage());
   }
 
 private:

@@ -73,7 +73,6 @@ set(DMP_RENDERER_SOURCE_FILES
   include/renderer/resource/resource_texture.h
   include/renderer/resource/mesh_loader.h
   include/renderer/resource/texture_loader.h
-  include/renderer/renderer_ostream.h
 
   src/camera/camera.cpp
   src/renderer_window.cpp
@@ -88,9 +87,8 @@ set(DMP_RENDERER_SOURCE_FILES
   src/resource/resource_texture.cpp
   src/resource/mesh_loader.cpp
   src/resource/texture_loader.cpp
-  src/renderer_ostream.cpp
 
-  src/main.cpp)
+  src/main.cpp include/renderer/request/request_subscriber.h include/renderer/resource/raw_mesh.h)
 
 add_executable(renderer ${DMP_RENDERER_SOURCE_FILES})
 target_link_libraries(renderer

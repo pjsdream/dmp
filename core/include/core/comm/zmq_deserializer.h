@@ -26,7 +26,7 @@ public:
   ZmqDeserializer& operator>>(T&& v)
   {
     using type = typename std::remove_reference_t<T>;
-    return deserialize(std::forward<type>(v), std::is_compound<type>());
+    return deserialize(std::forward<type>(v), std::is_same<std::integral_constant<bool, std::is_compound<type>::value && !std::is_enum<type>::value>, std::true_type>());
   }
 
   template<typename T>
