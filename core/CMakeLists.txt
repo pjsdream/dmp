@@ -20,6 +20,7 @@ message(${cppzmq_INCLUDE_DIR})
 include_directories(
   include
   lib
+  ${EIGEN3_INCLUDE_DIRS}
 )
 
 set(DMP_CORE_SOURCE_FILES
@@ -29,10 +30,14 @@ set(DMP_CORE_SOURCE_FILES
   include/core/comm/subscriber.h
   include/core/comm/publisher.h
   include/core/comm/context.h
+  include/core/comm/zmq_serializer.h
+  include/core/comm/zmq_deserializer.h
+  include/core/utils/timer.h
 
   src/comm/serializer.cpp
   src/comm/deserializer.cpp
-  src/comm/context.cpp include/core/comm/zmq_serializer.h include/core/comm/zmq_deserializer.h)
+  src/comm/context.cpp
+  src/utils/timer.cpp)
 
 add_library(dmp_core ${DMP_CORE_SOURCE_FILES})
 target_link_libraries(dmp_core

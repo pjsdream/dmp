@@ -12,6 +12,7 @@ public:
   explicit Timer(double time);
 
   bool isOver();
+  void sleepUntil();
 
 private:
   double time_;

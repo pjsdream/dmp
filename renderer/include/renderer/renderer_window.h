@@ -53,9 +53,15 @@ protected:
   void mouseMoveEvent(QMouseEvent* event) override;
 
 private:
+  void receiveRequests();
+  bool receiveRequest();
+
+  void handleRequest(std::unique_ptr<Request> request);
+
   std::shared_ptr<GlFunctions> gl_;
 
   Subscriber request_subscriber_;
+  std::vector<std::unique_ptr<Request>> requests_;
 
   std::unique_ptr<SceneManager> scene_manager_;
   std::unique_ptr<ResourceManager> resource_manager_;

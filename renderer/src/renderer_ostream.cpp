@@ -5,21 +5,13 @@
 
 namespace dmp
 {
-RendererOstream rout;
-
 RendererOstream::RendererOstream()
+    : publisher_("renderer", "127.0.0.1"), created_timer_(0.1)
 {
-  using namespace std::chrono_literals;
-
-  context_ = Context::getInstance();
-  publisher_.connect("127.0.0.1");
-
-  std::this_thread::sleep_for(100ms);
 }
 
-RendererOstream& RendererOstream::operator<<(RequestMesh& mesh)
+void RendererOstream::flush()
 {
-  publisher_.publish(mesh);
-  return *this;
+  publisher_ << dmp::Publisher::flush;
 }
 }

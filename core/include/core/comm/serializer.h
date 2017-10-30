@@ -5,6 +5,8 @@
 #include <string>
 #include <type_traits>
 
+#include <Eigen/Dense>
+
 namespace dmp
 {
 class Serializer
@@ -48,7 +50,10 @@ public:
   Serializer& operator<<(T&& v)
   {
     using type = typename std::remove_reference_t<T>;
-    return serialize(std::forward<type>(v), std::is_compound<type>());
+    return serialize(std::forward<type>(v),
+                     std::is_same<std::integral_constant<bool,
+                                                         std::is_compound<type>::value && !std::is_enum<type>::value>,
+                                  std::true_type>());
   }
 
   // std::string argument
@@ -82,6 +87,48 @@ public:
     *this << v.size();
     for (auto& element : v)
       *this << element;
+    return *this;
+  }
+
+  // Eigen::matrix argument
+  template<typename base_type, int n, int m>
+  Serializer& operator<<(Eigen::Matrix<base_type, n, m>&& v)
+  {
+    for (int i = 0; i < n; i++)
+      for (int j = 0; j < m; j++)
+        *this << v(i, j);
+
+    return *this;
+  }
+
+  template<typename base_type, int n, int m>
+  Serializer& operator<<(Eigen::Matrix<base_type, n, m>& v)
+  {
+    for (int i = 0; i < n; i++)
+      for (int j = 0; j < m; j++)
+        *this << v(i, j);
+
+    return *this;
+  }
+
+  // Eigen::transform argument
+  template<typename base_type, int n, int m>
+  Serializer& operator<<(Eigen::Transform<base_type, n, m>&& v)
+  {
+    for (int i = 0; i < v.rows(); i++)
+      for (int j = 0; j < v.cols(); j++)
+        *this << v.matrix()(i, j);
+
+    return *this;
+  }
+
+  template<typename base_type, int n, int m>
+  Serializer& operator<<(Eigen::Transform<base_type, n, m>& v)
+  {
+    for (int i = 0; i < v.rows(); i++)
+      for (int j = 0; j < v.cols(); j++)
+        *this << v.matrix()(i, j);
+
     return *this;
   }
 

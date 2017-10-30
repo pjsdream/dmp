@@ -24,7 +24,7 @@ public:
   template<typename Archive>
   Archive& serialize(Archive& ar)
   {
-    return ar & type() & name & filename;
+    return ar & name & filename;
   }
 };
 }

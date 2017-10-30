@@ -66,6 +66,7 @@ set(DMP_RENDERER_SOURCE_FILES
   include/renderer/shader/light_shader.h
   include/renderer/scene/scene_manager.h
   include/renderer/scene/scene_node.h
+  include/renderer/light/light.h
   include/renderer/light/light_manager.h
   include/renderer/resource/resource.h
   include/renderer/resource/resource_manager.h
@@ -73,6 +74,15 @@ set(DMP_RENDERER_SOURCE_FILES
   include/renderer/resource/resource_texture.h
   include/renderer/resource/mesh_loader.h
   include/renderer/resource/texture_loader.h
+  include/renderer/resource/raw_mesh.h
+  include/renderer/request/request.h
+  include/renderer/request/request_clear.h
+  include/renderer/request/request_mesh.h
+  include/renderer/request/request_custom_mesh.h
+  include/renderer/request/request_custom_texture.h
+  include/renderer/request/request_frame.h
+  include/renderer/request/request_light.h
+  include/renderer/renderer_ostream.h
 
   src/camera/camera.cpp
   src/renderer_window.cpp
@@ -87,8 +97,9 @@ set(DMP_RENDERER_SOURCE_FILES
   src/resource/resource_texture.cpp
   src/resource/mesh_loader.cpp
   src/resource/texture_loader.cpp
+  src/renderer_ostream.cpp
 
-  src/main.cpp include/renderer/request/request_subscriber.h include/renderer/resource/raw_mesh.h)
+  src/main.cpp)
 
 add_executable(renderer ${DMP_RENDERER_SOURCE_FILES})
 target_link_libraries(renderer
@@ -102,12 +113,7 @@ target_link_libraries(renderer
 
 add_executable(test_renderer
   src/test_renderer.cpp
-
-  # Requests
-  include/renderer/request/request.h
-  include/renderer/request/request_mesh.h
   include/renderer/renderer_ostream.h
-
   src/renderer_ostream.cpp
   )
 

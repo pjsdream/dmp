@@ -1,4 +1,6 @@
-#include <dmp/utils/timer.h>
+#include <core/utils/timer.h>
+
+#include <thread>
 
 namespace dmp
 {
@@ -19,5 +21,14 @@ bool Timer::isOver()
     return true;
   }
   return false;
+}
+
+void Timer::sleepUntil()
+{
+  if (!isOver())
+  {
+    std::chrono::duration<double> diff = std::chrono::high_resolution_clock::now() - start_time_;
+    std::this_thread::sleep_for(diff);
+  }
 }
 }

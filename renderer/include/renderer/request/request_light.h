@@ -1,8 +1,8 @@
 #ifndef DMP_REQUEST_LIGHT_H
 #define DMP_REQUEST_LIGHT_H
 
-#include <dmp/rendering/request/request.h>
-#include <dmp/rendering/light/light.h>
+#include "request.h"
+#include <renderer/light/light.h>
 
 #include <Eigen/Dense>
 
@@ -11,28 +11,95 @@ namespace dmp
 class RequestLight : public Request
 {
 public:
-  enum class Action
+  enum class Action : unsigned char
   {
     Nothing,
     Set,
     Delete,
   };
 
-  RequestLight();
+  enum class LightType : unsigned char
+  {
+    Directional,
+    Point
+  };
+
+  RequestLight()
+      : Request(Request::Type::Light)
+  {
+  }
+
   ~RequestLight() override = default;
 
-  void setLight(int index, Light&& light);
+  void setLight(int index, Light&& light)
+  {
+    index = index;
+    action = Action::Set;
 
-  void deleteLight(int index);
+    // TODO: store light
+    switch (light.type)
+    {
+      case Light::LightType::Directional:
+        light_type = LightType::Directional;
+        break;
 
-  Action getAction();
-  int getIndex();
-  const Light& getLight();
+      case Light::LightType::Point:
+        light_type = LightType::Point;
+        break;
+    }
 
-private:
-  Action action_;
-  int index_;
-  Light light_;
+    position = light.position;
+    ambient = light.ambient;
+    diffuse = light.diffuse;
+    specular = light.specular;
+    attenuation = light.attenuation;
+  }
+
+  void deleteLight(int index)
+  {
+    index = index;
+    action = Action::Delete;
+  }
+
+  Light getLight()
+  {
+    Light light;
+
+    switch (light_type)
+    {
+      case LightType::Directional:
+        light.type = Light::LightType::Directional;
+        break;
+
+      case LightType::Point:
+        light.type = Light::LightType::Point;
+        break;
+    }
+
+    light.position = position;
+    light.ambient = ambient;
+    light.diffuse = diffuse;
+    light.specular = specular;
+    light.attenuation = attenuation;
+
+    return light;
+  }
+
+  template<typename Archive>
+  Archive& serialize(Archive& ar)
+  {
+    // TODO: serialize light
+    return ar & action & index & light_type & position & ambient & diffuse & specular & attenuation;
+  }
+
+  Action action = Action::Nothing;
+  int index = 0;
+  LightType light_type = LightType::Directional;
+  Eigen::Vector3f position;
+  Eigen::Vector3f ambient;
+  Eigen::Vector3f diffuse;
+  Eigen::Vector3f specular;
+  Eigen::Vector3f attenuation;
 };
 }
 

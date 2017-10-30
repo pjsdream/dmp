@@ -13,11 +13,14 @@ int main()
   {
     using namespace std::chrono_literals;
 
-    double d;
-
-    while (subscriber.receive(d))
+    bool first = true;
+    while (!subscriber.eof())
     {
-      std::cout << "[" << std::chrono::high_resolution_clock::now().time_since_epoch().count() << "] received " << d << "\n";
+      double d;
+      subscriber >> d;
+      if (first || d == 999999)
+        std::cout << "[" << std::chrono::high_resolution_clock::now().time_since_epoch().count() << "] received " << d << "\n";
+      first = false;
     }
 
     std::this_thread::sleep_for(16ms);

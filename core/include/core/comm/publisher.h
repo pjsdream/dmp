@@ -12,22 +12,19 @@ namespace dmp
 class Publisher
 {
 public:
-  struct Flush {};
+  struct Flush
+  {
+  };
+
   static Flush flush;
 
   Publisher() = delete;
 
-  explicit Publisher(std::string topic)
-  : topic_(std::move(topic))
-  {
-    prepareSerializer();
-  }
-
   Publisher(std::string topic, std::string ip)
-  : topic_(std::move(topic))
+      : serializer_(buffer_), topic_(std::move(topic))
   {
-    connect(ip);
-    prepareSerializer();
+    serializer_ << topic_;
+    connect(std::move(ip));
   }
 
   void connect(std::string ip)
@@ -49,21 +46,24 @@ public:
    */
 
   template<typename T>
-  Publisher& operator << (T&& message)
+  Publisher& operator<<(T&& message)
   {
+    serializer_ << std::forward<T>(message);
     return *this;
   }
 
-private:
-  static void prepareSerializer()
+  Publisher& operator<<(Flush flush)
   {
-    // TODO
-    serializer_
+    zmq_socket_->send(buffer_.begin(), buffer_.end());
+    buffer_.clear();
+    serializer_ << topic_;
   }
 
+private:
   std::string topic_;
   std::unique_ptr<zmq::socket_t> zmq_socket_;
 
+  std::vector<char> buffer_;
   Serializer serializer_;
 };
 }

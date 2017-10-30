@@ -3,6 +3,7 @@
 namespace dmp
 {
 Deserializer::Deserializer(char* buffer)
+    : buffer_(buffer)
 {
 }
 }

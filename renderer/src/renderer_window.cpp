@@ -8,8 +8,11 @@
 #include <renderer/camera/camera.h>
 #include <renderer/light/light_manager.h>
 #include <renderer/light/light.h>
+#include <renderer/request/request_clear.h>
 #include <renderer/request/request_mesh.h>
-#include <renderer/request/request_subscriber.h>
+#include <renderer/request/request_custom_mesh.h>
+#include <renderer/request/request_light.h>
+#include <renderer/request/request_frame.h>
 
 #include <QMouseEvent>
 #include <QTimer>
@@ -31,27 +34,87 @@ RendererWindow::RendererWindow()
 
 RendererWindow::~RendererWindow() = default;
 
+bool RendererWindow::receiveRequest()
+{
+  if (request_subscriber_.eof())
+    return false;
+
+  Request::Type type;
+  request_subscriber_ >> type;
+
+  printf("type: %d\n", static_cast<int>(type));
+
+  switch (type)
+  {
+    case Request::Type::Clear:
+    {
+      auto req = std::make_unique<RequestClear>();
+      request_subscriber_ >> *req;
+      std::cout << "Clear\n";
+      requests_.push_back(std::move(req));
+    }
+      break;
+
+    case Request::Type::Mesh:
+    {
+      auto req = std::make_unique<RequestMesh>();
+      request_subscriber_ >> *req;
+
+      std::cout << "Mesh name: " << req->name << ", filename: " << req->filename << "\n";
+      requests_.push_back(std::move(req));
+    }
+      break;
+
+    case Request::Type::Light:
+    {
+      auto req = std::make_unique<RequestLight>();
+      request_subscriber_ >> *req;
+
+      std::cout << "Light action: " << static_cast<int>(req->action) << ", index: " << req->index << "\n";
+      requests_.push_back(std::move(req));
+    }
+      break;
+
+    case Request::Type::Frame:
+    {
+      auto req = std::make_unique<RequestFrame>();
+      request_subscriber_ >> *req;
+
+      std::cout << "Frame name: " << req->name << ", parent: " << req->parent << ", transform:\n"
+                << req->transform.matrix() << "\n";
+      requests_.push_back(std::move(req));
+    }
+      break;
+
+    default:
+    {
+      std::cerr << "unknown request type\n";
+    }
+      break;
+  }
+
+  return true;
+}
+
+void RendererWindow::receiveRequests()
+{
+  requests_.clear();
+  while (receiveRequest());
+}
+
+void RendererWindow::handleRequest(std::unique_ptr<Request> request)
+{
+}
+
 void RendererWindow::paintGL()
 {
   gl_->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // TODO: Update scene upon requests
-  std::vector<RequestMesh> requests;
-  while (true)
-  {
-    RequestMesh request;
-    if (!request_subscriber_.receive(request))
-      break;
-    requests.push_back(request);
-  }
+  receiveRequests();
 
-  if (!requests.empty())
-    printf("%d requests\n", requests.size());
-
-  /*
-  for (auto& request : requests)
+  for (auto& request : requests_)
     handleRequest(std::move(request));
-   */
 
   // traverse scene
   auto nodes = scene_manager_->traverseNodes();
