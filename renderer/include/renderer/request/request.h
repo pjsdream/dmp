@@ -31,8 +31,8 @@ public:
 
   virtual ~Request() = default;
 
-  Request(const Request& rhs) = delete;
-  Request& operator=(const Request& rhs) = delete;
+  Request(const Request& rhs) = default;
+  Request& operator=(const Request& rhs) = default;
 
   Request(Request&& rhs) = default;
   Request& operator=(Request&& rhs) = default;

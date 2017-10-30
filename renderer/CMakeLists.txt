@@ -114,3 +114,11 @@ add_executable(test_renderer
 target_link_libraries(test_renderer
   ${DMP_CORE_LIBRARIES}
   )
+
+add_executable(test_widget
+  src/test_widget.cpp
+  )
+
+target_link_libraries(test_widget
+  ${Qt5Widgets_LIBRARIES}
+  )

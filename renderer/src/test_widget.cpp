@@ -1,7 +1,5 @@
-#include <renderer/renderer_window.h>
-
 #include <QApplication>
-#include <QWindow>
+#include <QOpenGLWindow>
 
 int main(int argc, char** argv)
 {
@@ -18,15 +16,12 @@ int main(int argc, char** argv)
   format.setProfile(QSurfaceFormat::CoreProfile);
   QSurfaceFormat::setDefaultFormat(format);
 
-  // renderer
-  auto renderer_window = std::make_shared<dmp::RendererWindow>();
+  QOpenGLWindow* widget = new QOpenGLWindow();
 
   // showing renderer
-  renderer_window->resize(800, 600);
-  renderer_window->show();
+  widget->resize(800, 600);
+  widget->show();
 
   app.exec();
-
-  renderer_window.reset();
   return 0;
 }

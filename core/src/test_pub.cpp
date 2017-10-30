@@ -13,14 +13,14 @@ int main()
   using namespace std::chrono_literals;
   std::this_thread::sleep_for(50ms);
 
-  for (int i=0; i<10; i++)
+  for (int i=0; i<1000; i++)
   {
     auto d = static_cast<double>(i);
     std::cout << "[" << std::chrono::high_resolution_clock::now().time_since_epoch().count() << "] publishing " << d << "\n";
 
     publisher.publish(d);
 
-    std::this_thread::sleep_for(500ms);
+    //std::this_thread::sleep_for(500ms);
   }
 
   return 0;

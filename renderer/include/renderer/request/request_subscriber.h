@@ -3,17 +3,19 @@
 
 #include "request_mesh.h"
 
+#include <core/comm/subscriber.h>
+
 namespace dmp
 {
 // Subscriber specialization
 template<>
-std::unique_ptr<Request> Subscriber::receive()
+bool Subscriber::receive(RequestMesh& result)
 {
   // Receive message through zmq
   zmq::message_t zmq_message;
   auto received = zmq_socket_->recv(&zmq_message, ZMQ_NOBLOCK);
   if (!received)
-    return nullptr;
+    return false;
 
   std::cout << "message size: " << zmq_message.size() <<"\n";
   for (int i=0; i<zmq_message.size(); i++)
@@ -30,32 +32,30 @@ std::unique_ptr<Request> Subscriber::receive()
   {
     case Request::Type::Mesh:
     {
-      auto req = std::make_unique<RequestMesh>();
-      deserializer >> *req;
-      return std::move(req);
+      deserializer >> result;
     }
 
     case Request::Type::Clear:
-      return nullptr;
+      return true;
 
     case Request::Type::CustomMesh:
-      return nullptr;
+      return true;
 
     case Request::Type::CustomTexture:
-      return nullptr;
+      return true;
 
     case Request::Type::Shape:
-      return nullptr;
+      return true;
 
     case Request::Type::Frame:
-      return nullptr;
+      return true;
 
     case Request::Type::Light:
-      return nullptr;
+      return true;
 
     default:
       std::cerr << "received request of unknown type\n";
-      return nullptr;
+      return false;
   }
 }
 }

@@ -15,7 +15,7 @@ int main()
 
     double d;
 
-    if (subscriber.receive(d))
+    while (subscriber.receive(d))
     {
       std::cout << "[" << std::chrono::high_resolution_clock::now().time_since_epoch().count() << "] received " << d << "\n";
     }

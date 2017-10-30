@@ -22,7 +22,7 @@ namespace dmp
 // RendererWindow::Impl
 //
 RendererWindow::RendererWindow()
-    : request_subscriber_("127.0.0.1"),
+    : request_subscriber_("renderer", "127.0.0.1"),
       camera_(std::make_unique<Camera>()),
       scene_manager_(std::make_unique<SceneManager>()),
       light_manager_(std::make_unique<LightManager>())
@@ -36,20 +36,22 @@ void RendererWindow::paintGL()
   gl_->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // TODO: Update scene upon requests
-  std::vector<std::unique_ptr<Request>> requests;
+  std::vector<RequestMesh> requests;
   while (true)
   {
-    auto ptr = request_subscriber_.receive<Request>();
-    if (ptr == nullptr)
+    RequestMesh request;
+    if (!request_subscriber_.receive(request))
       break;
-    requests.push_back(std::move(ptr));
+    requests.push_back(request);
   }
 
   if (!requests.empty())
     printf("%d requests\n", requests.size());
 
+  /*
   for (auto& request : requests)
     handleRequest(std::move(request));
+   */
 
   // traverse scene
   auto nodes = scene_manager_->traverseNodes();
