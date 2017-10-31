@@ -46,6 +46,7 @@ void LightShader::setUniformLocations()
   loc_model_ = getUniformLocation("model");
   loc_view_ = getUniformLocation("view");
   loc_projection_ = getUniformLocation("projection");
+  loc_model_inverse_transpose_ = getUniformLocation("model_inverse_transpose");
 
   loc_eye_position_ = getUniformLocation("eye_position");
 
@@ -115,6 +116,7 @@ void LightShader::hasGlobalColor(const Eigen::Vector3f& color)
 void LightShader::loadModel(const Eigen::Affine3d& model)
 {
   uniformMatrix4f(loc_model_, model.cast<float>().matrix());
+  uniformMatrix3f(loc_model_inverse_transpose_, model.linear().inverse().transpose().cast<float>());
 }
 
 void LightShader::loadView(const Eigen::Affine3d& view)

@@ -205,6 +205,11 @@ void Shader::uniform(GLint location, const Eigen::Vector3f& v)
   gl_->glUniform3fv(location, 1, v.data());
 }
 
+void Shader::uniformMatrix3f(GLint location, const Eigen::Matrix3f& matrix)
+{
+  gl_->glUniformMatrix3fv(location, 1, GL_FALSE, matrix.data());
+}
+
 void Shader::uniformMatrix4f(GLint location, const Eigen::Matrix4f& matrix)
 {
   gl_->glUniformMatrix4fv(location, 1, GL_FALSE, matrix.data());

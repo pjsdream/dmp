@@ -37,6 +37,7 @@ public:
   void uniform(GLint location, int v);
   void uniform(GLint location, float v);
   void uniform(GLint location, const Eigen::Vector3f& v);
+  void uniformMatrix3f(GLint location, const Eigen::Matrix3f& matrix);
   void uniformMatrix4f(GLint location, const Eigen::Matrix4f& matrix);
 
 protected:

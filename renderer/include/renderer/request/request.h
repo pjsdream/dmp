@@ -17,8 +17,8 @@ public:
     Mesh,
     CustomMesh,
     CustomTexture,
-    Shape,
     Frame,
+    FrameAttach,
     Light,
   };
 

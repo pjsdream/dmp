@@ -11,8 +11,10 @@
 #include <renderer/request/request_clear.h>
 #include <renderer/request/request_mesh.h>
 #include <renderer/request/request_custom_mesh.h>
+#include <renderer/request/request_custom_texture.h>
 #include <renderer/request/request_light.h>
 #include <renderer/request/request_frame.h>
+#include <renderer/request/request_frame_attach.h>
 
 #include <QMouseEvent>
 #include <QTimer>
@@ -65,6 +67,26 @@ bool RendererWindow::receiveRequest()
     }
       break;
 
+    case Request::Type::CustomMesh:
+    {
+      auto req = std::make_unique<RequestCustomMesh>();
+      request_subscriber_ >> *req;
+
+      std::cout << "Custom Mesh name: " << req->name << ", # vertices: " << req->vertex_buffer.size() << "\n";
+      requests_.push_back(std::move(req));
+    }
+      break;
+
+    case Request::Type::CustomTexture:
+    {
+      auto req = std::make_unique<RequestCustomTexture>();
+      request_subscriber_ >> *req;
+
+      std::cout << "Custom Texture name: " << req->name << ", size = (" << req->w << ", " << req->h << ")\n";
+      requests_.push_back(std::move(req));
+    }
+      break;
+
     case Request::Type::Light:
     {
       auto req = std::make_unique<RequestLight>();
@@ -86,9 +108,12 @@ bool RendererWindow::receiveRequest()
     }
       break;
 
-    default:
+    case Request::Type::FrameAttach:
     {
-      std::cerr << "unknown request type\n";
+      auto req = std::make_unique<RequestFrameAttach>();
+      request_subscriber_ >> *req;
+
+      std::cout << "Frame Attach frame: " << req->frame << ", resource: " << req->resource << "\n";
     }
       break;
   }
@@ -102,7 +127,68 @@ void RendererWindow::receiveRequests()
   while (receiveRequest());
 }
 
-void RendererWindow::handleRequest(std::unique_ptr<Request> request)
+void RendererWindow::handleRequests()
+{
+  for (auto& request : requests_)
+  {
+    switch (request->type())
+    {
+      case Request::Type::Clear:
+        handleRequest(std::unique_ptr<RequestClear>(static_cast<RequestClear*>(request.release())));
+        break;
+
+      case Request::Type::Mesh:
+        handleRequest(std::unique_ptr<RequestMesh>(static_cast<RequestMesh*>(request.release())));
+        break;
+
+      case Request::Type::CustomMesh:
+        handleRequest(std::unique_ptr<RequestCustomMesh>(static_cast<RequestCustomMesh*>(request.release())));
+        break;
+
+      case Request::Type::CustomTexture:
+        handleRequest(std::unique_ptr<RequestCustomTexture>(static_cast<RequestCustomTexture*>(request.release())));
+        break;
+
+      case Request::Type::Frame:
+        handleRequest(std::unique_ptr<RequestFrame>(static_cast<RequestFrame*>(request.release())));
+        break;
+
+      case Request::Type::FrameAttach:
+        handleRequest(std::unique_ptr<RequestFrameAttach>(static_cast<RequestFrameAttach*>(request.release())));
+        break;
+
+      case Request::Type::Light:
+        handleRequest(std::unique_ptr<RequestLight>(static_cast<RequestLight*>(request.release())));
+        break;
+    }
+  }
+}
+
+void RendererWindow::handleRequest(std::unique_ptr<RequestClear> req)
+{
+}
+
+void RendererWindow::handleRequest(std::unique_ptr<RequestMesh> req)
+{
+}
+
+void RendererWindow::handleRequest(std::unique_ptr<RequestCustomMesh> req)
+{
+}
+
+void RendererWindow::handleRequest(std::unique_ptr<RequestCustomTexture> req)
+{
+}
+
+void RendererWindow::handleRequest(std::unique_ptr<RequestFrame> req)
+{
+}
+
+void RendererWindow::handleRequest(std::unique_ptr<RequestFrameAttach> req)
+{
+}
+
+void RendererWindow::handleRequest(std::unique_ptr<RequestLight> req)
 {
 }
 
@@ -112,9 +198,7 @@ void RendererWindow::paintGL()
 
   // TODO: Update scene upon requests
   receiveRequests();
-
-  for (auto& request : requests_)
-    handleRequest(std::move(request));
+  handleRequests();
 
   // traverse scene
   auto nodes = scene_manager_->traverseNodes();

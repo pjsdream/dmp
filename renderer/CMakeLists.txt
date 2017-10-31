@@ -99,7 +99,7 @@ set(DMP_RENDERER_SOURCE_FILES
   src/resource/texture_loader.cpp
   src/renderer_ostream.cpp
 
-  src/main.cpp)
+  src/main.cpp include/renderer/request/request_frame_attach.h)
 
 add_executable(renderer ${DMP_RENDERER_SOURCE_FILES})
 target_link_libraries(renderer

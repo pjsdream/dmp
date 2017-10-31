@@ -45,6 +45,7 @@ private:
   GLint loc_model_;
   GLint loc_projection_;
   GLint loc_view_;
+  GLint loc_model_inverse_transpose_;
 
   GLint loc_eye_position_;
 

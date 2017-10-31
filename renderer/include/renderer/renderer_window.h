@@ -22,7 +22,9 @@ class SceneNode;
 class SceneObject;
 class ResourceManager;
 class LightShader;
+class RequestClear;
 class RequestFrame;
+class RequestFrameAttach;
 class RequestMesh;
 class RequestLight;
 class RequestCustomTexture;
@@ -55,8 +57,14 @@ protected:
 private:
   void receiveRequests();
   bool receiveRequest();
-
-  void handleRequest(std::unique_ptr<Request> request);
+  void handleRequests();
+  void handleRequest(std::unique_ptr<RequestClear> req);
+  void handleRequest(std::unique_ptr<RequestMesh> req);
+  void handleRequest(std::unique_ptr<RequestCustomMesh> req);
+  void handleRequest(std::unique_ptr<RequestCustomTexture> req);
+  void handleRequest(std::unique_ptr<RequestFrame> req);
+  void handleRequest(std::unique_ptr<RequestFrameAttach> req);
+  void handleRequest(std::unique_ptr<RequestLight> req);
 
   std::shared_ptr<GlFunctions> gl_;
 
