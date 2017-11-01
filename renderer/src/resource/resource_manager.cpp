@@ -18,15 +18,24 @@ std::shared_ptr<ResourceMesh> ResourceManager::createMesh(const std::string& nam
   return mesh;
 }
 
-std::shared_ptr<ResourceMesh> ResourceManager::getMesh(const std::string& filename)
+std::shared_ptr<ResourceMesh> ResourceManager::loadMesh(const std::string& name, const std::string& filename)
 {
-  auto it = meshes_.find(filename);
+  auto it = mesh_name_to_filename_.find(name);
+  if (it != mesh_name_to_filename_.cend() && it->second == filename)
+    return meshes_[name];
+
+  mesh_name_to_filename_[name] = filename;
+  auto mesh = std::make_shared<ResourceMesh>(gl_, filename);
+  meshes_[name] = mesh;
+  return mesh;
+}
+
+std::shared_ptr<ResourceMesh> ResourceManager::getMesh(const std::string& name)
+{
+  auto it = meshes_.find(name);
   if (it != meshes_.cend())
     return it->second;
-
-  auto mesh = std::make_shared<ResourceMesh>(gl_, filename);
-  meshes_[filename] = mesh;
-  return mesh;
+  return nullptr;
 }
 
 std::shared_ptr<ResourceTexture> ResourceManager::createTexture(const std::string& name,
@@ -38,10 +47,13 @@ std::shared_ptr<ResourceTexture> ResourceManager::createTexture(const std::strin
   return texture;
 }
 
-std::shared_ptr<ResourceTexture> ResourceManager::getTexture(const std::string& name)
+std::shared_ptr<ResourceTexture> ResourceManager::getTexture(const std::string& name, const std::string& filename)
 {
-  if (textures_.find(name) == textures_.cend())
-    return nullptr;
-  return textures_[name];
+  auto it = texture_name_to_filename_.find(name);
+  if (textures_.find(name) != textures_.cend() && it->second == filename)
+    return textures_[name];
+
+  // TODO: load texture from file
+  return nullptr;
 }
 }

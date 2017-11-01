@@ -20,6 +20,8 @@
 #include <QTimer>
 
 #include <iostream>
+#include <include/renderer/resource/raw_mesh.h>
+#include <include/renderer/resource/texture_loader.h>
 
 namespace dmp
 {
@@ -114,6 +116,7 @@ bool RendererWindow::receiveRequest()
       request_subscriber_ >> *req;
 
       std::cout << "Frame Attach frame: " << req->frame << ", resource: " << req->resource << "\n";
+      requests_.push_back(std::move(req));
     }
       break;
   }
@@ -166,30 +169,83 @@ void RendererWindow::handleRequests()
 
 void RendererWindow::handleRequest(std::unique_ptr<RequestClear> req)
 {
+  // TODO
 }
 
 void RendererWindow::handleRequest(std::unique_ptr<RequestMesh> req)
 {
+  resource_manager_->loadMesh(req->name, req->filename);
 }
 
 void RendererWindow::handleRequest(std::unique_ptr<RequestCustomMesh> req)
 {
+  RawMesh raw_mesh;
+  raw_mesh.vertex_buffer = std::move(req->vertex_buffer);
+  raw_mesh.normal_buffer = std::move(req->normal_buffer);
+  raw_mesh.color_buffer = std::move(req->color_buffer);
+  raw_mesh.face_buffer = std::move(req->face_buffer);
+  raw_mesh.texture_buffer = std::move(req->texture_buffer);
+  raw_mesh.texture_filename = std::move(req->texture_name);
+  raw_mesh.global_color = req->getGlobalColor();
+  raw_mesh.has_global_color = req->hasGlobalColor();
+
+  // TODO: raw mesh material
+  resource_manager_->createMesh(req->name, std::move(raw_mesh));
 }
 
 void RendererWindow::handleRequest(std::unique_ptr<RequestCustomTexture> req)
 {
+  TextureLoaderRawTexture raw_texture;
+  raw_texture.width = req->w;
+  raw_texture.height = req->h;
+  raw_texture.image = std::move(req->image);
+
+  resource_manager_->createTexture(req->name, std::move(raw_texture));
 }
 
 void RendererWindow::handleRequest(std::unique_ptr<RequestFrame> req)
 {
+  scene_manager_->setFrame(req->parent, req->name, req->transform);
 }
 
 void RendererWindow::handleRequest(std::unique_ptr<RequestFrameAttach> req)
 {
+  scene_manager_->attachResource(req->frame, resource_manager_->getMesh(req->resource));
 }
 
 void RendererWindow::handleRequest(std::unique_ptr<RequestLight> req)
 {
+  switch (req->action)
+  {
+    case RequestLight::Action::Nothing:
+      break;
+
+    case RequestLight::Action::Set:
+    {
+      Light light;
+      switch (req->light_type)
+      {
+        case RequestLight::LightType::Directional:
+          light.type = Light::LightType::Directional;
+          break;
+        case RequestLight::LightType::Point:
+          light.type = Light::LightType::Point;
+          break;
+      }
+      light.position = req->position;
+      light.ambient = req->ambient;
+      light.diffuse = req->diffuse;
+      light.specular = req->specular;
+      light.attenuation = req->attenuation;
+
+      light_manager_->setLight(req->index, light);
+    }
+      break;
+
+    case RequestLight::Action::Delete:
+      light_manager_->deleteLight(req->index);
+      break;
+  }
 }
 
 void RendererWindow::paintGL()

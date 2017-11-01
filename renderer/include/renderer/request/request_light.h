@@ -31,9 +31,9 @@ public:
 
   ~RequestLight() override = default;
 
-  void setLight(int index, Light&& light)
+  void setLight(int index, const Light& light)
   {
-    index = index;
+    this->index = index;
     action = Action::Set;
 
     // TODO: store light

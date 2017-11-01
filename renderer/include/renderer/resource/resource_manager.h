@@ -27,9 +27,10 @@ public:
   ResourceManager& operator=(ResourceManager&& rhs) = delete;
 
   std::shared_ptr<ResourceMesh> createMesh(const std::string& name, RawMesh&& raw_mesh);
-  std::shared_ptr<ResourceMesh> getMesh(const std::string& filename);
+  std::shared_ptr<ResourceMesh> loadMesh(const std::string& name, const std::string& filename);
+  std::shared_ptr<ResourceMesh> getMesh(const std::string& name);
   std::shared_ptr<ResourceTexture> createTexture(const std::string& name, TextureLoaderRawTexture&& raw_texture);
-  std::shared_ptr<ResourceTexture> getTexture(const std::string& name);
+  std::shared_ptr<ResourceTexture> getTexture(const std::string& name, const std::string& filename);
 
 private:
   static const int MAX_NUM_LIGHTS = 8;
@@ -38,6 +39,9 @@ private:
 
   std::unordered_map<std::string, std::shared_ptr<ResourceMesh>> meshes_;
   std::unordered_map<std::string, std::shared_ptr<ResourceTexture>> textures_;
+
+  std::unordered_map<std::string, std::string> mesh_name_to_filename_;
+  std::unordered_map<std::string, std::string> texture_name_to_filename_;
 };
 }
 
