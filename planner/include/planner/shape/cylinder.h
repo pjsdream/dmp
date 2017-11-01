@@ -1,7 +1,7 @@
 #ifndef DMP_CYLINDER_H
 #define DMP_CYLINDER_H
 
-#include <dmp/shape/shape.h>
+#include <planner/shape/shape.h>
 
 namespace dmp
 {

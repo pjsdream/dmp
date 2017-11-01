@@ -97,7 +97,6 @@ set(DMP_RENDERER_SOURCE_FILES
   src/resource/resource_texture.cpp
   src/resource/mesh_loader.cpp
   src/resource/texture_loader.cpp
-  src/renderer_ostream.cpp
 
   src/main.cpp include/renderer/request/request_frame_attach.h)
 
@@ -114,7 +113,6 @@ target_link_libraries(renderer
 add_executable(test_renderer
   src/test_renderer.cpp
   include/renderer/renderer_ostream.h
-  src/renderer_ostream.cpp
   )
 
 target_link_libraries(test_renderer

@@ -1,6 +1,6 @@
-#include <dmp/shape/bounding_volume_factory.h>
-#include <dmp/shape/shape.h>
-#include <dmp/shape/aabb.h>
+#include <planner/shape/bounding_volume_factory.h>
+#include <planner/shape/shape.h>
+#include <planner/shape/aabb.h>
 
 namespace dmp
 {

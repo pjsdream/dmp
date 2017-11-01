@@ -1,4 +1,4 @@
-#include <dmp/shape/aabb.h>
+#include <planner/shape/aabb.h>
 
 namespace dmp
 {

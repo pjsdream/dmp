@@ -58,7 +58,6 @@ int main()
 
   using namespace std::chrono_literals;
   dmp::RendererOstream rout;
-  std::this_thread::sleep_for(100ms);
   rout << request_light0 << request_light1 << request_light2 << request_light3 << request_light4;
   rout.flush();
 
@@ -67,13 +66,16 @@ int main()
 
   std::cout << "sending request to renderer complete\n";
 
+  rout << request_clear;
+
   request_mesh.name = "torso";
   request_mesh.filename = "/home/jaesungp/catkin_ws/src/fetch_ros/fetch_description/meshes/torso_lift_link.dae";
 
-  request_frame.name = "torso_frame";
+  request_frame.name = "torso_frame_up";
   request_frame.transform = Eigen::Affine3d::Identity();
+  request_frame.transform.translate(Eigen::Vector3d(0, 0, 1));
 
-  request_frame_attach.frame = "torso_frame";
+  request_frame_attach.frame = "torso_frame_up";
   request_frame_attach.resource = "torso";
 
   rout << request_mesh << request_frame << request_frame_attach;

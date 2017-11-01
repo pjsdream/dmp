@@ -1,5 +1,5 @@
-#include <dmp/robot/tree_robot_model.h>
-#include <dmp/robot/tree_robot_link.h>
+#include <planner/robot/tree_robot_model.h>
+#include <planner/robot/tree_robot_link.h>
 
 namespace dmp
 {

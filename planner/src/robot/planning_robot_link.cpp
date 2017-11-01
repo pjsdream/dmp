@@ -1,4 +1,4 @@
-#include <dmp/robot/planning_robot_link.h>
+#include <planner/robot/planning_robot_link.h>
 
 namespace dmp
 {

@@ -1,9 +1,9 @@
-#include <dmp/robot/robot_model.h>
-#include <dmp/robot/tree_robot_model.h>
-#include <dmp/robot/tree_robot_link.h>
-#include <dmp/robot/tree_robot_joint.h>
-#include <dmp/robot/robot_link.h>
-#include <dmp/robot/robot_joint.h>
+#include <planner/robot/robot_model.h>
+#include <planner/robot/tree_robot_model.h>
+#include <planner/robot/tree_robot_link.h>
+#include <planner/robot/tree_robot_joint.h>
+#include <planner/robot/robot_link.h>
+#include <planner/robot/robot_joint.h>
 
 namespace dmp
 {

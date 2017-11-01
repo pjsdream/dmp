@@ -3,7 +3,7 @@
 
 #include <memory>
 #include <Eigen/Dense>
-#include <dmp/utils/vector_eigen.h>
+#include <core/utils/vector_eigen.h>
 
 namespace dmp
 {

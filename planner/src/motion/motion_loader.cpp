@@ -1,7 +1,7 @@
-#include <dmp/planning/motion/motion_loader.h>
-#include <dmp/planning/motion/motion.h>
-#include <dmp/json/json_loader.h>
-#include <dmp/json/json.h>
+#include <planner/motion/motion_loader.h>
+#include <planner/motion/motion.h>
+#include <core/json/json_loader.h>
+#include <core/json/json.h>
 
 namespace dmp
 {

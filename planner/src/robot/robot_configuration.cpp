@@ -1,8 +1,8 @@
-#include <include/dmp/robot/robot_configuration.h>
-#include <dmp/robot/planning_robot_model.h>
-#include <dmp/robot/planning_robot_joint.h>
-#include <dmp/robot/planning_robot_link.h>
-#include <dmp/planning/motion/motion.h>
+#include <planner/robot/robot_configuration.h>
+#include <planner/robot/planning_robot_model.h>
+#include <planner/robot/planning_robot_joint.h>
+#include <planner/robot/planning_robot_link.h>
+#include <planner/motion/motion.h>
 
 #include <iostream>
 

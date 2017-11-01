@@ -37,6 +37,12 @@ void SceneManager::deleteNode(const std::string& name)
   }
 }
 
+void SceneManager::clear()
+{
+  node_map_.clear();
+  edges_.clear();
+}
+
 std::shared_ptr<SceneNode> SceneManager::getNode(const std::string& name)
 {
   if (node_map_.find(name) == node_map_.cend())

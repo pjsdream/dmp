@@ -1,4 +1,4 @@
-#include <dmp/planning/motion/motion.h>
+#include <planner/motion/motion.h>
 
 namespace dmp
 {

@@ -1,29 +1,7 @@
-#include <dmp/rendering/renderer.h>
-#include <dmp/rendering/scene/scene_node.h>
-#include <dmp/json/json.h>
-#include <dmp/rendering/request/request_frame.h>
-#include <dmp/rendering/request/request_mesh.h>
-#include <dmp/rendering/request/request_light.h>
-#include <dmp/planning/planner.h>
-#include <dmp/planning/planning_option.h>
-#include <dmp/robot/robot_model_loader.h>
-#include <dmp/robot/robot_model.h>
-#include <dmp/planning/environment/environment_loader.h>
-#include <dmp/planning/environment/environment.h>
-#include <dmp/planning/environment/interactable_object.h>
-#include <dmp/planning/motion/motion_loader.h>
-#include <dmp/shape/distance_query.h>
-#include <dmp/shape/cube.h>
-#include <dmp/shape/cylinder.h>
-#include <dmp/shape/sphere.h>
-#include <dmp/controlling/controller_option.h>
-#include <dmp/controlling/controller.h>
-#include <dmp/common.h>
-#include <dmp/planning/objective/objective_reach_to_grip.h>
-#include <dmp/planning/objective/objective_grip.h>
-#include <dmp/planning/cost/cost_smoothness.h>
-#include <dmp/planning/cost/cost_collision.h>
-#include <dmp/comm/manager.h>
+#include <renderer/renderer_ostream.h>
+#include <renderer/request/request_clear.h>
+#include <renderer/request/request_light.h>
+#include <planner/robot/robot_model_loader.h>
 
 #include <QApplication>
 #include <QWindow>
@@ -35,24 +13,17 @@ int main(int argc, char** argv)
 
   QApplication app(argc, argv);
 
-  QSurfaceFormat format;
-  format.setDepthBufferSize(24);
-  format.setStencilBufferSize(8);
-  format.setSamples(4);
-  format.setVersion(4, 3);
-  format.setProfile(QSurfaceFormat::CoreProfile);
-  QSurfaceFormat::setDefaultFormat(format);
-
-  // dmp communication manager
-  auto manager = std::make_shared<dmp::Manager>();
+  // TODO: set project source dir
+  std::string PROJECT_SOURCE_DIR = "/home/jaesungp/cpp_workspace/dmp";
 
   // robot model
   auto robot_model_loader = dmp::RobotModelLoader{};
-  robot_model_loader.setSubstitutePackageDirectory(dmp::PROJECT_SOURCE_DIR + "/../../catkin_ws/src/fetch_ros");
+  robot_model_loader.setSubstitutePackageDirectory(PROJECT_SOURCE_DIR + "/../../catkin_ws/src/fetch_ros");
   robot_model_loader.load(
-      dmp::PROJECT_SOURCE_DIR + "/../../catkin_ws/src/fetch_ros/fetch_description/robots/fetch.urdf");
+      PROJECT_SOURCE_DIR + "/../../catkin_ws/src/fetch_ros/fetch_description/robots/fetch.urdf");
   auto robot_model = robot_model_loader.getRobotModel();
 
+  /*
   // environment
   dmp::EnvironmentLoader environment_loader;
   auto environment = environment_loader.loadEnvironment(dmp::PROJECT_SOURCE_DIR + "/config/stacked_blocks.json");
@@ -99,88 +70,42 @@ int main(int argc, char** argv)
 
   auto controller = std::make_shared<dmp::Controller>(manager, controller_option);
 
+   */
+
   // renderer
-  auto renderer = std::make_shared<dmp::Renderer>(manager);
+  dmp::RendererOstream rout;
+  dmp::RequestClear request_clear;
+  rout << request_clear;
 
-  auto light_publisher = manager->createPublisher<dmp::Request>("rendering");
-  auto addLight = [&light_publisher](int index,
-                                     auto type,
-                                     auto position,
-                                     auto ambient,
-                                     auto diffuse,
-                                     auto specular,
-                                     auto attenuation)
-  {
-    auto light = dmp::Light{};
-    light.type = type;
-    light.position = position;
-    light.ambient = ambient;
-    light.diffuse = diffuse;
-    light.specular = specular;
-    light.attenuation = attenuation;
+  dmp::Light light;
+  dmp::RequestLight request_light0;
+  light.type = dmp::Light::LightType::Directional;
+  light.position = Eigen::Vector3f(0., 0., 1.);
+  light.ambient = Eigen::Vector3f(0.1f, 0.1f, 0.1f);
+  light.diffuse = Eigen::Vector3f(0.25f, 0.25f, 0.25f);
+  light.specular = Eigen::Vector3f(0.15f, 0.15f, 0.15f);
+  light.attenuation = Eigen::Vector3f(1.f, 0.07f, 0.017f);
+  request_light0.setLight(0, light);
 
-    auto light_req = std::make_unique<dmp::RequestLight>();
-    light_req->setLight(index, std::move(light));
+  dmp::RequestLight request_light1;
+  light.type = dmp::Light::LightType::Point;
+  light.position = Eigen::Vector3f(2., -2., 2.);
+  light.diffuse = Eigen::Vector3f(0.25f, 0.25f, 0.25f);
+  light.specular = Eigen::Vector3f(0.15f, 0.15f, 0.15f);
+  request_light1.setLight(1, light);
 
-    light_publisher.publish(std::move(light_req));
-  };
+  dmp::RequestLight request_light2;
+  light.position = Eigen::Vector3f(2., 2., 2.);
+  request_light2.setLight(2, light);
 
-  addLight(0,
-           dmp::Light::LightType::Directional,
-           Eigen::Vector3f(0., 0., 1.),
-           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
-           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
-           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
-           Eigen::Vector3f(1.f, 0.07f, 0.017f));
+  dmp::RequestLight request_light3;
+  light.position = Eigen::Vector3f(0., -2., 2.);
+  request_light3.setLight(3, light);
 
-  addLight(1,
-           dmp::Light::LightType::Point,
-           Eigen::Vector3f(2., -2., 2.),
-           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
-           Eigen::Vector3f(0.25f, 0.25f, 0.25f),
-           Eigen::Vector3f(0.15f, 0.15f, 0.15f),
-           Eigen::Vector3f(1.f, 0.07f, 0.017f));
-
-  addLight(2,
-           dmp::Light::LightType::Point,
-           Eigen::Vector3f(2., 2., 2.),
-           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
-           Eigen::Vector3f(0.25f, 0.25f, 0.25f),
-           Eigen::Vector3f(0.15f, 0.15f, 0.15f),
-           Eigen::Vector3f(1.f, 0.07f, 0.017f));
-
-  addLight(3,
-           dmp::Light::LightType::Point,
-           Eigen::Vector3f(0., -2., 2.),
-           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
-           Eigen::Vector3f(0.25f, 0.25f, 0.25f),
-           Eigen::Vector3f(0.15f, 0.15f, 0.15f),
-           Eigen::Vector3f(1.f, 0.07f, 0.017f));
-
-  addLight(4,
-           dmp::Light::LightType::Point,
-           Eigen::Vector3f(0., 2., 2.),
-           Eigen::Vector3f(0.1f, 0.1f, 0.1f),
-           Eigen::Vector3f(0.25f, 0.25f, 0.25f),
-           Eigen::Vector3f(0.15f, 0.15f, 0.15f),
-           Eigen::Vector3f(1.f, 0.07f, 0.017f));
-
-  // showing renderer
-  renderer->resize(800, 600);
-  renderer->show();
-
-  // run threads
-  planner->runThread();
-  controller->runThread();
+  dmp::RequestLight request_light4;
+  light.position = Eigen::Vector3f(0., 2., 2.);
+  request_light4.setLight(4, light);
 
   app.exec();
-
-  printf("exiting the program\n");
-  planner->requestStop();
-  controller->requestStop();
-  planner->joinThread();
-  controller->joinThread();
-
-  renderer.reset();
   return 0;
 }

@@ -1,4 +1,4 @@
-#include <dmp/robot/planning_robot_joint.h>
+#include <planner/robot/planning_robot_joint.h>
 
 #include <iostream>
 

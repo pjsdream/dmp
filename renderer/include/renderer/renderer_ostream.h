@@ -12,7 +12,10 @@ class RequestMesh;
 class RendererOstream
 {
 public:
-  RendererOstream();
+  RendererOstream()
+      : publisher_("renderer", "127.0.0.1"), created_timer_(0.1)
+  {
+  }
 
   template<typename T>
   RendererOstream& operator<<(T& request)
@@ -22,7 +25,10 @@ public:
     return *this;
   }
 
-  void flush();
+  void flush()
+  {
+    publisher_ << dmp::Publisher::flush;
+  }
 
 private:
   Timer created_timer_;

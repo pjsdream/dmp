@@ -1,7 +1,7 @@
 #ifndef DMP_SPHERE_H
 #define DMP_SPHERE_H
 
-#include <dmp/shape/shape.h>
+#include <planner/shape/shape.h>
 
 namespace dmp
 {

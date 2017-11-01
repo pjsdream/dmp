@@ -28,6 +28,8 @@ public:
   void setFrame(const std::string& from, const std::string& to, const Eigen::Affine3d& transform);
   void attachResource(const std::string& name, std::shared_ptr<Resource> resource);
 
+  void clear();
+
   std::vector<std::shared_ptr<SceneNode>> traverseNodes();
 
 private:

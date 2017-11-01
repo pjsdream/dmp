@@ -1,5 +1,5 @@
-#include <dmp/shape/cube.h>
-#include <dmp/shape/aabb.h>
+#include <planner/shape/cube.h>
+#include <planner/shape/aabb.h>
 
 namespace dmp
 {

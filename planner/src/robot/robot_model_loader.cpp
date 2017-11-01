@@ -1,8 +1,8 @@
-#include <dmp/robot/robot_model_loader.h>
-#include <dmp/robot/tree_robot_model.h>
-#include <dmp/robot/tree_robot_link.h>
-#include <dmp/robot/tree_robot_joint.h>
-#include <dmp/robot/robot_model.h>
+#include <planner/robot/robot_model_loader.h>
+#include <planner/robot/tree_robot_model.h>
+#include <planner/robot/tree_robot_link.h>
+#include <planner/robot/tree_robot_joint.h>
+#include <planner/robot/robot_model.h>
 
 #include <tinyxml2/tinyxml2.h>
 

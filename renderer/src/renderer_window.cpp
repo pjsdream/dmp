@@ -169,7 +169,7 @@ void RendererWindow::handleRequests()
 
 void RendererWindow::handleRequest(std::unique_ptr<RequestClear> req)
 {
-  // TODO
+  scene_manager_->clear();
 }
 
 void RendererWindow::handleRequest(std::unique_ptr<RequestMesh> req)

@@ -1,4 +1,4 @@
-#include <dmp/robot/robot_joint.h>
+#include <planner/robot/robot_joint.h>
 
 namespace dmp
 {

@@ -1,14 +1,16 @@
-#include <dmp/robot/planning_robot_model.h>
-#include <dmp/robot/robot_model.h>
-#include <dmp/robot/robot_joint.h>
-#include <dmp/robot/robot_link.h>
-#include <dmp/robot/planning_robot_joint.h>
-#include <dmp/robot/planning_robot_link.h>
-#include <dmp/utils/mesh_loader.h>
-#include <dmp/shape/bounding_volume_factory.h>
-#include <dmp/shape/aabb.h>
-#include <dmp/shape/cube.h>
-#include <dmp/planning/motion/motion.h>
+#include <planner/robot/planning_robot_model.h>
+#include <planner/robot/robot_model.h>
+#include <planner/robot/robot_joint.h>
+#include <planner/robot/robot_link.h>
+#include <planner/robot/planning_robot_joint.h>
+#include <planner/robot/planning_robot_link.h>
+
+#include <renderer/resource/mesh_loader.h>
+#include <renderer/resource/raw_mesh.h>
+#include <planner/shape/bounding_volume_factory.h>
+#include <planner/shape/aabb.h>
+#include <planner/shape/cube.h>
+#include <planner/motion/motion.h>
 
 #include <iostream>
 

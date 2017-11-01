@@ -4,7 +4,7 @@
 #include <memory>
 #include <unordered_map>
 #include <Eigen/Dense>
-#include <dmp/utils/vector_eigen.h>
+#include <core/utils/vector_eigen.h>
 #include <Eigen/StdVector>
 
 namespace dmp

@@ -1,9 +1,9 @@
-#include <dmp/shape/distance_query.h>
-#include <dmp/shape/shape.h>
-#include <dmp/shape/aabb.h>
-#include <dmp/shape/cube.h>
-#include <dmp/shape/cylinder.h>
-#include <dmp/shape/sphere.h>
+#include <planner/shape/distance_query.h>
+#include <planner/shape/shape.h>
+#include <planner/shape/aabb.h>
+#include <planner/shape/cube.h>
+#include <planner/shape/cylinder.h>
+#include <planner/shape/sphere.h>
 
 namespace dmp
 {

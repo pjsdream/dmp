@@ -1,5 +1,5 @@
-#include <dmp/shape/shape.h>
-#include <dmp/shape/distance_query.h>
+#include <planner/shape/shape.h>
+#include <planner/shape/distance_query.h>
 
 namespace dmp
 {

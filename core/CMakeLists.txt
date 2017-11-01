@@ -33,11 +33,17 @@ set(DMP_CORE_SOURCE_FILES
   include/core/comm/zmq_serializer.h
   include/core/comm/zmq_deserializer.h
   include/core/utils/timer.h
+  include/core/utils/vector_eigen.h
+  include/core/json/json.h
+  include/core/json/json_loader.h
 
   src/comm/serializer.cpp
   src/comm/deserializer.cpp
   src/comm/context.cpp
-  src/utils/timer.cpp)
+  src/utils/timer.cpp
+  src/json/json.cpp
+  src/json/json_loader.cpp
+  )
 
 add_library(dmp_core ${DMP_CORE_SOURCE_FILES})
 target_link_libraries(dmp_core

@@ -1,7 +1,7 @@
 #ifndef DMP_AABB_H
 #define DMP_AABB_H
 
-#include <dmp/shape/shape.h>
+#include <planner/shape/shape.h>
 
 namespace dmp
 {

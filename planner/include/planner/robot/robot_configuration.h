@@ -1,7 +1,7 @@
 #ifndef DMP_ROBOT_CONFIGURATION_H
 #define DMP_ROBOT_CONFIGURATION_H
 
-#include <dmp/utils/vector_eigen.h>
+#include <core/utils/vector_eigen.h>
 
 #include <memory>
 #include <unordered_map>
