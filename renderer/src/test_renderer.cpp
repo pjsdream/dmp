@@ -67,6 +67,7 @@ int main()
   std::cout << "sending request to renderer complete\n";
 
   rout << request_clear;
+  rout.flush();
 
   request_mesh.name = "torso";
   request_mesh.filename = "/home/jaesungp/catkin_ws/src/fetch_ros/fetch_description/meshes/torso_lift_link.dae";

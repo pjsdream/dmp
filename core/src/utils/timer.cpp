@@ -28,7 +28,9 @@ void Timer::sleepUntil()
   if (!isOver())
   {
     std::chrono::duration<double> diff = std::chrono::high_resolution_clock::now() - start_time_;
-    std::this_thread::sleep_for(diff);
+    auto remaining = time_ - diff.count();
+    if (remaining > 0)
+      std::this_thread::sleep_for(std::chrono::duration<double>(remaining));
   }
 }
 }
