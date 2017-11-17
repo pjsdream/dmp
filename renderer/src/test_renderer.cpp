@@ -1,9 +1,4 @@
 #include <renderer/renderer_ostream.h>
-#include <renderer/request/request_clear.h>
-#include <renderer/request/request_mesh.h>
-#include <renderer/request/request_light.h>
-#include <renderer/request/request_frame.h>
-#include <renderer/request/request_frame_attach.h>
 
 #include <iostream>
 #include <thread>

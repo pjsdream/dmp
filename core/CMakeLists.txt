@@ -37,10 +37,6 @@ set(DMP_CORE_SOURCE_FILES
   include/core/json/json.h
   include/core/json/json_loader.h
 
-  src/comm/serializer.cpp
-  src/comm/deserializer.cpp
-  src/comm/context.cpp
-  src/utils/timer.cpp
   src/json/json.cpp
   src/json/json_loader.cpp
   )

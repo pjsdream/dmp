@@ -12,7 +12,10 @@ class Deserializer
 {
 public:
   Deserializer() = delete;
-  explicit Deserializer(char* buffer);
+  explicit Deserializer(char* buffer)
+      : buffer_(buffer)
+  {
+  }
 
   auto pointer() const
   {

@@ -4,6 +4,14 @@
 #include <core/comm/publisher.h>
 #include <core/utils/timer.h>
 
+#include "request/request_clear.h"
+#include "request/request_custom_mesh.h"
+#include "request/request_custom_texture.h"
+#include "request/request_frame.h"
+#include "request/request_frame_attach.h"
+#include "request/request_light.h"
+#include "request/request_mesh.h"
+
 namespace dmp
 {
 class Request;

@@ -13,7 +13,10 @@ class Serializer
 {
 public:
   Serializer() = delete;
-  explicit Serializer(std::vector<char>& buffer);
+  explicit Serializer(std::vector<char>& buffer)
+      : buffer_(buffer)
+  {
+  }
 
   // Forward & operator with any type to corresponding << operators
   template<typename T>
